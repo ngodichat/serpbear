@@ -194,8 +194,12 @@ export const extractScrapedResult = (content: string, device: string): SearchRes
 export const getSerp = (domain:string, result:SearchResult[]) : SERPObject => {
    if (result.length === 0 || !domain) { return { postion: false, url: '' }; }
    const foundItem = result.find((item) => {
-      const itemDomain = item.url.replace('www.', '').match(/^(?:https?:)?(?:\/\/)?([^/?]+)/i);
-      return itemDomain && itemDomain.includes(domain.replace('www.', ''));
+      // const itemDomain = item.url.replace('www.', '').match(/^(?:https?:)?(?:\/\/)?([^/?]+)/i);
+      // console.log('item: ', item);
+      // console.log('itemDomain: ', itemDomain);
+      // return itemDomain && itemDomain.includes(domain.replace('www.', '')+ '/special-features/real-money-online-uk-casinos-25818381');
+      const itemDomain = item.url;
+      return itemDomain && itemDomain.includes(domain)
    });
    return { postion: foundItem ? foundItem.position : 0, url: foundItem && foundItem.url ? foundItem.url : '' };
 };

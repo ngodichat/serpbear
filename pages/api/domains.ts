@@ -65,8 +65,9 @@ export const addDomain = async (req: NextApiRequest, res: NextApiResponse<Domain
    }
    const { domain } = req.body || {};
    const domainData = {
-      domain: domain.trim(),
-      slug: domain.trim().replaceAll('-', '_').replaceAll('.', '-'),
+      domain: domain.trim().toLowerCase(),
+      slug: domain.trim().replaceAll('-', '_').replaceAll('.', '-').replaceAll('/', '__')
+      .toLowerCase(),
       lastUpdated: new Date().toJSON(),
       added: new Date().toJSON(),
    };

@@ -12,8 +12,9 @@ const AddDomain = ({ closeModal }: AddDomainProps) => {
    const { mutate: addMutate, isLoading: isAdding } = useAddDomain(() => closeModal());
 
    const addDomain = () => {
-      // console.log('ADD NEW DOMAIN', newDomain);
-      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(newDomain.trim())) {
+      console.log('ADD NEW DOMAIN', newDomain);
+      // if (/^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(newDomain.trim())) {
+      if (/^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test(newDomain.trim())) {
          setNewDomainError(false);
          // TODO: Domain Action
          addMutate(newDomain.trim());
@@ -31,7 +32,7 @@ const AddDomain = ({ closeModal }: AddDomainProps) => {
       <Modal closeModal={() => { closeModal(false); }} title={'Add New Domain'}>
          <div data-testid="adddomain_modal">
             <h4 className='text-sm mt-4'>
-               Domain Name {newDomainError && <span className=' ml-2 block float-right text-red-500 text-xs font-semibold'>Not a Valid Domain</span>}
+               URL {newDomainError && <span className=' ml-2 block float-right text-red-500 text-xs font-semibold'>Not a Valid URL</span>}
             </h4>
             <input
                className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
