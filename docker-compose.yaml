@@ -4,6 +4,8 @@ services:
   app:
     build: .
     restart: unless-stopped
+    ports:
+      - "3001:3000"
     environment:
       - USER=admin
       - PASSWORD=99999999
@@ -12,12 +14,12 @@ services:
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
     volumes:
       - serpbear_appdata:/app/data
-  nginx:
-    image: nginx
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-    ports:
-      - "3001:80"
+  # nginx:
+  #   image: nginx
+  #   volumes:
+  #     - ./nginx:/etc/nginx/conf.d
+  #   ports:
+  #     - "3001:80"
 networks:
   my-network:
     driver: bridge
