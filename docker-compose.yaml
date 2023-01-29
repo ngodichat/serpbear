@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - USER=admin
+      - PASSWORD=99999999
+      - SECRET=4715aed3216f7b0a38e6b534a958362654e96d10fbc04700770d572af3dce43625dd
+      - APIKEY=5saedXklbslhnapihe2pihp3pih4fdnakhjwq5
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    volumes:
+      - serpbear_appdata:/app/data
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+networks:
+  my-network:
+    driver: bridge
+volumes:
+  serpbear_appdata:
