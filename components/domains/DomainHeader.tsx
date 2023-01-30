@@ -31,11 +31,11 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
    const scDataFilterStlye = 'px-3 py-2 block w-full';
    return (
       <div className='domain_kewywords_head w-full '>
-         <div className='flex px-2'>
+         <div className='flex mb-2'>
             {/* <h1 className="hidden lg:block text-xl font-bold my-3" data-testid="domain-header">
                {domain && domain.domain && <><i className=' capitalize font-bold not-italic'>{domain.domain.charAt(0)}</i>{domain.domain.slice(1)}</>}
             </h1> */}
-            <div className='domain_selector bg-white mt-2 flex-1'>
+            <div className='domain_selector mt-2 flex-1'>
                <SelectField
                   options={domains && domains.length > 0 ? domains.map((d) => { return { label: d.domain, value: d.slug }; }) : []}
                   selected={[domain.slug]}
@@ -45,7 +45,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                   rounded={'rounded'}
                />
             </div>
-            <div className='sidebar_add font-semibold text-sm text-center text-zinc-500'>
+            <div className='hidden lg:block sidebar_add font-semibold text-sm text-center text-zinc-500'>
                <button data-testid="add_domain" onClick={() => showAddDomainModal(true)} className='p-4 hover:text-blue-600'>+ Add Domain</button>
             </div>
          </div>

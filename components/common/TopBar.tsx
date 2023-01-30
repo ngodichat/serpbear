@@ -32,7 +32,7 @@ const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
    return (
        <div className={`topbar flex w-full mx-auto justify-between items-center lg:justify-between
        ${isDomainsPage ? 'max-w-5xl' : 'max-w-7xl'}  bg-white lg:bg-transparent`}>
-         <div className='flex items-center'>
+         <div className='flex flex-row-reverse lg:flex-row md:flex-1 justify-between lg:justify-start items-center'>
             {!isDomainsPage && (
                <Link href={'/domains'} passHref={true}>
                   <a className=' right-14 top-2 px-2 py-1 cursor-pointer bg-[#ecf2ff] hover:bg-indigo-100 transition-all
