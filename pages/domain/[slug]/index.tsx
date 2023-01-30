@@ -70,6 +70,7 @@ const SingleDomain: NextPage = () => {
                   domain={activDomain}
                   domains={theDomains}
                   showAddModal={setShowAddKeywords}
+                  showAddDomainModal={setShowAddDomain}
                   showSettingsModal={setShowDomainSettings}
                   exportCsv={() => exportCSV(theKeywords, activDomain.domain)}
                   />

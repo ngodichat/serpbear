@@ -55,6 +55,7 @@ const InsightPage: NextPage = () => {
                   domain={activDomain}
                   domains={theDomains}
                   showAddModal={() => console.log('XXXXX')}
+                  showAddDomainModal={setShowAddDomain}
                   showSettingsModal={setShowDomainSettings}
                   exportCsv={() => exportCSV([], activDomain.domain, scDateFilter)}
                   scFilter={scDateFilter}

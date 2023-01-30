@@ -14,7 +14,7 @@ const AddDomain = ({ closeModal }: AddDomainProps) => {
    const addDomain = () => {
       console.log('ADD NEW DOMAIN', newDomain);
       // if (/^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(newDomain.trim())) {
-      if (/^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test(newDomain.trim())) {
+      if (/^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=,]*)$/.test(newDomain.trim())) {
          setNewDomainError(false);
          // TODO: Domain Action
          addMutate(newDomain.trim());

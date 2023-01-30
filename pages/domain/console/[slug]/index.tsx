@@ -55,6 +55,7 @@ const DiscoverPage: NextPage = () => {
                   domain={activDomain}
                   domains={theDomains}
                   showAddModal={() => console.log('XXXXX')}
+                  showAddDomainModal={setShowAddDomain}
                   showSettingsModal={setShowDomainSettings}
                   exportCsv={() => exportCSV(theKeywords, activDomain.domain, scDateFilter)}
                   scFilter={scDateFilter}

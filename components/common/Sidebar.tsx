@@ -12,7 +12,7 @@ const Sidebar = ({ domains, showAddModal } : SidebarProps) => {
    const router = useRouter();
 
    return (
-      <div className="sidebar pt-44 w-1/5 hidden lg:block" data-testid="sidebar">
+      <div className="sidebar pt-44 w-1/5 hidden" data-testid="sidebar">
          <h3 className="py-7 text-base font-bold text-blue-700">
             <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#364AFF" /></span> SerpBear
          </h3>
