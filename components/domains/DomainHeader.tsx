@@ -35,7 +35,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
             {/* <h1 className="hidden lg:block text-xl font-bold my-3" data-testid="domain-header">
                {domain && domain.domain && <><i className=' capitalize font-bold not-italic'>{domain.domain.charAt(0)}</i>{domain.domain.slice(1)}</>}
             </h1> */}
-            <div className='domain_selector mt-2 flex-1'>
+            <div className='domain_selector mt-2 flex-1 max-w-full'>
                <SelectField
                   options={domains && domains.length > 0 ? domains.map((d) => { return { label: d.domain, value: d.slug }; }) : []}
                   selected={[domain.slug]}
