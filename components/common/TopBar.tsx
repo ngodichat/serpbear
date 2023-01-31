@@ -42,7 +42,7 @@ const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
                </Link>
             )}
             <h3 className={`p-4 text-base font-bold text-blue-700 ${isDomainsPage ? 'lg:pl-0' : 'lg:pl-2'}`}>
-               <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#364AFF" /></span> SerpBear
+               <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#364AFF" /></span> Clickhub
                <button className='px-3 py-1 font-bold text-blue-700  lg:hidden ml-3 text-lg' onClick={() => showAddModal()}>+</button>
             </h3>
          </div>

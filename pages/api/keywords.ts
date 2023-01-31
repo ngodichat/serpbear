@@ -45,8 +45,9 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
    if (!req.query.domain && typeof req.query.domain !== 'string') {
       return res.status(400).json({ error: 'Domain is Required!' });
    }
-   const domain = (req.query.domain as string).replaceAll('-', '.').replaceAll('__', '/').replaceAll('_', '-')
+   const domain = (req.query.domain as string).replaceAll('=', '/').replaceAll('-', '.').replaceAll('_', '-')
    .toLowerCase();
+   console.log('domain: ', domain);
    const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
    const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
 
