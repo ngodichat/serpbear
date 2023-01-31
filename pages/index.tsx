@@ -14,8 +14,8 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>SerpBear</title>
-        <meta name="description" content="SerpBear Google Keyword Position Tracking App" />
+        <title>Clickhub</title>
+        <meta name="description" content="Clickhub Google Keyword Position Tracking App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
