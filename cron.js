@@ -46,17 +46,19 @@ const generateCronTime = (interval) => {
    if (interval === 'hourly') {
       cronTime = '0 0 */1 * * *';
    }
-   if (interval === 'daily') {
+   else if (interval === 'daily') {
       cronTime = '0 0 0 * * *';
    }
-   if (interval === 'daily_morning') {
+   else if (interval === 'daily_morning') {
       cronTime = '0 0 3 * * *';
    }
-   if (interval === 'weekly') {
+   else if (interval === 'weekly') {
       cronTime = '0 0 0 */7 * *';
    }
-   if (interval === 'monthly') {
+   else if (interval === 'monthly') {
       cronTime = '0 0 1 * *'; // Run every first day of the month at 00:00(midnight)
+   } else if(interval === 'minute') {
+      cronTime = '* * * * *';
    }
 
    return cronTime;
@@ -64,18 +66,26 @@ const generateCronTime = (interval) => {
 
 const runAppCronJobs = () => {
    // RUN SERP Scraping CRON (EveryDay at Midnight) 0 0 0 * *
-   const scrapeCronTime = generateCronTime('daily');
+   // const scrapeCronTime = generateCronTime('daily');
+   const scrapeCronTime = generateCronTime('minute');
+   console.log('runAppCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, () => {
-      // console.log('### Running Keyword Position Cron Job!');
+      console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
       const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => {
-         console.log('ERROR Making Daily Scraper Cron Request..');
-         console.log(err);
-      });
+      try {
+         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
+         .then((res) => res.json())
+         .then((data) => console.log(data))
+         .catch((err) => {
+            console.log('ERROR Making Daily Scraper Cron Request..');
+            console.log(err);
+         });
+      } catch (error){
+          console.log(error);
+      };
    }, { scheduled: true });
+
+   // fetch('https://google.com.vn').then((res) => console.log(res));
 
    // Run Failed scraping CRON (Every Hour)
    const failedCronTime = generateCronTime('hourly');
