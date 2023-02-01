@@ -10,13 +10,13 @@ import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConso
 
 type KeywordsGetResponse = {
    keywords?: KeywordType[],
-   error?: string|null,
+   error?: string | null,
 }
 
 type KeywordsDeleteRes = {
    domainRemoved?: number,
    keywordsRemoved?: number,
-   error?: string|null,
+   error?: string | null,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -27,6 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
    }
 
    if (req.method === 'GET') {
+      const withStats = !!req?.query?.withstats;
+      if (withStats) return getKeywordsStats(req, res);
       return getKeywords(req, res);
    }
    if (req.method === 'POST') {
@@ -46,23 +48,23 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
       return res.status(400).json({ error: 'Domain is Required!' });
    }
    const domain = (req.query.domain as string).replaceAll('=', '/').replaceAll('-', '.').replaceAll('_', '-')
-   .toLowerCase();
+      .toLowerCase();
    console.log('domain: ', domain);
    const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
    const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
 
    try {
-      const allKeywords:Keyword[] = await Keyword.findAll({ where: { domain } });
+      const allKeywords: Keyword[] = await Keyword.findAll({ where: { domain } });
       const keywords: KeywordType[] = parseKeywords(allKeywords.map((e) => e.get({ plain: true })));
       const processedKeywords = keywords.map((keyword) => {
-         const historyArray = Object.keys(keyword.history).map((dateKey:string) => ({
+         const historyArray = Object.keys(keyword.history).map((dateKey: string) => ({
             date: new Date(dateKey).getTime(),
             dateRaw: dateKey,
             position: keyword.history[dateKey],
          }));
          const historySorted = historyArray.sort((a, b) => a.date - b.date);
-         const lastWeekHistory :KeywordHistory = {};
-         historySorted.slice(-7).forEach((x:any) => { lastWeekHistory[x.dateRaw] = x.position; });
+         const lastWeekHistory: KeywordHistory = {};
+         historySorted.slice(-7).forEach((x: any) => { lastWeekHistory[x.dateRaw] = x.position; });
          const keywordWithSlimHistory = { ...keyword, lastResult: [], history: lastWeekHistory };
          const finalKeyword = domainSCData ? integrateKeywordSCData(keywordWithSlimHistory, domainSCData) : keywordWithSlimHistory;
          return finalKeyword;
@@ -82,7 +84,7 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
 
       keywords.forEach((kwrd: KeywordAddPayload) => {
          const { keyword, device, country, domain, tags } = kwrd;
-         const tagsArray = tags ? tags.split(',').map((item:string) => item.trim()) : [];
+         const tagsArray = tags ? tags.split(',').map((item: string) => item.trim()) : [];
          const newKeyword = {
             keyword,
             device,
@@ -101,7 +103,7 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
       });
 
       try {
-         const newKeywords:Keyword[] = await Keyword.bulkCreate(keywordsToAdd);
+         const newKeywords: Keyword[] = await Keyword.bulkCreate(keywordsToAdd);
          const formattedkeywords = newKeywords.map((el) => el.get({ plain: true }));
          const keywordsParsed: KeywordType[] = parseKeywords(formattedkeywords);
          const settings = await getAppSettings();
@@ -148,9 +150,9 @@ const updateKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywords
       if (sticky !== undefined) {
          await Keyword.update({ sticky }, { where: { ID: { [Op.in]: keywordIDs } } });
          const updateQuery = { where: { ID: { [Op.in]: keywordIDs } } };
-         const updatedKeywords:Keyword[] = await Keyword.findAll(updateQuery);
+         const updatedKeywords: Keyword[] = await Keyword.findAll(updateQuery);
          const formattedKeywords = updatedKeywords.map((el) => el.get({ plain: true }));
-          keywords = parseKeywords(formattedKeywords);
+         keywords = parseKeywords(formattedKeywords);
          return res.status(200).json({ keywords });
       }
       if (tags) {
@@ -171,4 +173,18 @@ const updateKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywords
       console.log('[ERROR] Updating Keyword. ', error);
       return res.status(200).json({ error: 'Error Updating keywords!' });
    }
+};
+
+const getKeywordsStats = async (req: NextApiRequest, res: NextApiResponse<any>) => {
+   const keywords = await Keyword.findAll();
+   let mobile: number = 0;
+   let desktop: number = 0;
+   keywords.forEach((k) => {
+      if (k.device === 'desktop') {
+         desktop += 1;
+      } else {
+         mobile += 1;
+      }
+   });
+   return res.status(200).json({ mobile, desktop });
 };

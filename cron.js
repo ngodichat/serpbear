@@ -66,8 +66,8 @@ const generateCronTime = (interval) => {
 
 const runAppCronJobs = () => {
    // RUN SERP Scraping CRON (EveryDay at Midnight) 0 0 0 * *
-   // const scrapeCronTime = generateCronTime('daily');
-   const scrapeCronTime = generateCronTime('minute');
+   const scrapeCronTime = generateCronTime('daily');
+   // const scrapeCronTime = generateCronTime('minute');
    console.log('runAppCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, () => {
       console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
@@ -81,7 +81,7 @@ const runAppCronJobs = () => {
             console.log(err);
          });
       } catch (error){
-          console.log(error);
+         //  console.log(error);
       };
    }, { scheduled: true });
 

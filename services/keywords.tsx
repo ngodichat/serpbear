@@ -8,6 +8,16 @@ export const fetchKeywords = async (router: NextRouter) => {
    return res.json();
 };
 
+export const fetchKeywordsStats = async (router: NextRouter) => {
+   const res = await fetch(`${window.location.origin}/api/keywords?withstats=true`, { method: 'GET' });
+   return res.json();
+};
+
+export function useFetchKeywordsStats(router: NextRouter) {
+   const {data: stats} = useQuery([], () => fetchKeywordsStats(router),{});
+   return {stats};
+}
+
 export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?:Function, keywordSPollInterval:undefined|number = undefined) {
    const { data: keywordsData, isLoading: keywordsLoading, isError } = useQuery(
       ['keywords', router.query.slug],
