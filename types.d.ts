@@ -15,6 +15,7 @@ type DomainType = {
    scVisits?: number,
    scImpressions?: number,
    scPosition?: number,
+   auto_refresh: boolean
 }
 
 type KeywordHistory = {
@@ -64,6 +65,7 @@ type countryCodeData = {
 type DomainSettings = {
    notification_interval: string,
    notification_emails: string,
+   auto_refresh: boolean
 }
 
 type SettingsType = {

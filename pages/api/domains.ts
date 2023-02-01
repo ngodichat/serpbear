@@ -103,12 +103,12 @@ export const updateDomain = async (req: NextApiRequest, res: NextApiResponse<Dom
       return res.status(400).json({ domain: null, error: 'Domain is Required!' });
    }
    const { domain } = req.query || {};
-   const { notification_interval, notification_emails } = req.body;
+   const { notification_interval, notification_emails, auto_refresh } = req.body;
 
    try {
       const domainToUpdate: Domain|null = await Domain.findOne({ where: { domain } });
       if (domainToUpdate) {
-         domainToUpdate.set({ notification_interval, notification_emails });
+         domainToUpdate.set({ notification_interval, notification_emails, auto_refresh });
          await domainToUpdate.save();
       }
       return res.status(200).json({ domain: domainToUpdate });
