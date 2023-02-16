@@ -23,7 +23,7 @@ import Country from "./models/country";
 
 const connection = new Sequelize({
    dialect: 'mysql',
-   host: 'localhost',
+   host: '172.105.14.205',
    username: 'serpbear',
    password: '8TxnsEr&EusL',
    database: 'serpbear',
