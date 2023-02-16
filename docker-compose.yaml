@@ -31,3 +31,4 @@ networks:
     driver: bridge
 volumes:
   serpbear_appdata:
+  db_data:
