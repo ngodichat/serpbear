@@ -2,6 +2,7 @@ import { Sequelize } from 'sequelize-typescript';
 // import sqlite3 from 'sqlite3';
 import Domain from './models/domain';
 import Keyword from './models/keyword';
+import Country from "./models/country";
 
 // const connection = new Sequelize({
 //    dialect: 'sqlite',
@@ -32,7 +33,7 @@ const connection = new Sequelize({
       idle: 10000,
    },
    logging: false,
-   models: [Domain, Keyword],
+   models: [Domain, Keyword, Country],
 });
 
 export default connection;

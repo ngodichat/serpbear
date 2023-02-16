@@ -80,7 +80,10 @@ type SettingsType = {
    smtp_username?: string,
    smtp_password?: string,
    search_console_integrated?: boolean,
-   available_scapers?: Array
+   available_scapers?: Array,
+   keyword_volume_type: string,
+   keyword_volume_username: string,
+   keyword_volume_password: string,
 }
 
 type KeywordSCDataChild = {
