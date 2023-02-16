@@ -9,7 +9,9 @@ COPY . .
 
 FROM node:lts-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app ./
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+COPY --from=deps --chown=nextjs:nodejs /app ./
 RUN npm run build
 
 
