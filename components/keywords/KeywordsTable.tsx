@@ -133,6 +133,9 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                      </span>
                      <span className='domKeywords_head_position flex-1 basis-40 grow-0 text-center'>Position</span>
                      <span className='domKeywords_head_history flex-1'>History (7d)</span>
+                     <span className='domKeywords_head_start flex-1'>Start</span>
+                     <span className='domKeywords_head_volume flex-1'>Volume</span>
+                     <span className='domKeywords_head_ppc flex-1'>PPC Low - High</span>
                      <span className='domKeywords_head_url flex-1'>URL</span>
                      <span className='domKeywords_head_updated flex-1'>Updated</span>
                      {showSCData && (
