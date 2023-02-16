@@ -5,7 +5,7 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - USER=admin
       - PASSWORD=99999999
@@ -14,14 +14,21 @@ services:
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
     volumes:
       - serpbear_appdata:/app/data
-  # nginx:
-  #   image: nginx
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d
-  #   ports:
-  #     - "3001:80"
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: G6r#T@1zU*^j
+      MYSQL_DATABASE: serpbear
+      MYSQL_USER: serpbear
+      MYSQL_PASSWORD: 8TxnsEr&EusL
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 networks:
   my-network:
     driver: bridge
 volumes:
   serpbear_appdata:
+  db_data:
