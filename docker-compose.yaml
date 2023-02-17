@@ -13,7 +13,7 @@ services:
       - APIKEY=5saedXklbslhnapihe2pihp3pih4fdnakhjwq5
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
     volumes:
-      - ./data:/app/data
+      - serpbear_appdata:/app/data
   db:
     image: mysql:latest
     restart: always

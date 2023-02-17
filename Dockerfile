@@ -9,8 +9,6 @@ COPY . .
 
 FROM node:16-alpine AS builder
 WORKDIR /app
-# RUN addgroup --system --gid 1001 nodejs
-# RUN adduser --system --uid 1001 nextjs
 COPY --from=deps /app ./
 RUN npm run build
 
@@ -22,7 +20,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN set -xe && mkdir -p /app/data && chown nextjs:nodejs /app/data
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# COPY --from=builder --chown=nextjs:nodejs /app/data ./data
+COPY --from=builder --chown=nextjs:nodejs /app/data ./data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
