@@ -21,14 +21,10 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN set -xe && mkdir -p /app/data && chown nextjs:nodejs /app/data
-# COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# COPY --from=builder --chown=nextjs:nodejs /app/data ./data
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder  /app/public ./public
-COPY --from=builder  /app/data ./data
-COPY --from=builder  /app/.next/standalone ./
-COPY --from=builder  /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/data ./data
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # setup the cron
 COPY --from=builder --chown=nextjs:nodejs /app/cron.js ./
