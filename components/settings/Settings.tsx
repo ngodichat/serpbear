@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useUpdateKeywordVolume from '../../services/keywordVolume';
 // import { useQuery } from 'react-query';
 import useUpdateSettings, { useFetchSettings } from '../../services/settings';
 import Icon from '../common/Icon';
@@ -33,6 +34,7 @@ const Settings = ({ closeSettings }:SettingsProps) => {
    const [settings, setSettings] = useState<SettingsType>(defaultSettings);
    const [settingsError, setSettingsError] = useState<SettingsError|null>(null);
    const { mutate: updateMutate, isLoading: isUpdating } = useUpdateSettings(() => console.log(''));
+   const { mutate: updateVolume, isLoading: isUpdatingVolume } = useUpdateKeywordVolume(() => console.log(''));
    const { data: appSettings, isLoading } = useFetchSettings();
 
    useEffect(() => {
@@ -313,6 +315,13 @@ const Settings = ({ closeSettings }:SettingsProps) => {
                                     placeholder={'API Username'}
                                     onChange={(event) => updateSettings('keyword_volume_password', event.target.value)}
                                  />
+                              </div>
+                              <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
+                                 <button
+                                 onClick={() => updateVolume(settings)}
+                                 className=' py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'>
+                                 {isUpdatingVolume && <Icon type="loading" size={14} />} Update Keyword Volume
+                                 </button>
                               </div>
                            </div>
                            )}
