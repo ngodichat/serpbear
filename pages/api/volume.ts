@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../database/database';
 import verifyUser from '../../utils/verifyUser';
 import Keyword from '../../database/models/keyword';
+import Country from '../../database/models/country';
 
 type KeywordVolumeResponse = {
     settings?: object | null,
@@ -27,27 +28,49 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
     console.log('Received updating keyword volume request: ', settings);
     try {
         const allKeywords: Keyword[] = await Keyword.findAll();
-        console.log('Number of keywords: ', allKeywords.length);
+        const allCountries: Country[] = await Country.findAll();
+        const countryDict: any = {};
+        allCountries.forEach((country) => {
+            countryDict[country.get('country_iso_code')] = country.get('location_code');
+        });
 
         // group keywords by country
         const groups: {[key: string]: any[]} = {};
         for (let i = 0; i < allKeywords.length; i += 1) {
             const keyword = allKeywords[i];
-            if (!Object.keys(groups).includes(keyword.get('country'))) {
-                groups[keyword.get('country')] = [];
+            const country = keyword.get('country');
+            if (!countryDict[country]) {
+                console.log('Error mapping country code: ', country);
+            } else {
+                const countryCode = countryDict[country];
+                const k = keyword.get('keyword').trim();
+                if (!Object.keys(groups).includes(countryCode)) {
+                    groups[countryCode] = [];
+                }
+                if (!groups[countryCode].includes(k)) {
+                    groups[countryCode].push(k);
+                }
             }
-            groups[keyword.get('country')].push(keyword.get('keyword'));
         }
+        // create task list
+        const tasks: any = [];
         Object.keys(groups).forEach((group) => {
-            console.log(group, groups[group].length);
+            const listKeywords = groups[group];
+            console.log('Group: ', group, listKeywords.length);
+            const results = [];
+            const chunkSize = 1000;
+            for (let i = 0; i < listKeywords.length; i += chunkSize) {
+                results.push(listKeywords.slice(i, i + chunkSize));
+            }
+            results.forEach((result) => {
+                const task = {
+                    location_code: group,
+                    keywords: result,
+                };
+                tasks.push(task);
+            });
         });
-        // // divide those keywords into batches of 1000 per batch
-        // const result = [];
-        // const chunkSize = 1000;
-        // for (let i = 0; i < allKeywords.length; i += chunkSize) {
-        //     result.push(allKeywords.slice(i, i + chunkSize));
-        // }
-        // console.log('Chunks: ', result.length, result[0].length);
+        console.log(tasks);
         return res.status(200).json({});
     } catch (error) {
         console.log('[ERROR] Updating Keyword Volume: ', error);
