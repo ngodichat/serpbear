@@ -4,6 +4,7 @@ import db from '../../database/database';
 import verifyUser from '../../utils/verifyUser';
 import Keyword from '../../database/models/keyword';
 import Country from '../../database/models/country';
+import { AxiosResponse } from 'axios';
 
 type KeywordVolumeResponse = {
     settings?: object | null,
@@ -26,54 +27,70 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<KeywordVolumeResponse>) => {
     const { settings } = req.body || {};
     console.log('Received updating keyword volume request: ', settings);
-    try {
-        const allKeywords: Keyword[] = await Keyword.findAll();
-        const allCountries: Country[] = await Country.findAll();
-        const countryDict: any = {};
-        allCountries.forEach((country) => {
-            countryDict[country.get('country_iso_code')] = country.get('location_code');
-        });
-
-        // group keywords by country
-        const groups: {[key: string]: any[]} = {};
-        for (let i = 0; i < allKeywords.length; i += 1) {
-            const keyword = allKeywords[i];
-            const country = keyword.get('country');
-            if (!countryDict[country]) {
-                console.log('Error mapping country code: ', country);
-            } else {
-                const countryCode = countryDict[country];
-                const k = keyword.get('keyword').trim();
-                if (!Object.keys(groups).includes(countryCode)) {
-                    groups[countryCode] = [];
-                }
-                if (!groups[countryCode].includes(k)) {
-                    groups[countryCode].push(k);
-                }
-            }
-        }
-        // create task list
-        const tasks: any = [];
-        Object.keys(groups).forEach((group) => {
-            const listKeywords = groups[group];
-            console.log('Group: ', group, listKeywords.length);
-            const results = [];
-            const chunkSize = 1000;
-            for (let i = 0; i < listKeywords.length; i += chunkSize) {
-                results.push(listKeywords.slice(i, i + chunkSize));
-            }
-            results.forEach((result) => {
-                const task = {
-                    location_code: group,
-                    keywords: result,
-                };
-                tasks.push(task);
+    if(settings['keyword_volume_type'] == 'dataforseo'){
+        try {
+            const username = settings['keyword_volume_username'];
+            const password = settings['keyword_volume_password'];
+            const allKeywords: Keyword[] = await Keyword.findAll();
+            const allCountries: Country[] = await Country.findAll();
+            const countryDict: any = {};
+            allCountries.forEach((country) => {
+                countryDict[country.get('country_iso_code')] = country.get('location_code');
             });
-        });
-        console.log(tasks);
-        return res.status(200).json({});
-    } catch (error) {
-        console.log('[ERROR] Updating Keyword Volume: ', error);
-        return res.status(400).json({ error: 'Error Updating Keyword Volume' });
+
+            // group keywords by country
+            const groups: {[key: string]: any[]} = {};
+            for (let i = 0; i < allKeywords.length; i += 1) {
+                const keyword = allKeywords[i];
+                const country = keyword.get('country');
+                if (!countryDict[country]) {
+                    console.log('Error mapping country code: ', country);
+                } else {
+                    // const countryCode = countryDict[country];
+                    const k = keyword.get('keyword').trim();
+                    if (!Object.keys(groups).includes(country)) {
+                        groups[country] = [];
+                    }
+                    if (!groups[country].includes(k)) {
+                        groups[country].push(k);
+                    }
+                }
+            }
+            // create task list
+            const tasks: any = [];
+            Object.keys(groups).forEach((group) => {
+                const listKeywords = groups[group];
+                console.log('Group: ', group, listKeywords.length);
+                const results = [];
+                const chunkSize = 1000;
+                for (let i = 0; i < listKeywords.length; i += chunkSize) {
+                    results.push(listKeywords.slice(i, i + chunkSize));
+                }
+                results.forEach((result) => {
+                    const task = {
+                        location_code: countryDict[group],
+                        keywords: result,
+                    };
+                    tasks.push(task);
+                });
+            });
+            // call post api on task
+
+            return res.status(200).json({});
+        } catch (error) {
+            console.log('[ERROR] Updating Keyword Volume: ', error);
+            return res.status(400).json({ error: 'Error Updating Keyword Volume' });
+        }
     }
 };
+
+const callDataForSeoAPI = async (tasks:any[], username: string, password: string) => {
+    let client: Promise<AxiosResponse|Response> | false = false;
+    const headers: any = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
+        Accept: 'application/json; charset=utf8;',
+        Authorization: `Bearer ${btoa(username+ ':' + password)}`
+     };
+     client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers });
+}
