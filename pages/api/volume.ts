@@ -4,7 +4,6 @@ import db from '../../database/database';
 import verifyUser from '../../utils/verifyUser';
 import Keyword from '../../database/models/keyword';
 import Country from '../../database/models/country';
-import { AxiosResponse } from 'axios';
 
 type KeywordVolumeResponse = {
     settings?: object | null,
@@ -27,10 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<KeywordVolumeResponse>) => {
     const { settings } = req.body || {};
     console.log('Received updating keyword volume request: ', settings);
-    if(settings['keyword_volume_type'] == 'dataforseo'){
+    if (settings.keyword_volume_type === 'dataforseo') {
         try {
-            const username = settings['keyword_volume_username'];
-            const password = settings['keyword_volume_password'];
+            const username = settings.keyword_volume_username;
+            const password = settings.keyword_volume_password;
             const allKeywords: Keyword[] = await Keyword.findAll();
             const allCountries: Country[] = await Country.findAll();
             const countryDict: any = {};
@@ -75,22 +74,79 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                 });
             });
             // call post api on task
+            createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
+            .then((data) => {
+            //    const tasksRes = data.tasks;
+            //    const taskIds = [];
+            //    tasksRes.forEach((task: any) => {
+            //     taskIds.push(task.id);
+            //    });
+            //    while (taskIds.length > 0) {
 
+            //    }
+                getReadyTasksDataForSeo(['02200151-5209-0110-0000-b0c08592be4f', '02200152-5209-0153-0000-da85a6445d72'], username, password);
+            // setTimeout(() => {
+                console.log(data);
+            // }, 4000);
+             })
+             .catch((error) => {
+               console.error('Error:', error);
+             });
+            console.log('Return api call');
             return res.status(200).json({});
         } catch (error) {
             console.log('[ERROR] Updating Keyword Volume: ', error);
             return res.status(400).json({ error: 'Error Updating Keyword Volume' });
         }
     }
+    return res.status(200).json({});
 };
 
-const callDataForSeoAPI = async (tasks:any[], username: string, password: string) => {
-    let client: Promise<AxiosResponse|Response> | false = false;
+const createPostTasksDataForSeo = async (tasks:any[], username: string, password: string) => {
+    let client: Promise<Response> | false = false;
+    const bearer = btoa(`${username}:${password}`);
+    console.log('Bearer: ', bearer);
     const headers: any = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
         Accept: 'application/json; charset=utf8;',
-        Authorization: `Bearer ${btoa(username+ ':' + password)}`
+        Authorization: `Basic ${bearer}`,
      };
-     client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers });
-}
+    //  client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers, body: JSON.stringify(tasks) });
+    client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/02200151-5209-0110-0000-b0c08592be4f', { method: 'GET', headers });
+    return client;
+};
+
+const getReadyTasksDataForSeo = async (tasks_:any[], username: string, password: string) => {
+    // let client: Promise<Response> | false = false;
+    const bearer = btoa(`${username}:${password}`);
+    const tasks = [...tasks_];
+    console.log('Bearer: ', bearer);
+    const headers: any = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
+        Accept: 'application/json; charset=utf8;',
+        Authorization: `Basic ${bearer}`,
+     };
+    //  client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers, body:  JSON.stringify(tasks) })
+    // let i = 0;
+    while (tasks.length > 0) {
+        const task = tasks.shift();
+        const res = await fetch(`https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/${task}`, { method: 'GET', headers });
+        const data = await res.json();
+        console.log(data);
+        await sleep(3000);
+    }
+    // return data;
+    // return client;
+};
+
+const sleep = (ms: number) => {
+    return new Promise((resolve, reject) => {
+      if (ms < 0) {
+        reject(new Error('Invalid sleep time'));
+      } else {
+        setTimeout(resolve, ms);
+      }
+    });
+};
