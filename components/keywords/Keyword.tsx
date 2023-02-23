@@ -35,7 +35,7 @@ const Keyword = (props: KeywordProps) => {
       scDataType = 'threeDays',
    } = props;
    const {
-      keyword, domain, ID, position, url = '', lastUpdated, country, sticky, history = {}, updating = false, lastUpdateError = false,
+      keyword, domain, ID, position, url = '', lastUpdated, country, sticky, history = {}, updating = false, lastUpdateError = false, volume, low_top_of_page_bid, high_top_of_page_bid,
    } = keywordData;
    const [showOptions, setShowOptions] = useState(false);
    const [showPositionError, setPositionError] = useState(false);
@@ -113,8 +113,8 @@ const Keyword = (props: KeywordProps) => {
             </div>
          )}
          <div className='lg:flex-1 hidden lg:block'>{history[Object.keys(history)[0]]}</div>
-         <div className='lg:flex-1 hidden lg:block'>Volume</div>
-         <div className='lg:flex-1 hidden lg:block'>PPC Low - High</div>
+         <div className='lg:flex-1 hidden lg:block'>{volume}</div>
+         <div className='lg:flex-1 hidden lg:block'>{low_top_of_page_bid} - {high_top_of_page_bid}</div>
          <div
          className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
          overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-none lg:pr-5`}>

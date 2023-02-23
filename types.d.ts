@@ -39,7 +39,10 @@ type KeywordType = {
    updating: boolean,
    lastUpdateError: {date: string, error: string, scraper: string} | false,
    scData?: KeywordSCData,
-   uid?: string
+   uid?: string,
+   volume?: number, 
+   low_top_of_page_bid?: number, 
+   high_top_of_page_bid?: number,
 }
 
 type KeywordLastResult = {

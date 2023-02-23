@@ -11,7 +11,7 @@ type KeywordVolumeResponse = {
  }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    await db.sync();
+    await db.sync({ alter: true });
     const authorized = verifyUser(req, res);
     if (authorized !== 'authorized') {
        return res.status(401).json({ error: authorized });
@@ -56,10 +56,10 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                 }
             }
             // create task list
-            const tasks: any = [];
+            let tasks: any[] = [];
             Object.keys(groups).forEach((group) => {
                 const listKeywords = groups[group];
-                console.log('Group: ', group, listKeywords.length);
+                // console.log('Group: ', group, listKeywords.length);
                 const results = [];
                 const chunkSize = 1000;
                 for (let i = 0; i < listKeywords.length; i += chunkSize) {
@@ -74,6 +74,12 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                 });
             });
             // call post api on task
+            tasks = [
+                {
+                    location_code: 2826,
+                    keywords: 'uk casino online',
+                },
+            ];
             createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
             .then((data) => {
             //    const tasksRes = data.tasks;
@@ -84,15 +90,15 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
             //    while (taskIds.length > 0) {
 
             //    }
-                getReadyTasksDataForSeo(['02200151-5209-0110-0000-b0c08592be4f', '02200152-5209-0153-0000-da85a6445d72'], username, password);
+                console.log('List of task ids: ', data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
+                getReadyTasksDataForSeo(data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id), username, password);
             // setTimeout(() => {
-                console.log(data);
+                // console.log(data);
             // }, 4000);
              })
              .catch((error) => {
                console.error('Error:', error);
              });
-            console.log('Return api call');
             return res.status(200).json({});
         } catch (error) {
             console.log('[ERROR] Updating Keyword Volume: ', error);
@@ -105,15 +111,15 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
 const createPostTasksDataForSeo = async (tasks:any[], username: string, password: string) => {
     let client: Promise<Response> | false = false;
     const bearer = btoa(`${username}:${password}`);
-    console.log('Bearer: ', bearer);
+    console.log('List of tasks sent: ', tasks);
     const headers: any = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
         Accept: 'application/json; charset=utf8;',
         Authorization: `Basic ${bearer}`,
      };
-    //  client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers, body: JSON.stringify(tasks) });
-    client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/02200151-5209-0110-0000-b0c08592be4f', { method: 'GET', headers });
+    client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_post', { method: 'POST', headers, body: JSON.stringify(tasks) });
+    // client = fetch('https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/02200151-5209-0110-0000-b0c08592be4f', { method: 'GET', headers });
     return client;
 };
 
@@ -121,7 +127,6 @@ const getReadyTasksDataForSeo = async (tasks_:any[], username: string, password:
     // let client: Promise<Response> | false = false;
     const bearer = btoa(`${username}:${password}`);
     const tasks = [...tasks_];
-    console.log('Bearer: ', bearer);
     const headers: any = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
@@ -134,8 +139,31 @@ const getReadyTasksDataForSeo = async (tasks_:any[], username: string, password:
         const task = tasks.shift();
         const res = await fetch(`https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/${task}`, { method: 'GET', headers });
         const data = await res.json();
-        console.log(data);
-        await sleep(3000);
+        const { result, status_code } = data.tasks[0];
+        if (result) {
+            const country: Country | null = await Country.findOne({ where: { location_code: result[0].location_code } });
+            if (country) {
+                const countryCode = country.country_iso_code;
+                const promises = result.map(async (r: any) => {
+                    const { keyword, search_volume, low_top_of_page_bid, high_top_of_page_bid } = r;
+
+                    // Update all the Keyword records found
+                    return Keyword.update(
+                        { volume: search_volume, low_top_of_page_bid, high_top_of_page_bid },
+                        { where: { keyword, country: countryCode } },
+                    );
+                });
+                const keywords = await Keyword.findAll({ where: { keyword: 'data labeling', country: countryCode } });
+                console.log('keyword: ', keywords);
+                await Promise.all(promises);
+            }
+        } else {
+            if (status_code !== 40401) {
+                console.log('Task not ready --> insert back');
+                tasks.unshift(task);
+            }
+            await sleep(3000);
+        }
     }
     // return data;
     // return client;
