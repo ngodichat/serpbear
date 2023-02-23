@@ -15,12 +15,12 @@ module.exports = {
     });
 
     await queryInterface.addColumn('keyword', 'low_top_of_page_bid', {
-      type: Sequelize.DECIMAL,
+      type: Sequelize.DECIMAL(10,2),
       allowNull: true
     });
 
     await queryInterface.addColumn('keyword', 'high_top_of_page_bid', {
-      type: Sequelize.DECIMAL,
+      type: Sequelize.DECIMAL(10,2),
       allowNull: true
     });
   },
