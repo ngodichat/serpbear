@@ -74,12 +74,12 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                 });
             });
             // call post api on task
-            tasks = [
-                {
-                    location_code: 2826,
-                    keywords: 'uk casino online',
-                },
-            ];
+            // tasks = [
+            //     {
+            //         location_code: 2826,
+            //         keywords: ['uk casino online'],
+            //     },
+            // ];
             createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
             .then((data) => {
             //    const tasksRes = data.tasks;
@@ -90,7 +90,7 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
             //    while (taskIds.length > 0) {
 
             //    }
-                console.log('List of task ids: ', data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
+                console.log('List of task ids: ', data, data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
                 getReadyTasksDataForSeo(data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id), username, password);
             // setTimeout(() => {
                 // console.log(data);
