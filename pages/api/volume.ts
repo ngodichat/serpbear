@@ -56,7 +56,7 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                 }
             }
             // create task list
-            let tasks: any[] = [];
+            const tasks: any[] = [];
             Object.keys(groups).forEach((group) => {
                 const listKeywords = groups[group];
                 // console.log('Group: ', group, listKeywords.length);
