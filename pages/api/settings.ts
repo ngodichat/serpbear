@@ -84,6 +84,9 @@ export const getAppSettings = async () : Promise<SettingsType> => {
          smtp_port: '',
          smtp_username: '',
          smtp_password: '',
+         keyword_volume_type: 'none',
+         keyword_volume_username: '',
+         keyword_volume_password: '',
       };
       await writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(settings), { encoding: 'utf-8' });
       return settings;

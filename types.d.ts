@@ -39,7 +39,10 @@ type KeywordType = {
    updating: boolean,
    lastUpdateError: {date: string, error: string, scraper: string} | false,
    scData?: KeywordSCData,
-   uid?: string
+   uid?: string,
+   volume?: number, 
+   low_top_of_page_bid?: number, 
+   high_top_of_page_bid?: number,
 }
 
 type KeywordLastResult = {
@@ -80,7 +83,10 @@ type SettingsType = {
    smtp_username?: string,
    smtp_password?: string,
    search_console_integrated?: boolean,
-   available_scapers?: Array
+   available_scapers?: Array,
+   keyword_volume_type: string,
+   keyword_volume_username: string,
+   keyword_volume_password: string,
 }
 
 type KeywordSCDataChild = {

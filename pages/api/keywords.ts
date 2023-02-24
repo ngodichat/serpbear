@@ -7,6 +7,7 @@ import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
 import parseKeywords from '../../utils/parseKeywords';
 import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConsole';
+import Domain from '../../database/models/domain';
 
 type KeywordsGetResponse = {
    keywords?: KeywordType[],
@@ -47,8 +48,10 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
    if (!req.query.domain && typeof req.query.domain !== 'string') {
       return res.status(400).json({ error: 'Domain is Required!' });
    }
-   const domain = (req.query.domain as string).replaceAll('=', '/').replaceAll('-', '.').replaceAll('_', '-')
-      .toLowerCase();
+   const domainreq = (req.query.domain as string).toLowerCase();
+   const domainObj: Domain | null = await Domain.findOne({ where: { slug: domainreq } });
+   if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
+   const { domain } = domainObj;
    console.log('domain: ', domain);
    const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
    const domainSCData = integratedSC ? await readLocalSCData(domain) : false;

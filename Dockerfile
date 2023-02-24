@@ -1,4 +1,4 @@
-FROM node:lts-alpine AS deps
+FROM node:16-alpine AS deps
 
 WORKDIR /app
 
@@ -7,20 +7,20 @@ RUN npm install
 COPY . .
 
 
-FROM node:lts-alpine AS builder
+FROM node:16-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app ./
 RUN npm run build
 
 
-FROM node:lts-alpine AS runner
+FROM node:16-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN set -xe && mkdir -p /app/data && chown nextjs:nodejs /app/data
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# COPY --from=builder --chown=nextjs:nodejs /app/data ./data
+COPY --from=builder --chown=nextjs:nodejs /app/data ./data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

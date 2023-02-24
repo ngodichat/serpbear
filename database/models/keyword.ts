@@ -47,7 +47,7 @@ class Keyword extends Model {
    @Column({ type: DataType.STRING, allowNull: true, defaultValue: JSON.stringify([]) })
    tags!: string;
 
-   @Column({ type: DataType.STRING, allowNull: true, defaultValue: JSON.stringify([]) })
+   @Column({ type: DataType.TEXT, allowNull: true, defaultValue: JSON.stringify([]) })
    lastResult!: string;
 
    @Column({ type: DataType.BOOLEAN, allowNull: true, defaultValue: true })
@@ -58,6 +58,15 @@ class Keyword extends Model {
 
    @Column({ type: DataType.STRING, allowNull: true, defaultValue: 'false' })
    lastUpdateError!: string;
+
+   @Column({ type: DataType.INTEGER, allowNull: true })
+   volume!: number;
+
+   @Column({ type: DataType.DECIMAL(10,2), allowNull: true })
+   low_top_of_page_bid!: number;
+
+   @Column({ type: DataType.DECIMAL(10,2), allowNull: true })
+   high_top_of_page_bid!: number;
 }
 
 export default Keyword;
