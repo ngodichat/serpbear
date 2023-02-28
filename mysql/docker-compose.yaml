@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: G6r#T@1zU*^j
+      MYSQL_DATABASE: serpbear
+      MYSQL_USER: serpbear
+      MYSQL_PASSWORD: 8TxnsEr&EusL
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
+
