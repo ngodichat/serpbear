@@ -47,11 +47,12 @@ export const generateTheChartData = (history: KeywordHistory, time:string = '30'
          const pastDateKey = `${pastDate.getFullYear()}-${pastDate.getMonth() + 1}-${pastDate.getDate()}`;
          const prevSerp = history[pastDateKey];
          // const serpVal = prevSerp || (lastFoundSerp > 0 ? lastFoundSerp : 111);
-         const serpVal = prevSerp || 0;
-         console.log('serpVal: ', serpVal);
+         let serpVal = prevSerp ?? -1;
+         console.log('serpVal: ', serpVal, prevSerp);
          console.log('pastDateKey: ', pastDateKey);
-         if (serpVal !== 0) {
+         if (serpVal !== -1) {
             // lastFoundSerp = prevSerp;
+            serpVal = serpVal === 0 ? 111 : serpVal;
             foundFirstDayWithValue = true;
             chartData.labels.push(pastDateKey);
             chartData.sreies.push(serpVal);
