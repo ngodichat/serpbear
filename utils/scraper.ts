@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'fs/promises';
 import HttpsProxyAgent from 'https-proxy-agent';
 import countries from './countries';
 import allScrapers from '../scrapers/index';
+import { logWithColor } from './logs';
 
 type SearchResult = {
    title: string,
@@ -118,7 +119,8 @@ export const scrapeKeywordFromGoogle = async (keyword:KeywordType, settings:Sett
          // await writeFile('result.txt', JSON.stringify(scrapeResult), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
          const serp = getSerp(keyword.domain, extracted);
          refreshedResults = { ID: keyword.ID, keyword: keyword.keyword, position: serp.postion, url: serp.url, result: extracted, error: false };
-         console.log('[SERP]: ', keyword.keyword, serp.postion, serp.url);
+         logWithColor(`[SERP]: ${keyword.keyword} ${serp.postion} ${serp.url}`, 'green');
+         // console.log('[SERP]: ', keyword.keyword, serp.postion, serp.url);
       } else {
          scraperError = res.detail || res.error || 'Unknown Error';
          throw new Error(res);
@@ -129,7 +131,8 @@ export const scrapeKeywordFromGoogle = async (keyword:KeywordType, settings:Sett
          refreshedResults.error = `[${error.response.status}] ${error.response.statusText}`;
       }
 
-      console.log('[ERROR] Scraping Keyword : ', keyword.keyword, '. Error: ', error && error.response && error.response.statusText);
+      // console.log('[ERROR] Scraping Keyword : ', keyword.keyword, '. Error: ', error && error.response && error.response.statusText);
+      logWithColor(`[ERROR] Scraping Keyword : ${keyword.keyword}. Error:  ${error && error.response && error.response.statusText}`, 'red');
       if (!(error && error.response && error.response.statusText)) {
          console.log('[ERROR_MESSAGE]: ', error);
       }
