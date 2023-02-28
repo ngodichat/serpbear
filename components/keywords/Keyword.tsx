@@ -80,7 +80,7 @@ const Keyword = (props: KeywordProps) => {
       key={keyword}
       className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
       lg:flex lg:justify-between lg:items-center ${selected ? ' bg-indigo-50 keyword--selected' : ''} ${lastItem ? 'border-b-0' : ''}`}>
-         <div className=' w-3/4 lg:flex-1 lg:basis-20 lg:w-auto font-semibold cursor-pointer'>
+         <div className=' w-3/4 lg:flex-1 lg:basis-40 lg:w-auto font-semibold cursor-pointer'>
             <button
                className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px] border 
                ${selected ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
@@ -108,13 +108,13 @@ const Keyword = (props: KeywordProps) => {
             {!updating && positionChange < 0 && <i className=' not-italic ml-1 text-xs text-red-300'>▼ {positionChange}</i>}
          </div>
          {chartData.labels.length > 0 && (
-            <div className='lg:flex-1 hidden lg:block'>
+            <div className='lg:flex-1 hidden lg:block basis-32 grow-0'>
                <ChartSlim labels={chartData.labels} sreies={chartData.sreies} />
             </div>
          )}
-         <div className='lg:flex-1 hidden lg:block'>{history[Object.keys(history)[0]]}</div>
-         <div className='lg:flex-1 hidden lg:block pl-8'>{volume}</div>
-         <div className='lg:flex-1 hidden lg:block'>{low_top_of_page_bid} - {high_top_of_page_bid}</div>
+         <div className='hidden lg:block basis-12 grow-0 text-center'>{history[Object.keys(history)[0]]}</div>
+         <div className='hidden lg:block basis-16 grow-0 text-center'>{volume?.toLocaleString('en-US', { style: 'decimal' })}</div>
+         <div className='hidden lg:block basis-40 grow-0 text-center'>${low_top_of_page_bid} - ${high_top_of_page_bid}</div>
          <div
          className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
          overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-none lg:pr-5`}>
