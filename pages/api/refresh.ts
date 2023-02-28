@@ -42,6 +42,7 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
          return res.status(400).json({ error: 'Scraper has not been set up yet.' });
       }
       const query = req.query.id === 'all' && domain ? { domain } : { ID: { [Op.in]: keywordIDs } };
+      // console.log('Refresh keywords query: ', query);
       await Keyword.update({ updating: true }, { where: query });
       const keywordQueries: Keyword[] = await Keyword.findAll({ where: query });
 
@@ -53,7 +54,15 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
          const refreshed: KeywordType[] = await refreshAndUpdateKeywords(keywordQueries, settings);
          keywords = refreshed;
       } else {
-         refreshAndUpdateKeywords(keywordQueries, settings);
+         const results: Keyword[][] = [];
+         const chunkSize = 10;
+         for (let i = 0; i < keywordQueries.length; i += chunkSize) {
+            results.push(keywordQueries.slice(i, i + chunkSize));
+         }
+         results.forEach((keywordChunk: Keyword[]) => {
+            console.log('Start refreshing: ', keywordChunk.length);
+            refreshAndUpdateKeywords(keywordChunk, settings);
+         });
          keywords = parseKeywords(keywordQueries.map((el) => el.get({ plain: true })));
       }
 

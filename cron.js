@@ -31,13 +31,27 @@ const getAppSettings = async () => {
             console.log('Error Decrypting Settings API Keys!');
          }
       } else {
+         console.log('Setting file not found');
          throw Error('Settings file dont exist.');
       }
       return decryptedSettings;
    } catch (error) {
-      // console.log('CRON ERROR: Reading Settings File. ', error);
-      await promises.writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(defaultSettings), { encoding: 'utf-8' });
-      return defaultSettings;
+      console.log('CRON ERROR: Reading Settings File. ', error);
+      try {
+         await promises.access(`${process.cwd()}/data`);
+         await promises.writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(defaultSettings), { encoding: 'utf-8' });
+         return defaultSettings;
+      } catch (err) {
+         if (err.code === 'ENOENT') {
+            // directory does not exist, so create it
+            await promises.mkdir(`${process.cwd()}/data`, { recursive: true });
+            await promises.writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(defaultSettings), { encoding: 'utf-8' });
+            return defaultSettings;
+          } else {
+            // some other error occurred
+            throw err;
+          }
+      }
    }
 };
 
