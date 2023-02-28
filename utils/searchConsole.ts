@@ -137,14 +137,16 @@ export const integrateKeywordSCData = (keyword: KeywordType, SCData:SCDomainData
 };
 
 export const readLocalSCData = async (domain:string): Promise<SCDomainDataType> => {
-   const filePath = `${process.cwd()}/data/SC_${domain}.json`;
-   const currentQueueRaw = await readFile(filePath, { encoding: 'utf-8' }).catch(async () => { await updateLocalSCData(domain); return '{}'; });
+   const domainNormalized = domain.replaceAll('/','-');
+   const filePath = `${process.cwd()}/data/SC_${domainNormalized}.json`;
+   const currentQueueRaw = await readFile(filePath, { encoding: 'utf-8' }).catch(async () => { await updateLocalSCData(domainNormalized); return '{}'; });
    const domainSCData = JSON.parse(currentQueueRaw);
    return domainSCData;
 };
 
 export const updateLocalSCData = async (domain:string, scDomainData?:SCDomainDataType): Promise<SCDomainDataType|false> => {
-   const filePath = `${process.cwd()}/data/SC_${domain}.json`;
+   const domainNormalized = domain.replaceAll('/','-');
+   const filePath = `${process.cwd()}/data/SC_${domainNormalized}.json`;
    const emptyData:SCDomainDataType = { threeDays: [], sevenDays: [], thirtyDays: [], lastFetched: '', lastFetchError: '' };
    await writeFile(filePath, JSON.stringify(scDomainData || emptyData), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
    return scDomainData || emptyData;
