@@ -3,6 +3,7 @@ import { Sequelize } from 'sequelize-typescript';
 import Domain from './models/domain';
 import Keyword from './models/keyword';
 import Country from "./models/country";
+import BackLink from './models/backlink';
 
 // const connection = new Sequelize({
 //    dialect: 'sqlite',
@@ -34,7 +35,7 @@ const connection = new Sequelize({
       idle: 10000,
    },
    logging: false,
-   models: [Domain, Keyword, Country],
+   models: [Domain, Keyword, Country, BackLink],
 });
 
 export default connection;

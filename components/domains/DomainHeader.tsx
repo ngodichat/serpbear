@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
 import { useRefreshKeywords } from '../../services/keywords';
 import Icon from '../common/Icon';
 import SelectField from '../common/SelectField';
@@ -23,12 +24,35 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
    const { mutate: refreshMutate } = useRefreshKeywords(() => { });
    const isConsole = router.pathname === '/domain/console/[slug]';
    const isInsight = router.pathname === '/domain/insight/[slug]';
+   const isBacklink = router.pathname === '/domain/backlink/[slug]';
 
    const daysName = (dayKey: string) => dayKey.replace('three', '3').replace('seven', '7').replace('thirty', '30').replace('Days', ' Days');
    const buttonStyle = 'leading-6 inline-block px-2 py-2 text-gray-500 hover:text-gray-700';
    const buttonLabelStyle = 'ml-2 text-sm not-italic lg:invisible lg:opacity-0';
    const tabStyle = 'rounded rounded-b-none cursor-pointer border-[#e9ebff] border-b-0';
    const scDataFilterStlye = 'px-3 py-2 block w-full';
+
+   const handleFileChange = (event: any) => {
+      handleSubmit(event.target.files[0]);
+   };
+
+   const handleSubmit = async (file: any) => {
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      try {
+         const response = await axios.post('/api/backlinks', formData, {
+            headers: {
+               'Content-Type': 'multipart/form-data',
+            },
+         });
+
+         console.log(response.data);
+      } catch (error) {
+         console.error(error);
+      }
+   };
+
    return (
       <div className='domain_kewywords_head w-full '>
          <div className='flex mb-2'>
@@ -55,6 +79,13 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                   <Link href={`/domain/${domain.slug}`} passHref={true}>
                      <a className='px-4 py-2 inline-block'><Icon type="tracking" color='#999' classes='hidden lg:inline-block' />
                         <span className='text-xs lg:text-sm lg:ml-2'>Tracking</span>
+                     </a>
+                  </Link>
+               </li>
+               <li className={`${tabStyle} ${router.pathname === '/domain/backlink/[slug]' ? 'bg-white border border-b-0 font-semibold' : ''}`}>
+                  <Link href={`/domain/backlink/${domain.slug}`} passHref={true}>
+                     <a className='px-4 py-2 inline-block'><Icon type="backlink" size={13} classes='hidden lg:inline-block' />
+                        <span className='text-xs lg:text-sm lg:ml-2'>Backlinks</span>
                      </a>
                   </Link>
                </li>
@@ -85,7 +116,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                   className={`hidden w-40 ml-[-70px] lg:block absolute mt-10 bg-white border border-gray-100 z-40 rounded 
             lg:z-auto lg:relative lg:mt-0 lg:border-0 lg:w-auto lg:bg-transparent`}
                   style={{ display: showOptions ? 'block' : undefined }}>
-                  {!isInsight && (
+                  {!isInsight && !isBacklink && (
                      <button
                         className={`domheader_action_button relative ${buttonStyle}`}
                         aria-pressed="false"
@@ -93,7 +124,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                         <Icon type='download' size={20} /><i className={`${buttonLabelStyle}`}>Export as csv</i>
                      </button>
                   )}
-                  {!isConsole && !isInsight && (
+                  {!isConsole && !isInsight && !isBacklink && (
                      <button
                         className={`domheader_action_button relative ${buttonStyle} lg:ml-3`}
                         aria-pressed="false"
@@ -101,15 +132,17 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                         <Icon type='reload' size={14} /><i className={`${buttonLabelStyle}`}>Reload All Serps</i>
                      </button>
                   )}
-                  <button
-                     data-testid="show_domain_settings"
-                     className={`domheader_action_button relative ${buttonStyle} lg:ml-3`}
-                     aria-pressed="false"
-                     onClick={() => showSettingsModal(true)}><Icon type='settings' size={20} />
-                     <i className={`${buttonLabelStyle}`}>Domain Settings</i>
-                  </button>
+                  {!isBacklink && (
+                     <button
+                        data-testid="show_domain_settings"
+                        className={`domheader_action_button relative ${buttonStyle} lg:ml-3`}
+                        aria-pressed="false"
+                        onClick={() => showSettingsModal(true)}><Icon type='settings' size={20} />
+                        <i className={`${buttonLabelStyle}`}>Domain Settings</i>
+                     </button>
+                  )}
                </div>
-               {!isConsole && !isInsight && (
+               {!isConsole && !isInsight && !isBacklink && (
                   <button
                      data-testid="add_keyword"
                      className={'ml-2 inline-block px-4 py-2 text-blue-700 font-bold text-sm'}
@@ -138,6 +171,14 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                         </div>
                      )}
                   </div>
+               )}
+               {isBacklink && (
+                  <label htmlFor='import'
+                     className={`domheader_action_button relative ${buttonStyle}`}
+                     aria-pressed="false">
+                     <Icon type='upload' size={20} /><i className={`${buttonLabelStyle}`}>Import from csv</i>
+                     <input id='import' className='hidden' type="file" onChange={handleFileChange} />
+                  </label>
                )}
             </div>
          </div>
