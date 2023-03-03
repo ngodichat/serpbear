@@ -6,6 +6,11 @@ import db from '../../database/database';
 import verifyUser from '../../utils/verifyUser';
 import BackLink from '../../database/models/backlink';
 
+type BacklinksGetResponse = {
+  backlinks?: BackLink[],
+  error?: string | null,
+};
+
 export const config = {
   api: {
     bodyParser: false,
@@ -75,7 +80,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // });
       // res.status(200).json({ message: 'API POST endpoint reached' });
     });
+  }
+  if (req.method === 'GET') {
+    getBacklinks(req, res);
   } else {
     res.status(405).json({ message: 'Method not allowed' });
   }
 }
+
+const getBacklinks = async (req: NextApiRequest, res: NextApiResponse<BacklinksGetResponse>) => {
+  if (!req.query.domain && typeof req.query.domain !== 'string') {
+    return res.status(400).json({ error: 'Domain is Required!' });
+  }
+  const domainreq = (req.query.domain as string).toLowerCase();
+  const domainObj: Domain | null = await Domain.findOne({ where: { slug: domainreq } });
+  if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
+  const { domain } = domainObj;
+};

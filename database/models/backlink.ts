@@ -27,6 +27,9 @@ class BackLink extends Model {
    
    @Column({ type: DataType.STRING, allowNull: true })
    link_first_index_date!: string;
+
+   @Column({ type: DataType.STRING, allowNull: false })
+   domain!: string;
 }
 
 export default BackLink;
