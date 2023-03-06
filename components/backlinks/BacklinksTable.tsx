@@ -35,6 +35,9 @@ const BacklinksTable = (props: BacklinksTableProps) => {
                                                             key={backlink.URL}
                                                             backLinkData={backlink}
                                                       />)}
+                     {!isLoading && backlinks.length === 0 && (
+                        <p className=' p-9 pt-[10%] text-center text-gray-500'>No Backlink Added for this domain.</p>
+                     )}
                      {isLoading && (
                         <p className=' p-9 pt-[10%] text-center text-gray-500'>Loading Backlinks...</p>
                      )}
