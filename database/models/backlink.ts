@@ -30,6 +30,9 @@ class BackLink extends Model {
 
    @Column({ type: DataType.STRING, allowNull: false })
    domain!: string;
+   
+   @Column({ type: DataType.STRING, allowNull: false })
+   last_updated!: string;
 }
 
 export default BackLink;

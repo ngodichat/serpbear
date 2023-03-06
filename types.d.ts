@@ -187,3 +187,16 @@ interface ScraperSettings {
    scrapeURL?(keyword:KeywordType, settings:SettingsType, countries:countryData): string,
    serpExtractor?(content:string): scraperExtractedItem[],
 }
+
+
+type BacklinkType = {
+   URL: string,
+   anchor_text: string,
+   source_trust_flow: number,
+   source_citation_flow: number,
+   domain_trust_flow: number,
+   domain_citation_flow: number,
+   domain: string,
+   link_first_index_date: string,
+   last_updated: string
+}

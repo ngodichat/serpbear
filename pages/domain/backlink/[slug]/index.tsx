@@ -8,26 +8,22 @@ import TopBar from '../../../../components/common/TopBar';
 import DomainHeader from '../../../../components/domains/DomainHeader';
 import AddDomain from '../../../../components/domains/AddDomain';
 import DomainSettings from '../../../../components/domains/DomainSettings';
-import exportCSV from '../../../../utils/exportcsv';
 import Settings from '../../../../components/settings/Settings';
 import { useFetchDomains } from '../../../../services/domains';
-import { useFetchSCInsight } from '../../../../services/searchConsole';
-import SCInsight from '../../../../components/insight/Insight';
-import { useFetchSettings } from '../../../../services/settings';
+import BacklinksTable from '../../../../components/backlinks/BacklinksTable';
+import { useFetchBacklinks } from '../../../../services/backlinks';
 
 const BacklinkPage: NextPage = () => {
    const router = useRouter();
    const [showDomainSettings, setShowDomainSettings] = useState(false);
    const [showSettings, setShowSettings] = useState(false);
    const [showAddDomain, setShowAddDomain] = useState(false);
-   const [scDateFilter, setSCDateFilter] = useState('thirtyDays');
-   const { data: appSettings } = useFetchSettings();
    const { data: domainsData } = useFetchDomains(router);
-   const scConnected = !!(appSettings && appSettings?.settings?.search_console_integrated);
-   const { data: insightData } = useFetchSCInsight(router, !!(domainsData?.domains?.length) && scConnected);
+   const [keywordSPollInterval, setKeywordSPollInterval] = useState<undefined|number>(undefined);
+   const { backlinksData, backlinksLoading } = useFetchBacklinks(router, setKeywordSPollInterval, keywordSPollInterval);
 
    const theDomains: DomainType[] = (domainsData && domainsData.domains) || [];
-   const theInsight: InsightDataType = insightData && insightData.data ? insightData.data : {};
+   const theBacklinks: BacklinkType[] = backlinksData && backlinksData.backlinks;
 
    const activDomain: DomainType|null = useMemo(() => {
       let active:DomainType|null = null;
@@ -55,16 +51,11 @@ const BacklinkPage: NextPage = () => {
                   showAddModal={() => console.log('XXXXX')}
                   showAddDomainModal={setShowAddDomain}
                   showSettingsModal={setShowDomainSettings}
-                  exportCsv={() => exportCSV([], activDomain.domain, scDateFilter)}
-                  scFilter={scDateFilter}
-                  setScFilter={(item:string) => setSCDateFilter(item)}
                   />
                }
-               <SCInsight
-               isLoading={false}
-               domain={activDomain}
-               insight={theInsight}
-               isConsoleIntegrated={scConnected}
+               <BacklinksTable
+                  isLoading={backlinksLoading}
+                  backlinks={theBacklinks}
                />
             </div>
          </div>

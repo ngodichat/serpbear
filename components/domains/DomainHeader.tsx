@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { useRefreshKeywords } from '../../services/keywords';
 import Icon from '../common/Icon';
 import SelectField from '../common/SelectField';
@@ -12,7 +13,7 @@ type DomainHeaderProps = {
    showAddModal: Function,
    showAddDomainModal: Function,
    showSettingsModal: Function,
-   exportCsv: Function,
+   exportCsv?: Function,
    scFilter?: string
    setScFilter?: Function
 }
@@ -46,10 +47,11 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                'Content-Type': 'multipart/form-data',
             },
          });
-
+         toast('Import Backlinks Successfully!', { icon: '✔️' });
          console.log(response.data);
       } catch (error) {
          console.error(error);
+         toast('Failed to import Backlinks!', { icon: '⚠️' });
       }
    };
 
@@ -120,7 +122,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                      <button
                         className={`domheader_action_button relative ${buttonStyle}`}
                         aria-pressed="false"
-                        onClick={() => exportCsv()}>
+                        onClick={() => exportCsv!()}>
                         <Icon type='download' size={20} /><i className={`${buttonLabelStyle}`}>Export as csv</i>
                      </button>
                   )}
