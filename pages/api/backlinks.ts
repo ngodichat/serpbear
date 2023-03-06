@@ -82,7 +82,7 @@ const importBacklinksFromCSV = async (req:NextApiRequest, res: NextApiResponse) 
               domain_trust_flow: parseInt(row['Domain Trust Flow'], 10),
               domain_citation_flow: row['Domain Citation Flow'],
               link_first_index_date: row['Link First Indexed Date'],
-              domain: row['Target URL'].replace('www', '').replace(/https?:\/\//, ''),
+              domain: row['Target URL'].replace('www.', '').replace(/https?:\/\//, ''),
               last_updated: lastUpdated,
             };
             records.push(record);
