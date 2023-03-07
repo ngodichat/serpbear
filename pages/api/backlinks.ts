@@ -43,7 +43,7 @@ const getBacklinks = async (req: NextApiRequest, res: NextApiResponse<BacklinksG
   if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
   const { domain } = domainObj;
   try {
-    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { domain } });
+    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { domain }, order: [['link_first_index_date', 'DESC']] });
     return res.status(200).json({ backlinks: allBacklinks });
  } catch (error) {
     console.log('[ERROR] Getting Domain Backlinks for ', domain, error);
