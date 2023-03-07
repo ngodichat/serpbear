@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import csv from 'csv-parser';
 import fs from 'fs';
-import { Op } from 'sequelize';
+import { literal, Op } from 'sequelize';
 import db from '../../database/database';
 import verifyUser from '../../utils/verifyUser';
 import BackLink from '../../database/models/backlink';
@@ -44,7 +44,7 @@ const getBacklinks = async (req: NextApiRequest, res: NextApiResponse<BacklinksG
   if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
   const { domain } = domainObj;
   try {
-    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { domain, source_trust_flow: { [Op.gt]: 10 } }, order: [['link_first_index_date', 'DESC']] });
+    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { domain, source_trust_flow: { [Op.gt]: 10 } }, order: literal("STR_TO_DATE(link_first_index_date, '%d/%m/%Y %H:%i') DESC") });
     return res.status(200).json({ backlinks: allBacklinks });
  } catch (error) {
     console.log('[ERROR] Getting Domain Backlinks for ', domain, error);
