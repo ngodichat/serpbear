@@ -16,6 +16,12 @@ const BacklinksTable = (props: BacklinksTableProps) => {
             <div className={`domkeywordsTable domkeywordsTable--keywords} 
                styled-scrollbar w-full overflow-auto min-h-[60vh]`}>
                <div className=' lg:min-w-[800px]'>
+                  <div className={`domBacklinks_filters hidden lg:flex p-3 px-6 bg-[#FCFCFF]
+                   text-gray-600 justify-between items-center font-semibold border-y`}>
+                    <span className='domBacklinks_filters_item_count flex-1 basis-[44rem] grow-0 w-auto '>{backlinks.length} results</span>
+                    <span className='flex-1 basis-28 grow-0'>URL</span>
+                    <span className='flex-1 '>Domain</span>
+                  </div>
                   <div className={`domKeywords_head hidden lg:flex p-3 px-6 bg-[#FCFCFF]
                    text-gray-600 justify-between items-center font-semibold border-y`}>
                      <span className='domKeywords_head_keyword flex-1 w-auto '>

@@ -117,7 +117,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                <div
                   className={`hidden w-40 ml-[-70px] lg:block absolute mt-10 bg-white border border-gray-100 z-40 rounded 
             lg:z-auto lg:relative lg:mt-0 lg:border-0 lg:w-auto lg:bg-transparent`}
-                  style={{ display: showOptions ? 'block' : undefined }}>
+                  style={{ display: showOptions ? 'block' : 'none' }}>
                   {!isInsight && !isBacklink && (
                      <button
                         className={`domheader_action_button relative ${buttonStyle}`}
@@ -176,7 +176,7 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                )}
                {isBacklink && (
                   <label htmlFor='import'
-                     className={`domheader_action_button relative ${buttonStyle}`}
+                     className={`domheader_action_button relative ${buttonStyle} cursor-pointer`}
                      aria-pressed="false">
                      <Icon type='upload' size={20} /><i className={`${buttonLabelStyle}`}>Import from csv</i>
                      <input id='import' className='hidden' type="file" onChange={handleFileChange} />
