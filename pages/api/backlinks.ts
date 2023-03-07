@@ -44,7 +44,7 @@ const getBacklinks = async (req: NextApiRequest, res: NextApiResponse<BacklinksG
   if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
   const { domain } = domainObj;
   try {
-    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { domain, source_trust_flow: { [Op.gt]: 10 } }, order: literal("STR_TO_DATE(link_first_index_date, '%d/%m/%Y %H:%i') DESC") });
+    const allBacklinks: BackLink[] = await BackLink.findAll({ where: { [Op.or]: [{ domain }, { domain: domain.substring(0, domain.length - 1) }], source_trust_flow: { [Op.gt]: 10 } }, order: literal("STR_TO_DATE(link_first_index_date, '%d/%m/%Y %H:%i') DESC") });
     return res.status(200).json({ backlinks: allBacklinks });
  } catch (error) {
     console.log('[ERROR] Getting Domain Backlinks for ', domain, error);
@@ -93,7 +93,7 @@ const importBacklinksFromCSV = async (req:NextApiRequest, res: NextApiResponse) 
 
           try {
             const options = {
-              updateOnDuplicate: ['anchor_text', 'source_trust_flow', 'source_citation_flow', 'domain_trust_flow', 'domain_citation_flow', 'link_first_index_date', 'last_updated'],
+              updateOnDuplicate: ['anchor_text', 'source_trust_flow', 'source_citation_flow', 'domain_trust_flow', 'domain_citation_flow', 'link_first_index_date', 'last_updated', 'domain'],
             };
             await BackLink.bulkCreate(records, options);
             console.log('[SUCCESS] Adding New Backlinks successfully ');
