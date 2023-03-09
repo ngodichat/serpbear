@@ -1,6 +1,6 @@
 type ChartData = {
    labels: string[],
-   sreies: number[]
+   sreies: (number|null)[]
 }
 
 export const generateChartData = (history: KeywordHistory): ChartData => {
@@ -26,9 +26,49 @@ export const generateChartData = (history: KeywordHistory): ChartData => {
    return { labels: priorDates, sreies: Object.values(seriesDates) };
 };
 
+// export const generateTheChartData = (history: KeywordHistory, time:string = '30'): ChartData => {
+//    const currentDate = new Date();
+//    // let lastFoundSerp = 0;
+//    const chartData: ChartData = { labels: [], sreies: [] };
+
+//    if (time === 'all') {
+//       Object.keys(history).forEach((dateKey) => {
+//          const serpVal = history[dateKey] ? history[dateKey] : 111;
+//          chartData.labels.push(dateKey);
+//          chartData.sreies.push(serpVal);
+//       });
+//    } else {
+//       let foundFirstDayWithValue = false;
+//       // First Generate Labels. The labels should be the last 30 days dates. Format: Oct 26
+//       for (let index = parseInt(time, 10); index >= 0; index -= 1) {
+//          const pastDate = new Date(new Date().setDate(currentDate.getDate() - index));
+//          // Then Generate Series. if past date's serp does not exist, use 0.
+//          // If have a missing serp in between dates, use the previous date's serp to fill the gap.
+//          const pastDateKey = `${pastDate.getFullYear()}-${pastDate.getMonth() + 1}-${pastDate.getDate()}`;
+//          const prevSerp = history[pastDateKey];
+//          // const serpVal = prevSerp || (lastFoundSerp > 0 ? lastFoundSerp : 111);
+//          let serpVal = prevSerp ?? -1;
+//          console.log('serpVal: ', serpVal, prevSerp);
+//          console.log('pastDateKey: ', pastDateKey);
+//          if (serpVal !== -1) {
+//             // lastFoundSerp = prevSerp;
+//             serpVal = serpVal === 0 ? 111 : serpVal;
+//             foundFirstDayWithValue = true;
+//             chartData.labels.push(pastDateKey);
+//             chartData.sreies.push(serpVal);
+//          } else if (!foundFirstDayWithValue) {
+//             chartData.labels.push(pastDateKey);
+//             chartData.sreies.push(111);
+//          }
+//       }
+//    }
+//    // console.log(chartData);
+
+//    return chartData;
+// };
+
 export const generateTheChartData = (history: KeywordHistory, time:string = '30'): ChartData => {
-   const currentDate = new Date();
-   // let lastFoundSerp = 0;
+   const currentDate = new Date(); let lastFoundSerp = 0;
    const chartData: ChartData = { labels: [], sreies: [] };
 
    if (time === 'all') {
@@ -38,7 +78,6 @@ export const generateTheChartData = (history: KeywordHistory, time:string = '30'
          chartData.sreies.push(serpVal);
       });
    } else {
-      let foundFirstDayWithValue = false;
       // First Generate Labels. The labels should be the last 30 days dates. Format: Oct 26
       for (let index = parseInt(time, 10); index >= 0; index -= 1) {
          const pastDate = new Date(new Date().setDate(currentDate.getDate() - index));
@@ -46,20 +85,10 @@ export const generateTheChartData = (history: KeywordHistory, time:string = '30'
          // If have a missing serp in between dates, use the previous date's serp to fill the gap.
          const pastDateKey = `${pastDate.getFullYear()}-${pastDate.getMonth() + 1}-${pastDate.getDate()}`;
          const prevSerp = history[pastDateKey];
-         // const serpVal = prevSerp || (lastFoundSerp > 0 ? lastFoundSerp : 111);
-         let serpVal = prevSerp ?? -1;
-         console.log('serpVal: ', serpVal, prevSerp);
-         console.log('pastDateKey: ', pastDateKey);
-         if (serpVal !== -1) {
-            // lastFoundSerp = prevSerp;
-            serpVal = serpVal === 0 ? 111 : serpVal;
-            foundFirstDayWithValue = true;
-            chartData.labels.push(pastDateKey);
-            chartData.sreies.push(serpVal);
-         } else if (!foundFirstDayWithValue) {
-            chartData.labels.push(pastDateKey);
-            chartData.sreies.push(111);
-         }
+         const serpVal = prevSerp || (lastFoundSerp > 0 ? lastFoundSerp : null);
+         if (serpVal !== 0) { lastFoundSerp = prevSerp; }
+         chartData.labels.push(pastDateKey);
+         chartData.sreies.push(serpVal);
       }
    }
    // console.log(chartData);

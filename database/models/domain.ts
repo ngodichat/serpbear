@@ -41,6 +41,18 @@ class Domain extends Model {
 
    @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
    auto_refresh!: boolean;
+
+   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+   target_trust_flow!: number;
+
+   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+   target_citation_flow!: number;
+
+   @Column({ type: DataType.STRING, allowNull: true, defaultValue: null })
+   target_topical_trust_flow_topic!: string;
+
+   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+   target_topical_trust_flow_value!: number;
 }
 
 export default Domain;

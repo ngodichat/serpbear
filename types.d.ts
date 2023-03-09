@@ -15,7 +15,11 @@ type DomainType = {
    scVisits?: number,
    scImpressions?: number,
    scPosition?: number,
-   auto_refresh: boolean
+   auto_refresh: boolean,
+   target_trust_flow?: number,
+   target_citation_flow?: number,
+   target_topical_trust_flow_topic?: string,
+   target_topical_trust_flow_value?: number,
 }
 
 type KeywordHistory = {

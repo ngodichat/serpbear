@@ -6,7 +6,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, 
 
 type ChartProps ={
    labels: string[],
-   sreies: number[]
+   sreies: (number|null)[]
 }
 
 const ChartSlim = ({ labels, sreies }:ChartProps) => {

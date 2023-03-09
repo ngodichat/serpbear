@@ -26,8 +26,17 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false }: DomainIte
                <div className="domain_details flex-1">
                   <h3 className='font-semibold text-base mb-2 capitalize'>{domain.domain}</h3>
                  {keywordsUpdated && (
-                  <span className=' text-gray-600 text-xs'>
-                     Updated <TimeAgo title={dayjs(keywordsUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={keywordsUpdated} />
+                  <span className='flex'>
+                     <span className=' text-gray-600 text-xs'>
+                        Updated <TimeAgo title={dayjs(keywordsUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={keywordsUpdated} />
+                     </span>
+                     {domain.target_trust_flow && (
+                        <span>
+                           <span className='bg-[#DDFBE7] ml-4 p-1 px-2 text-xs rounded-full'>TF: {domain.target_trust_flow}</span>
+                           <span className='bg-[#FCECD6] ml-1 p-1 px-2 text-xs rounded-full'>CF: {domain.target_citation_flow}</span>
+                           <span className='ml-4'>{domain.target_topical_trust_flow_topic} ({domain.target_topical_trust_flow_value})</span>
+                        </span>
+                     )}
                   </span>
                  )}
                </div>

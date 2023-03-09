@@ -6,11 +6,12 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 type ChartProps ={
    labels: string[],
-   sreies: number[],
+   sreies: (number|null)[],
+   backlinks?: (number|null)[],
    reverse? : boolean,
 }
 
-const Chart = ({ labels, sreies, reverse = true }:ChartProps) => {
+const Chart = ({ labels, sreies, reverse = true, backlinks = [] }:ChartProps) => {
    const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -36,10 +37,17 @@ const Chart = ({ labels, sreies, reverse = true }:ChartProps) => {
             labels,
             datasets: [
                {
+                  data: backlinks,
+                  // data: [100, 8, 20, 50],
+                  borderColor: 'transparent',
+                  backgroundColor: 'blue',
+               },
+               {
                   fill: 'start',
                   data: sreies,
                   borderColor: 'rgb(31, 205, 176)',
                   backgroundColor: 'rgba(31, 205, 176, 0.5)',
+                  spanGaps: true,
                },
             ],
             }}

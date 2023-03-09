@@ -73,8 +73,20 @@ const importBacklinksFromCSV = async (req:NextApiRequest, res: NextApiResponse) 
           const records: any[] = [];
           const urlKey = Object.keys(results[0])[0];
           const lastUpdated = new Date().toJSON();
+          const targetScore = {
+            target_trust_flow: -1,
+            target_citation_flow: -1,
+            target_topical_trust_flow_topic: '',
+            target_topical_trust_flow_value: -1,
+          };
+          let domain = '';
           results.forEach((row) => {
             // console.log(row);
+            targetScore.target_trust_flow = row['Target Trust Flow'];
+            targetScore.target_citation_flow = row['Target Citation Flow'];
+            targetScore.target_topical_trust_flow_topic = row['Target Topical Trust Flow Topic 0'];
+            targetScore.target_topical_trust_flow_value = row['Target Topical Trust Flow Value 0'];
+            domain = row['Target URL'].replace('www.', '').replace(/https?:\/\//, '');
             const record = {
               URL: row[urlKey],
               anchor_text: row['Anchor Text'],
@@ -83,7 +95,7 @@ const importBacklinksFromCSV = async (req:NextApiRequest, res: NextApiResponse) 
               domain_trust_flow: parseInt(row['Domain Trust Flow'], 10),
               domain_citation_flow: row['Domain Citation Flow'],
               link_first_index_date: row['Link First Indexed Date'],
-              domain: row['Target URL'].replace('www.', '').replace(/https?:\/\//, ''),
+              domain,
               last_updated: lastUpdated,
             };
             if (record.source_trust_flow > 10) {
@@ -96,6 +108,13 @@ const importBacklinksFromCSV = async (req:NextApiRequest, res: NextApiResponse) 
               updateOnDuplicate: ['anchor_text', 'source_trust_flow', 'source_citation_flow', 'domain_trust_flow', 'domain_citation_flow', 'link_first_index_date', 'last_updated', 'domain'],
             };
             await BackLink.bulkCreate(records, options);
+            if (domain !== '') {
+              const domainObj = await Domain.findOne({ where: { domain: { [Op.like]: `%${domain}%` } } });
+              if (domainObj) {
+                console.log('Domain found!: ', domainObj);
+                await Domain.update(targetScore, { where: { ID: domainObj.ID } });
+              }
+            }
             console.log('[SUCCESS] Adding New Backlinks successfully ');
             return res.status(200).json({ message: 'Upload file successfully' });
           } catch (error) {
