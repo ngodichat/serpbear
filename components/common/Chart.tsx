@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ChartDataset } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -8,10 +8,11 @@ type ChartProps ={
    labels: string[],
    sreies: (number|null)[],
    backlinks?: (number|null)[],
+   backlinksData?: any,
    reverse? : boolean,
 }
 
-const Chart = ({ labels, sreies, reverse = true, backlinks = [] }:ChartProps) => {
+const Chart = ({ labels, sreies, reverse = true, backlinks = [], backlinksData = {} }:ChartProps) => {
    const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -28,14 +29,17 @@ const Chart = ({ labels, sreies, reverse = true, backlinks = [] }:ChartProps) =>
              display: false,
          },
          tooltip: {
-            displayColors: false,
+            displayColors: true,
             callbacks: {
-               label: (tooltipItem: any) => {
-                  console.log('Function call here', tooltipItem);
-                  return [
-                     `Label 1: ${tooltipItem.parsed.y}`,
-                     `Label 2: ${tooltipItem.parsed.x}`,
-                  ];
+               label: (tooltipItem: TooltipItem<any>) => {
+                  if (tooltipItem.datasetIndex === 1) {
+                     return `${tooltipItem.parsed.y}`;
+                  }
+                  console.log(backlinksData);
+                  if (backlinksData[tooltipItem.label]) {
+                     return backlinksData[tooltipItem.label];
+                  }
+                  return `${tooltipItem.parsed.y}`;
                },
             },
          },
@@ -49,8 +53,8 @@ const Chart = ({ labels, sreies, reverse = true, backlinks = [] }:ChartProps) =>
                labels,
                datasets: [
                   {
-                     // data: backlinks,
-                     data: [100, 8, 20, 50],
+                     data: backlinks,
+                     // data: [100, 8, 20, 50],
                      borderColor: 'transparent',
                      backgroundColor: 'blue',
                   },

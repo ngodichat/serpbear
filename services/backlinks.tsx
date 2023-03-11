@@ -15,8 +15,7 @@ export function useFetchBacklinks(router: NextRouter, setKeywordSPollInterval?:F
        {
           refetchInterval: keywordSPollInterval,
           onSuccess: (data) => {
-             // If Keywords are Manually Refreshed check if the any of the keywords position are still being fetched
-             // If yes, then refecth the keywords every 5 seconds until all the keywords position is updated by the server
+             console.log('Fetching backlinks successfully!: ', data);
              if (data.keywords && data.keywords.length > 0 && setKeywordSPollInterval) {
                 const hasRefreshingKeyword = data.keywords.some((x:KeywordType) => x.updating);
                 if (hasRefreshingKeyword) {

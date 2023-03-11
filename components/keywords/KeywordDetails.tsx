@@ -8,10 +8,11 @@ import { generateTheChartData } from '../common/generateChartData';
 
 type KeywordDetailsProps = {
    keyword: KeywordType,
-   closeDetails: Function
+   closeDetails: Function,
+   backlinks: BacklinkType[],
 }
 
-const KeywordDetails = ({ keyword, closeDetails }:KeywordDetailsProps) => {
+const KeywordDetails = ({ keyword, closeDetails, backlinks }:KeywordDetailsProps) => {
    const updatedDate = new Date(keyword.lastUpdated);
    const [keywordHistory, setKeywordHistory] = useState<KeywordHistory>(keyword.history);
    const [keywordSearchResult, setKeywordSearchResult] = useState<KeywordLastResult[]>([]);
@@ -25,6 +26,8 @@ const KeywordDetails = ({ keyword, closeDetails }:KeywordDetailsProps) => {
       { label: '1 Year', value: '360' },
       { label: 'All Time', value: 'all' },
    ];
+
+   console.log('Backlinks=====: ', backlinks);
 
    useEffect(() => {
       const fetchFullKeyword = async () => {
@@ -69,8 +72,8 @@ const KeywordDetails = ({ keyword, closeDetails }:KeywordDetailsProps) => {
    }, [keywordSearchResult, keyword.position]);
 
    const chartData = useMemo(() => {
-      return generateTheChartData(keywordHistory, chartTime);
-   }, [keywordHistory, chartTime]);
+      return generateTheChartData(keywordHistory, chartTime, backlinks);
+   }, [keywordHistory, chartTime, backlinks]);
 
    const closeOnBGClick = (e:React.SyntheticEvent) => {
       e.stopPropagation();
@@ -110,7 +113,7 @@ const KeywordDetails = ({ keyword, closeDetails }:KeywordDetailsProps) => {
                         </div>
                      </div>
                      <div className='keywordDetails__section__chart h-64'>
-                           <Chart labels={chartData.labels} sreies={chartData.sreies} />
+                           <Chart labels={chartData.labels} sreies={chartData.sreies} backlinks={ chartData.backlinks } backlinksData={ chartData.backlinksData } />
                      </div>
                   </div>
                   <div className='keywordDetails__section mt-10'>

@@ -1,6 +1,8 @@
 type ChartData = {
    labels: string[],
-   sreies: (number|null)[]
+   sreies: (number|null)[],
+   backlinks?: (number|null)[],
+   backlinksData?: any,
 }
 
 export const generateChartData = (history: KeywordHistory): ChartData => {
@@ -67,10 +69,24 @@ export const generateChartData = (history: KeywordHistory): ChartData => {
 //    return chartData;
 // };
 
-export const generateTheChartData = (history: KeywordHistory, time:string = '30'): ChartData => {
+export const generateTheChartData = (history: KeywordHistory, time:string = '30', backlinks: BacklinkType[] = []): ChartData => {
    const currentDate = new Date(); let lastFoundSerp = 0;
-   const chartData: ChartData = { labels: [], sreies: [] };
-
+   const chartData: ChartData = { labels: [], sreies: [], backlinks: [], backlinksData: {} };
+   // group backlinks by date
+   const backlinksByDate: any = {};
+   backlinks.forEach((bl: BacklinkType) => {
+      const dateParts = bl.link_first_index_date.replace(' 00:00', '').split('/');
+      console.log('dateParts: ', dateParts);
+      const year = parseInt(dateParts[2], 10);
+      const month = parseInt(dateParts[1], 10);
+      const day = parseInt(dateParts[0], 10);
+      const dateObj = `${year}-${month}-${day}`;
+      if (!(dateObj in backlinksByDate)) {
+         backlinksByDate[dateObj] = [];
+      }
+      backlinksByDate[dateObj].push(`(TF ${bl.domain_trust_flow}) ${bl.URL}`);
+   });
+   console.log('backlinks by date: ', backlinksByDate);
    if (time === 'all') {
       Object.keys(history).forEach((dateKey) => {
          const serpVal = history[dateKey] ? history[dateKey] : 111;
@@ -89,9 +105,14 @@ export const generateTheChartData = (history: KeywordHistory, time:string = '30'
          if (serpVal !== 0) { lastFoundSerp = prevSerp; }
          chartData.labels.push(pastDateKey);
          chartData.sreies.push(serpVal);
+         if (pastDateKey in backlinksByDate) {
+            chartData.backlinks!.push(100);
+            chartData.backlinksData[pastDateKey] = backlinksByDate[pastDateKey];
+         } else {
+            chartData.backlinks!.push(null);
+         }
       }
    }
-   // console.log(chartData);
-
+   console.log(chartData);
    return chartData;
 };

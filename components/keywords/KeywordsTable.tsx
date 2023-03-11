@@ -15,6 +15,7 @@ import AddTags from './AddTags';
 type KeywordsTableProps = {
    domain: DomainType | null,
    keywords: KeywordType[],
+   backlinks: BacklinkType[],
    isLoading: boolean,
    showAddModal: boolean,
    setShowAddModal: Function,
@@ -22,7 +23,7 @@ type KeywordsTableProps = {
 }
 
 const KeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false } = props;
+   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [] } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -199,7 +200,7 @@ const KeywordsTable = (props: KeywordsTableProps) => {
             </div>
          </div>
          {showKeyDetails && showKeyDetails.ID && (
-            <KeywordDetails keyword={showKeyDetails} closeDetails={() => setShowKeyDetails(null)} />
+            <KeywordDetails keyword={showKeyDetails} backlinks={backlinks} closeDetails={() => setShowKeyDetails(null)} />
          )}
          {showRemoveModal && selectedKeywords.length > 0 && (
             <Modal closeModal={() => { setSelectedKeywords([]); setShowRemoveModal(false); }} title={'Remove Keywords'}>

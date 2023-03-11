@@ -16,6 +16,7 @@ import Settings from '../../../components/settings/Settings';
 import { useFetchDomains } from '../../../services/domains';
 import { useFetchKeywords } from '../../../services/keywords';
 import { useFetchSettings } from '../../../services/settings';
+import { useFetchBacklinks } from '../../../services/backlinks';
 
 const SingleDomain: NextPage = () => {
    const router = useRouter();
@@ -28,9 +29,11 @@ const SingleDomain: NextPage = () => {
    const { data: appSettings } = useFetchSettings();
    const { data: domainsData } = useFetchDomains(router);
    const { keywordsData, keywordsLoading } = useFetchKeywords(router, setKeywordSPollInterval, keywordSPollInterval);
+   const { backlinksData } = useFetchBacklinks(router, setKeywordSPollInterval, keywordSPollInterval);
 
    const theDomains: DomainType[] = (domainsData && domainsData.domains) || [];
    const theKeywords: KeywordType[] = keywordsData && keywordsData.keywords;
+   const theBacklinks: BacklinkType[] = backlinksData && backlinksData.backlinks;
 
    const activDomain: DomainType|null = useMemo(() => {
       let active:DomainType|null = null;
@@ -79,6 +82,7 @@ const SingleDomain: NextPage = () => {
                isLoading={keywordsLoading}
                domain={activDomain}
                keywords={theKeywords}
+               backlinks={theBacklinks}
                showAddModal={showAddKeywords}
                setShowAddModal={setShowAddKeywords}
                isConsoleIntegrated={!!(appSettings && appSettings?.settings?.search_console_integrated) }
