@@ -30,13 +30,13 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false }: DomainIte
                      <span className=' text-gray-600 text-xs'>
                         Updated <TimeAgo title={dayjs(keywordsUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={keywordsUpdated} />
                      </span>
-                     {domain.target_trust_flow && (
-                        <span>
-                           <span className='bg-[#DDFBE7] ml-4 p-1 px-2 text-xs rounded-full'>TF: {domain.target_trust_flow}</span>
-                           <span className='bg-[#FCECD6] ml-1 p-1 px-2 text-xs rounded-full'>CF: {domain.target_citation_flow}</span>
+                     <span>
+                        <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>TF: {domain.target_trust_flow ?? 0}</span>
+                        <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>CF: {domain.target_citation_flow ?? 0}</span>
+                        {domain.target_topical_trust_flow_value && (
                            <span className='ml-4'>{domain.target_topical_trust_flow_topic} ({domain.target_topical_trust_flow_value})</span>
-                        </span>
-                     )}
+                        )}
+                     </span>
                   </span>
                  )}
                </div>

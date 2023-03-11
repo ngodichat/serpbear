@@ -7,9 +7,10 @@ import Icon from './Icon';
 type TopbarProps = {
    showSettings: Function,
    showAddModal: Function,
+   showAddDomainModal: Function,
 }
 
-const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
+const TopBar = ({ showSettings, showAddModal, showAddDomainModal }:TopbarProps) => {
    const [showMobileMenu, setShowMobileMenu] = useState<boolean>(false);
    const router = useRouter();
    const isDomainsPage = router.pathname === '/domains';
@@ -53,6 +54,9 @@ const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
             <ul
             className={`text-sm font-semibold text-gray-500 absolute mt-[-10px] right-3 bg-white z-10
             border border-gray-200 lg:mt-2 lg:relative lg:block lg:border-0 lg:bg-transparent ${showMobileMenu ? 'block' : 'hidden'}`}>
+               <li className='block lg:inline-block lg:ml-5'>
+                  <button data-testid="add_domain" onClick={() => showAddDomainModal(true)} className='p-4 hover:text-blue-600'>+ Add Domain</button>
+               </li>
                <li className='block lg:inline-block lg:ml-5'>
                   <a className='block px-3 py-2 cursor-pointer' href='https://docs.serpbear.com/' target="_blank" rel='noreferrer'>
                      <Icon type="question" color={'#888'} size={14} /> Help

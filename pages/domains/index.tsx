@@ -46,7 +46,7 @@ const SingleDomain: NextPage = () => {
          <Head>
             <title>Domains - Clickhub</title>
          </Head>
-         <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} />
+         <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
          <div className="flex flex-col w-full max-w-5xl mx-auto p-6 lg:mt-24 lg:p-0">
             <div className='flex justify-between mb-2 items-center'>

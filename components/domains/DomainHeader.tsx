@@ -18,7 +18,7 @@ type DomainHeaderProps = {
    setScFilter?: Function
 }
 
-const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsModal, exportCsv, domains, scFilter = 'thirtyDays', setScFilter }: DomainHeaderProps) => {
+const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, domains, scFilter = 'thirtyDays', setScFilter }: DomainHeaderProps) => {
    const router = useRouter();
    const [showOptions, setShowOptions] = useState<boolean>(false);
    const [ShowSCDates, setShowSCDates] = useState<boolean>(false);
@@ -71,8 +71,12 @@ const DomainHeader = ({ domain, showAddModal, showAddDomainModal, showSettingsMo
                   rounded={'rounded'}
                />
             </div>
-            <div className='hidden lg:block sidebar_add font-semibold text-sm text-center text-zinc-500'>
+            {/* <div className='hidden lg:block sidebar_add font-semibold text-sm text-center text-zinc-500'>
                <button data-testid="add_domain" onClick={() => showAddDomainModal(true)} className='p-4 hover:text-blue-600'>+ Add Domain</button>
+            </div> */}
+            <div className='flex items-center'>
+               <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>TF: {domain.target_trust_flow ?? 0}</span>
+               <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>CF: {domain.target_citation_flow ?? 0}</span>
             </div>
          </div>
          <div className='flex w-full justify-between'>
