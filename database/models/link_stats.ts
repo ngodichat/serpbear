@@ -1,0 +1,32 @@
+import { Table, Model, Column, DataType, PrimaryKey } from 'sequelize-typescript';
+
+@Table({
+    timestamps: false,
+    tableName: 'link_stats',
+})
+
+class LinkStats extends Model {
+    @PrimaryKey
+    @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true })
+    ID!: number;
+
+    @Column({ type: DataType.STRING, allowNull: true })
+    link_id!: string;
+
+    @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
+    totalClicks!: number;
+
+    @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
+    humanClicks!: number;
+
+    @Column({ type: DataType.STRING, allowNull: false, defaultValue: 0 })
+    date!: string;
+
+    @Column({ type: DataType.TEXT, allowNull: true })
+    data!: string;
+
+    @Column({ type: DataType.STRING, allowNull: false })
+    last_updated!: string;
+}
+
+export default LinkStats;

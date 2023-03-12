@@ -192,7 +192,6 @@ interface ScraperSettings {
    serpExtractor?(content:string): scraperExtractedItem[],
 }
 
-
 type BacklinkType = {
    URL: string,
    anchor_text: string,
@@ -203,4 +202,28 @@ type BacklinkType = {
    domain: string,
    link_first_index_date: string,
    last_updated: string
+}
+
+type StatDomainType = {
+   ID: number,
+   data: string,
+   last_updated: string,
+}
+
+type LinkType = {
+   ID: string,
+   tags: string,
+   data: string,
+   domain_id: number,
+   last_updated: string,
+}
+
+type LinkStatsType = {
+   ID: number,
+   date: string,
+   totalClicks: number,
+   humanClicks: number,
+   link_id: string,
+   data: string,
+   last_updated: string,
 }

@@ -2,6 +2,7 @@ const Cryptr = require('cryptr');
 const { promises } = require('fs');
 const { readFile } = require('fs');
 const cron = require('node-cron');
+const fetch = require('isomorphic-fetch');
 require('dotenv').config({ path: './.env.local' });
 
 const getAppSettings = async () => {
@@ -115,7 +116,7 @@ const runAppCronJobs = () => {
                .then((res) => res.json())
                .then((refreshedData) => console.log(refreshedData))
                .catch((fetchErr) => {
-                  console.log('ERROR Making failed_queue Cron Request..');
+               console.log('ERROR Making failed_queue Cron Request..');
                   console.log(fetchErr);
                });
             }
@@ -162,4 +163,27 @@ const runAppCronJobs = () => {
    });
 };
 
+const runShortIOCronJobs = () => {
+   const scrapeCronTime = generateCronTime('minute');
+   // const scrapeCronTime = generateCronTime('minute');
+   console.log('runAppCronJobs: ', scrapeCronTime);
+   cron.schedule(scrapeCronTime, () => {
+      console.log('### Running Cron Job to Update ShortIO content!');
+      const fetchOpts = { method: 'GET', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
+      try {
+         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/shortio`, fetchOpts)
+         .then((res) => res.json())
+         .then((data) => console.log(data))
+         .catch((err) => {
+            console.log('ERROR Making Daily SHORT IO Cron Request..');
+            console.log(err);
+         });
+      } catch (error){
+          console.log(error);
+      };
+   }, { scheduled: true });
+}
+
 runAppCronJobs();
+
+runShortIOCronJobs();

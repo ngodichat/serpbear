@@ -13,6 +13,7 @@ services:
       - APIKEY=5saedXklbslhnapihe2pihp3pih4fdnakhjwq5
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
       - DB_HOST=172.105.14.205
+      - SHORT_API=sk_Fz3XWKoKKu5MQZtI
     volumes:
       - serpbear_appdata:/app/data
   db:
