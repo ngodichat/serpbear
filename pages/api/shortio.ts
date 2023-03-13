@@ -54,38 +54,49 @@ const updateLinksInfo = async (domainID: number) => {
     const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
     let hasNextPage = true;
     let nextPageToken = null;
-    let count = 0;
     // while (hasNextPage) {
-        const data: any = await fetchLinks(domainID, nextPageToken, fetchOpts);
-        const links: LinkType[] = [];
-        const lastUpdated = new Date().toJSON();
-        data.links.forEach(async (link: any) => {
-            const linkType = {
-                ID: link.id,
-                tags: JSON.stringify(link.tags),
-                data: JSON.stringify(link),
-                domain_id: domainID,
-                last_updated: lastUpdated,
-            };
-            links.push(linkType);
-            setTimeout(() => {
-                if (count < 1) {
-                    updateLinkStats(link.id);
-                }
-                count += 1;
-            }, 5000);
-        });
-        const options = {
-            updateOnDuplicate: ['data'],
+    const data: any = await fetchLinks(domainID, nextPageToken, fetchOpts);
+    const links: LinkType[] = [];
+    const lastUpdated = new Date().toJSON();
+    // data.links.forEach(async (link: any) => {
+    //     const linkType = {
+    //         ID: link.id,
+    //         tags: JSON.stringify(link.tags),
+    //         data: JSON.stringify(link),
+    //         domain_id: domainID,
+    //         last_updated: lastUpdated,
+    //     };
+    //     links.push(linkType);
+    //     await updateLinkStats(link.id);
+    //     await sleep(5000);
+    // });
+
+    for (let i = 0; i < data.links.length; i += 1) {
+        const link = data.links[i];
+        const linkType = {
+            ID: link.id,
+            tags: JSON.stringify(link.tags),
+            data: JSON.stringify(link),
+            domain_id: domainID,
+            last_updated: lastUpdated,
         };
-        await Link.bulkCreate(links, options);
-        console.log('[SUCCESS] Updating Links for domain ', domainID);
-        if (data.nextPageToken !== null) {
-            nextPageToken = data.nextPageToken;
-        } else {
-            hasNextPage = false;
-            console.log(hasNextPage);
-        }
+        links.push(linkType);
+        setTimeout(() => {
+            updateLinkStats(link.id);
+        }, i * 1000);
+    }
+
+    const options = {
+        updateOnDuplicate: ['data'],
+    };
+    await Link.bulkCreate(links, options);
+    console.log('[SUCCESS] Updating Links for domain ', domainID);
+    if (data.nextPageToken !== null) {
+        nextPageToken = data.nextPageToken;
+    } else {
+        hasNextPage = false;
+        console.log(hasNextPage);
+    }
     // }
 };
 
@@ -101,22 +112,16 @@ const updateLinkStats = async (linkId: string) => {
     const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
     const startDate = new Date().valueOf();
     console.log('StartDate: ', startDate);
-    fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${startDate}`, fetchOpts)
-        .then((res) => res.json())
-        .then(async (data) => {
-            const stat = {
-                totalClicks: data.totalClicks,
-                humanClicks: data.humanClicks,
-                date: data.interval ? data.interval.startDate : new Date().toJSON(),
-                data: JSON.stringify(data),
-                last_updated: new Date().toJSON(),
-                link_id: linkId,
-            };
-            await LinkStats.create(stat);
-            console.log('[SUCCESS] Updating Stats for link ', linkId);
-        })
-        .catch((err) => {
-            console.log('ERROR Updating Stats for link:  ', linkId);
-            console.log(err);
-        });
+    const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${startDate}`, fetchOpts);
+    const data = await res.json();
+    const stat = {
+        totalClicks: data.totalClicks,
+        humanClicks: data.humanClicks,
+        date: data.interval ? data.interval.startDate : new Date().toJSON(),
+        data: JSON.stringify(data),
+        last_updated: new Date().toJSON(),
+        link_id: linkId,
+    };
+    await LinkStats.create(stat);
+    console.log('[SUCCESS] Updating Stats for link ', linkId);
 };
