@@ -164,7 +164,7 @@ const runAppCronJobs = () => {
 };
 
 const runShortIOCronJobs = () => {
-   const scrapeCronTime = generateCronTime('minute');
+   const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runAppCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, () => {

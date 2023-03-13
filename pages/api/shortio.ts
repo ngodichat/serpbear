@@ -1,4 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Op } from 'sequelize';
+import { isArray } from 'util';
 import db from '../../database/database';
 import Link from '../../database/models/link';
 import LinkStats from '../../database/models/link_stats';
@@ -12,12 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: authorized });
     }
     if (req.method === 'GET') {
-        return updateContent(res);
+        return updateContent(req, res);
     }
     return res.status(405).json({ message: 'Method not allowed' });
 }
 
-const updateContent = async (res_: NextApiResponse<any>) => {
+const updateContent = async (req: NextApiRequest, res_: NextApiResponse<any>) => {
     // fetch all domains
     const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
     fetch('https://api.short.io/api/domains', fetchOpts)
@@ -25,7 +27,7 @@ const updateContent = async (res_: NextApiResponse<any>) => {
         .then(async (data) => {
             const statDomains: StatDomainType[] = [];
             const lastUpdated = new Date().toJSON();
-            data.forEach(async (domain: any) => {
+            for await (const domain of data) {
                 const statDomain: StatDomainType = {
                     ID: domain.id,
                     data: JSON.stringify(domain),
@@ -35,12 +37,22 @@ const updateContent = async (res_: NextApiResponse<any>) => {
 
                 // call links api to get all Links of a domain
                 await updateLinksInfo(domain.id);
-            });
+                await sleep(100);
+            }
             const options = {
                 updateOnDuplicate: ['data'],
             };
             await StatsDomain.bulkCreate(statDomains, options);
             console.log('[SUCCESS] Updating New Domains from ShortIO successfully ');
+            const allLinks = await Link.findAll({ where: { tags: { [Op.like]: '%http%' } } });
+            let date = req?.query?.date;
+            if (isArray(date)) {
+                [date] = date;
+            }
+            for await (const link of allLinks) {
+                await updateLinkStats(link.ID, date ?? null);
+                await sleep(100);
+            }
             return res_.status(200).json({ message: ' Updating New Domains from ShortIO successfully' });
         })
         .catch((err) => {
@@ -54,50 +66,33 @@ const updateLinksInfo = async (domainID: number) => {
     const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
     let hasNextPage = true;
     let nextPageToken = null;
-    // while (hasNextPage) {
-    const data: any = await fetchLinks(domainID, nextPageToken, fetchOpts);
-    const links: LinkType[] = [];
-    const lastUpdated = new Date().toJSON();
-    // data.links.forEach(async (link: any) => {
-    //     const linkType = {
-    //         ID: link.id,
-    //         tags: JSON.stringify(link.tags),
-    //         data: JSON.stringify(link),
-    //         domain_id: domainID,
-    //         last_updated: lastUpdated,
-    //     };
-    //     links.push(linkType);
-    //     await updateLinkStats(link.id);
-    //     await sleep(5000);
-    // });
+    while (hasNextPage) {
+        const data: any = await fetchLinks(domainID, nextPageToken, fetchOpts);
+        const links: LinkType[] = [];
+        const lastUpdated = new Date().toJSON();
+        for (let i = 0; i < data.links.length; i += 1) {
+            const link = data.links[i];
+            const linkType = {
+                ID: link.id,
+                tags: JSON.stringify(link.tags),
+                data: JSON.stringify(link),
+                domain_id: domainID,
+                last_updated: lastUpdated,
+            };
+            links.push(linkType);
+        }
 
-    for (let i = 0; i < data.links.length; i += 1) {
-        const link = data.links[i];
-        const linkType = {
-            ID: link.id,
-            tags: JSON.stringify(link.tags),
-            data: JSON.stringify(link),
-            domain_id: domainID,
-            last_updated: lastUpdated,
+        const options = {
+            updateOnDuplicate: ['data'],
         };
-        links.push(linkType);
-        setTimeout(() => {
-            updateLinkStats(link.id);
-        }, i * 1000);
+        await Link.bulkCreate(links, options);
+        console.log('[SUCCESS] Updating Links for domain ', domainID);
+        if (data.nextPageToken !== null) {
+            nextPageToken = data.nextPageToken;
+        } else {
+            hasNextPage = false;
+        }
     }
-
-    const options = {
-        updateOnDuplicate: ['data'],
-    };
-    await Link.bulkCreate(links, options);
-    console.log('[SUCCESS] Updating Links for domain ', domainID);
-    if (data.nextPageToken !== null) {
-        nextPageToken = data.nextPageToken;
-    } else {
-        hasNextPage = false;
-        console.log(hasNextPage);
-    }
-    // }
 };
 
 const fetchLinks = async (domainID: number, nextPageToken: string | null, fetchOpts: any) => {
@@ -108,20 +103,39 @@ const fetchLinks = async (domainID: number, nextPageToken: string | null, fetchO
     return response.json();
 };
 
-const updateLinkStats = async (linkId: string) => {
-    const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
-    const startDate = new Date().valueOf();
-    console.log('StartDate: ', startDate);
-    const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${startDate}`, fetchOpts);
-    const data = await res.json();
-    const stat = {
-        totalClicks: data.totalClicks,
-        humanClicks: data.humanClicks,
-        date: data.interval ? data.interval.startDate : new Date().toJSON(),
-        data: JSON.stringify(data),
-        last_updated: new Date().toJSON(),
-        link_id: linkId,
-    };
-    await LinkStats.create(stat);
-    console.log('[SUCCESS] Updating Stats for link ', linkId);
+const updateLinkStats = async (linkId: string, date_: string | null) => {
+    let retry = true;
+    do {
+        const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
+        const startDate = date_ ? new Date(date_).valueOf() : new Date().valueOf();
+        console.log('StartDate: ', date_);
+        const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${startDate}`, fetchOpts);
+        const data = await res.json();
+        if ('totalClicks' in data) {
+            const stat = {
+                totalClicks: data.totalClicks,
+                humanClicks: data.humanClicks,
+                date: data.interval ? data.interval.startDate.substr(0, 10) : new Date().toJSON().substr(0, 10),
+                data: JSON.stringify(data),
+                last_updated: new Date().toJSON(),
+                link_id: linkId,
+            };
+            await LinkStats.upsert(stat);
+            console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId);
+            retry = false;
+        } else {
+            console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
+            await sleep(500);
+        }
+    } while (retry);
+};
+
+const sleep = (ms: number) => {
+    return new Promise((resolve, reject) => {
+        if (ms < 0) {
+            reject(new Error('Invalid sleep time'));
+        } else {
+            setTimeout(resolve, ms);
+        }
+    });
 };

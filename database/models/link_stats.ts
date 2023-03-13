@@ -1,4 +1,4 @@
-import { Table, Model, Column, DataType, PrimaryKey } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, PrimaryKey, Unique } from 'sequelize-typescript';
 
 @Table({
     timestamps: false,
@@ -10,7 +10,8 @@ class LinkStats extends Model {
     @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true })
     ID!: number;
 
-    @Column({ type: DataType.STRING, allowNull: true })
+    @Unique('link-date-unique')
+    @Column({ type: DataType.STRING, allowNull: true})
     link_id!: string;
 
     @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
@@ -19,6 +20,7 @@ class LinkStats extends Model {
     @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
     humanClicks!: number;
 
+    @Unique('link-date-unique')
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: 0 })
     date!: string;
 
