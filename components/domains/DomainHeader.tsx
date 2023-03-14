@@ -88,7 +88,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
                <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>CF: {domain.target_citation_flow ?? 0}</span>
             </div>
          </div>
-         <div className='stat-chart domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
+         <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
             <span className='domKeywords_filters py-4 px-6 flex flex-col justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>Stats</span>
             <span className='domKeywords_keywords border-gray-200 min-h-[55vh] relative'>
                <span className='ml-4 mt-4 p-4 flex flex-col bg-[white] rounded-md text-sm border mb-8 w-fit'>
