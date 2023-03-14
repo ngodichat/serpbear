@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 
 export const fetchLinkStats = async (router: NextRouter) => {
     if (!router.query.slug) { return []; }
-    const res = await fetch(`${window.location.origin}/api/shortio/stat?domain=${router.query.slug}`, { method: 'GET' });
+    const res = await fetch(`${window.location.origin}/api/shortio/stats?domain=${router.query.slug}`, { method: 'GET' });
     return res.json();
  };
 

@@ -25,25 +25,14 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
     const { domain } = domainObj;
 
-    // const result = await LinkStats.findAll({
-    //     attributes: ['date', [Sequelize.fn('SUM', Sequelize.col('humanClicks')), 'totalHumanClicks']],
-    //     include: [{
-    //         model: Link,
-    //         where: {
-    //             tags: {
-    //                 [Op.like]: `%${domain}%`,
-    //             },
-    //         },
-    //         attributes: [],
-    //     }],
-    //     group: ['date'],
-    //     raw: true,
-    // });
-
-    const [result] = await db.query(`SELECT date, sum(ls.humanClicks) from link_stats ls 
+    const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats ls 
     join link l on l.ID = ls.link_id
     where l.tags like '%${domain}%'
     group by date`);
     console.log('result: ', result);
-    return res.status(200).json({ message: result });
+    const resultObj: any = {};
+    result.forEach((r: any) => {
+        resultObj[r.date] = r.totalClicks;
+    })
+    return res.status(200).json({ stats: resultObj });
 };
