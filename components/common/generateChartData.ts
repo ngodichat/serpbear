@@ -76,12 +76,12 @@ export const generateTheChartData = (history: KeywordHistory, time: string = '30
 };
 
 export const generateStatChartData = (linkStats: any, time: string = '30'): ChartData => {
-   const chartData: ChartData = { labels: [], sreies: []};
+   const chartData: ChartData = { labels: [], sreies: [] };
    if (linkStats) {
       const currentDate = new Date();
       console.log('link stats: ', linkStats);
       if (time === 'all') {
-         Object.keys(history).forEach((dateKey) => {
+         Object.keys(linkStats).forEach((dateKey) => {
             const serpVal = linkStats[dateKey] ? linkStats[dateKey] : 111;
             chartData.labels.push(dateKey);
             chartData.sreies.push(serpVal);
@@ -92,7 +92,7 @@ export const generateStatChartData = (linkStats: any, time: string = '30'): Char
             const pastDate = new Date(new Date().setDate(currentDate.getDate() - index));
             // Then Generate Series. if past date's serp does not exist, use 0.
             // If have a missing serp in between dates, use the previous date's serp to fill the gap.
-            const pastDateKey = `${pastDate.getFullYear()}-${(pastDate.getMonth() + 1) > 9 ? (pastDate.getMonth() + 1) : '0' + (pastDate.getMonth() + 1)}-${pastDate.getDate()}`;
+            const pastDateKey = `${pastDate.getFullYear()}-${(pastDate.getMonth() + 1) > 9 ? (pastDate.getMonth() + 1) : `0${(pastDate.getMonth() + 1)}`}-${pastDate.getDate()}`;
             const serpVal = linkStats[pastDateKey];
             chartData.labels.push(pastDateKey);
             chartData.sreies.push(serpVal);

@@ -33,6 +33,6 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     const resultObj: any = {};
     result.forEach((r: any) => {
         resultObj[r.date] = r.totalClicks;
-    })
+    });
     return res.status(200).json({ stats: resultObj });
 };
