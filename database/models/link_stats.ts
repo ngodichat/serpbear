@@ -1,4 +1,5 @@
-import { Table, Model, Column, DataType, PrimaryKey, Unique } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, PrimaryKey, Unique} from 'sequelize-typescript';
+import Link from './link';
 
 @Table({
     timestamps: false,
