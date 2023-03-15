@@ -108,7 +108,7 @@ const updateLinkStats = async (linkId: string, date_: string | null) => {
     do {
         const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
         const endDate = date_ ? new Date(date_) : new Date();
-        const startDate = endDate; 
+        const startDate = endDate;
         startDate.setDate(startDate.getDate() - 1);
         console.log('StartDate: ', date_);
         const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
