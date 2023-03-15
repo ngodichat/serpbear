@@ -122,10 +122,10 @@ const updateLinkStats = async (linkId: string, date_: string | null) => {
                 link_id: linkId,
             };
             await LinkStats.upsert(stat);
-            console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId);
+            console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId, `https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${endDate}`);
             retry = false;
         } else {
-            console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
+            // console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
             await sleep(500);
         }
     } while (retry);
