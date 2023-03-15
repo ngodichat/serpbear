@@ -110,7 +110,7 @@ const updateLinkStats = async (linkId: string, date_: string | null) => {
         const endDate = date_ ? new Date(date_) : new Date();
         const startDate = endDate.setDate(endDate.getDate() - 1);
         console.log('StartDate: ', date_);
-        const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate}&endDate=${endDate}`, fetchOpts);
+        const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
         const data = await res.json();
         if ('totalClicks' in data) {
             const stat = {
