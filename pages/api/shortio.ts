@@ -150,22 +150,6 @@ const getLinksStatsByDomain = async (date_: any, domainId: any, links: any[]) =>
         console.log('StartDate: ', date_);
         const res = await fetch(`https://api-v2.short.cm/statistics/domain/${domainId}/link_clicks?ids=${links.join(',')}&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
         const data = await res.json();
-        // if ('totalClicks' in data) {
-        //     const stat = {
-        //         totalClicks: data.totalClicks,
-        //         humanClicks: data.humanClicks,
-        //         date: date_,
-        //         data: JSON.stringify(data),
-        //         last_updated: new Date().toJSON(),
-        //         link_id: linkId,
-        //     };
-        //     await LinkStats.upsert(stat);
-        //     console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId, `https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`);
-        //     retry = false;
-        // } else {
-        //     // console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
-        //     await sleep(500);
-        // }
         const allLinks = Object.keys(data);
         if (allLinks.includes('statusCode')) {
             console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, domainId);

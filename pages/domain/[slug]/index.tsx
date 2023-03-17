@@ -27,7 +27,7 @@ const SingleDomain: NextPage = () => {
    const [showSettings, setShowSettings] = useState(false);
    const [keywordSPollInterval, setKeywordSPollInterval] = useState<undefined|number>(undefined);
    const { data: appSettings } = useFetchSettings();
-   const { data: domainsData } = useFetchDomains(router);
+   const { data: domainsData } = useFetchDomains(router, '30');
    const { keywordsData, keywordsLoading } = useFetchKeywords(router, setKeywordSPollInterval, keywordSPollInterval);
    const { backlinksData } = useFetchBacklinks(router, setKeywordSPollInterval, keywordSPollInterval);
 

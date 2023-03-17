@@ -20,6 +20,7 @@ type DomainType = {
    target_citation_flow?: number,
    target_topical_trust_flow_topic?: string,
    target_topical_trust_flow_value?: number,
+   totalClicks?: number,
 }
 
 type KeywordHistory = {

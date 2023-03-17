@@ -7,8 +7,9 @@ type UpdatePayload = {
    domain: DomainType
 }
 
-export async function fetchDomains(router: NextRouter, withStats:boolean) {
-   const res = await fetch(`${window.location.origin}/api/domains${withStats ? '?withstats=true' : ''}`, { method: 'GET' });
+export async function fetchDomains(router: NextRouter, dateRange: string, withStats: boolean) {
+   console.log('fetchDomains with dateRange: ', dateRange);
+   const res = await fetch(`${window.location.origin}/api/domains?dateRange=${dateRange}${withStats ? '&withstats=true' : ''}`, { method: 'GET' });
    if (res.status >= 400 && res.status < 600) {
       if (res.status === 401) {
          console.log('Unauthorized!!');
@@ -19,14 +20,15 @@ export async function fetchDomains(router: NextRouter, withStats:boolean) {
    return res.json();
 }
 
-export function useFetchDomains(router: NextRouter, withStats:boolean = false) {
-   return useQuery('domains', () => fetchDomains(router, withStats));
+export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false) {
+   console.log('useFetchDomains with dateRange: ', dateRange);
+   return useQuery(['domains', dateRange] , () => fetchDomains(router, dateRange, withStats));
 }
 
-export function useAddDomain(onSuccess:Function) {
+export function useAddDomain(onSuccess: Function) {
    const router = useRouter();
    const queryClient = useQueryClient();
-   return useMutation(async (domainName:string) => {
+   return useMutation(async (domainName: string) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
       const fetchOpts = { method: 'POST', headers, body: JSON.stringify({ domain: domainName }) };
       const res = await fetch(`${window.location.origin}/api/domains`, fetchOpts);
@@ -37,7 +39,7 @@ export function useAddDomain(onSuccess:Function) {
    }, {
       onSuccess: async (data) => {
          console.log('Domain Added!!!', data);
-         const newDomain:DomainType = data.domain;
+         const newDomain: DomainType = data.domain;
          toast(`${newDomain.domain} Added Successfully!`, { icon: '✔️' });
          onSuccess(false);
          if (newDomain && newDomain.slug) {
@@ -52,7 +54,7 @@ export function useAddDomain(onSuccess:Function) {
    });
 }
 
-export function useUpdateDomain(onSuccess:Function) {
+export function useUpdateDomain(onSuccess: Function) {
    const queryClient = useQueryClient();
    return useMutation(async ({ domainSettings, domain }: UpdatePayload) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
@@ -76,9 +78,9 @@ export function useUpdateDomain(onSuccess:Function) {
    });
 }
 
-export function useDeleteDomain(onSuccess:Function) {
+export function useDeleteDomain(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async (domain:DomainType) => {
+   return useMutation(async (domain: DomainType) => {
       const res = await fetch(`${window.location.origin}/api/domains?domain=${domain.domain}`, { method: 'DELETE' });
       if (res.status >= 400 && res.status < 600) {
          throw new Error('Bad response from server');

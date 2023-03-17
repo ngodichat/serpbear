@@ -49,10 +49,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 export const getDomains = async (req: NextApiRequest, res: NextApiResponse<DomainsGetRes>) => {
    const withStats = !!req?.query?.withstats;
+   const dateRange = req?.query?.dateRange ?? 30;
+   console.log('dateRange: ', dateRange);
    try {
-      const allDomains: Domain[] = await Domain.findAll();
-      const formattedDomains: DomainType[] = allDomains.map((el) => el.get({ plain: true }));
-      const theDomains: DomainType[] = withStats ? await getdomainStats(formattedDomains) : allDomains;
+      // const allDomains: Domain[] = await Domain.findAll();
+      const [result] = await db.query(`with tmp as (
+         SELECT l.tags as domainTags, sum(humanClicks) as totalClicks from link_stats_new ls 
+         join link l on l.ID = ls.link_id
+         where l.tags like '%http%'
+         and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${dateRange} DAY)
+         group by l.tags)
+         select d.*, totalClicks from domain d
+         left join tmp on tmp.domainTags like CONCAT('%', d.domain, '%')
+         order by totalClicks desc`);
+      const results: DomainType[] = result.map((e: any) => ({
+         ID: e.ID,
+         domain: e.domain,
+         slug: e.slug,
+         tags: e.tags,
+         notification: e.notification,
+         notification_interval: e.notification_interval,
+         notification_emails: e.notification_emails,
+         lastUpdated: e.lastUpdated,
+         added: e.added,
+         keywordCount: e.keywordCount,
+         keywordsUpdated: e.keywordsUpdated,
+         avgPosition: e.avgPosition,
+         scVisits: e.scVisits,
+         scImpressions: e.scImpressions,
+         scPosition: e.scPosition,
+         auto_refresh: e.auto_refresh,
+         target_trust_flow: e.target_trust_flow,
+         target_citation_flow: e.target_citation_flow,
+         target_topical_trust_flow_topic: e.target_topical_trust_flow_topic,
+         target_topical_trust_flow_value: e.target_topical_trust_flow_value,
+         totalClicks: e.totalClicks,
+      }));
+      const theDomains: any[] = withStats ? await getdomainStats(results) : results;
       return res.status(200).json({ domains: theDomains });
    } catch (error) {
       return res.status(400).json({ domains: [], error: 'Error Getting Domains.' });

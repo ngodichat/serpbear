@@ -35,7 +35,6 @@ export const generateTheChartData = (history: KeywordHistory, time: string = '30
    const backlinksByDate: any = {};
    backlinks.forEach((bl: BacklinkType) => {
       const dateParts = bl.link_first_index_date.replace(' 00:00', '').split('/');
-      console.log('dateParts: ', dateParts);
       const year = parseInt(dateParts[2], 10);
       const month = parseInt(dateParts[1], 10);
       const day = parseInt(dateParts[0], 10);
@@ -45,7 +44,6 @@ export const generateTheChartData = (history: KeywordHistory, time: string = '30
       }
       backlinksByDate[dateObj].push(`(TF ${bl.domain_trust_flow}) ${bl.URL}`);
    });
-   console.log('backlinks by date: ', backlinksByDate);
    if (time === 'all') {
       Object.keys(history).forEach((dateKey) => {
          const serpVal = history[dateKey] ? history[dateKey] : 111;
@@ -79,7 +77,6 @@ export const generateStatChartData = (linkStats: any, time: string = '30'): Char
    const chartData: ChartData = { labels: [], sreies: [] };
    if (linkStats) {
       const currentDate = new Date();
-      console.log('link stats: ', linkStats);
       if (time === 'all') {
          Object.keys(linkStats).forEach((dateKey) => {
             const serpVal = linkStats[dateKey] ? linkStats[dateKey] : 111;
@@ -93,7 +90,6 @@ export const generateStatChartData = (linkStats: any, time: string = '30'): Char
             // Then Generate Series. if past date's serp does not exist, use 0.
             // If have a missing serp in between dates, use the previous date's serp to fill the gap.
             const pastDateKey = `${pastDate.getFullYear()}-${(pastDate.getMonth() + 1) > 9 ? (pastDate.getMonth() + 1) : `0${(pastDate.getMonth() + 1)}`}-${pastDate.getDate()}`;
-            console.log('pastDateKey: ', pastDateKey);
             const serpVal = linkStats[pastDateKey];
             chartData.labels.push(pastDateKey);
             chartData.sreies.push(serpVal);

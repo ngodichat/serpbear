@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!req.query.domain && typeof req.query.domain !== 'string') {
-        return res.status(400).json({ error: 'Domain is Required!' });
+        return getAllStats(req, res);
     }
     const domainreq = (req.query.domain as string).toLowerCase();
     const domainObj: Domain | null = await Domain.findOne({ where: { slug: domainreq } });
@@ -30,6 +30,19 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     where l.tags like '%${domain}%'
     group by date`);
     console.log('result: ', result);
+    const resultObj: any = {};
+    result.forEach((r: any) => {
+        resultObj[r.date] = r.totalClicks;
+    });
+    return res.status(200).json({ stats: resultObj });
+};
+
+const getAllStats = async (req: NextApiRequest, res: NextApiResponse) => {
+    const dateRange = req?.query?.dateRange ?? 30;
+    const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats_new ls 
+    join link l on l.ID = ls.link_id
+    and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${dateRange} DAY)
+    group by date`);
     const resultObj: any = {};
     result.forEach((r: any) => {
         resultObj[r.date] = r.totalClicks;

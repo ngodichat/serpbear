@@ -13,7 +13,7 @@ type DomainItemProps = {
 }
 
 const DomainItem = ({ domain, selected, isConsoleIntegrated = false }: DomainItemProps) => {
-   const { keywordsUpdated, slug, keywordCount = 0, avgPosition = 0, scVisits = 0, scImpressions = 0, scPosition = 0 } = domain;
+   const { keywordsUpdated, slug, keywordCount = 0, scVisits = 0, scImpressions = 0, scPosition = 0, totalClicks = 0 } = domain;
    // const router = useRouter();
    return (
       <div className={`domItem bg-white border rounded w-full text-sm mb-10 hover:border-indigo-200 ${selected ? '' : ''}`}>
@@ -50,7 +50,7 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false }: DomainIte
                      <span className='block text-xs lg:text-sm text-gray-500 mb-1'>Keywords</span>{keywordCount}
                   </div>
                   <div className="flex-1 relative">
-                     <span className='block text-xs lg:text-sm text-gray-500 mb-1'>Avg position</span>{avgPosition}
+                     <span className='block text-xs lg:text-sm text-gray-500 mb-1'>Clicks</span>{totalClicks ?? 0}
                   </div>
                </div>
             </div>

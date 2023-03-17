@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import SelectField from '../common/SelectField';
 import { useFetchLinkStats } from '../../services/shortio';
 import StatChart from '../common/StatChart';
 import { generateStatChartData } from '../common/generateChartData';
+import { useQueryClient } from 'react-query';
 
 type DomainHeaderProps = {
    domain: DomainType,
@@ -23,13 +24,22 @@ type DomainHeaderProps = {
 
 const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, domains, scFilter = 'thirtyDays', setScFilter }: DomainHeaderProps) => {
    const router = useRouter();
+   const queryClient = useQueryClient();
    const [showOptions, setShowOptions] = useState<boolean>(false);
    const [ShowSCDates, setShowSCDates] = useState<boolean>(false);
    const { mutate: refreshMutate } = useRefreshKeywords(() => { });
    const isConsole = router.pathname === '/domain/console/[slug]';
    const isInsight = router.pathname === '/domain/insight/[slug]';
    const isBacklink = router.pathname === '/domain/backlink/[slug]';
-   const { linkStatsData } = useFetchLinkStats(router);
+   const [chartTime, setChartTime] = useState<string>('30');
+   const { linkStatsData } = useFetchLinkStats(router, chartTime);
+   const dateOptions = [
+      { label: 'Last 7 Days', value: '7' },
+      { label: 'Last 30 Days', value: '30' },
+      { label: 'Last 90 Days', value: '90' },
+      { label: '1 Year', value: '360' },
+      { label: 'All Time', value: 'all' },
+   ];
 
    const daysName = (dayKey: string) => dayKey.replace('three', '3').replace('seven', '7').replace('thirty', '30').replace('Days', ' Days');
    const buttonStyle = 'leading-6 inline-block px-2 py-2 text-gray-500 hover:text-gray-700';
@@ -39,12 +49,16 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
 
    const linkStats = linkStatsData && linkStatsData.stats;
    const chartData = useMemo(() => {
-      return generateStatChartData(linkStats, '30');
-   }, [linkStats]);
+      return generateStatChartData(linkStats, chartTime);
+   }, [linkStats, chartTime]);
 
    const handleFileChange = (event: any) => {
       handleSubmit(event.target.files[0]);
    };
+
+   useEffect(() => {
+      queryClient.invalidateQueries(['linkstats']);
+   }, [chartTime]);
 
    const handleSubmit = async (file: any) => {
       const formData = new FormData();
@@ -89,7 +103,22 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
             </div>
          </div>
          <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
-            <span className='domKeywords_filters py-4 px-6 flex flex-col justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>Stats</span>
+            <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
+               <span>Stats</span>
+               <div className='flex items-center'>
+                  <Icon type="date" />
+                  <div className="keywordDetails__section__chart_select ml-3">
+                     <SelectField
+                     options={dateOptions}
+                     selected={[chartTime]}
+                     defaultLabel="Select Date"
+                     updateField={(updatedTime:[string]) => setChartTime(updatedTime[0])}
+                     multiple={false}
+                     rounded={'rounded'}
+                     />
+                  </div>
+               </div>
+            </span>
             <span className='domKeywords_keywords border-gray-200 min-h-[55vh] relative'>
                <span className='ml-4 mt-4 p-4 flex flex-col bg-[white] rounded-md text-sm border mb-8 w-fit'>
                   <span className='font-semibold text-lg'>Total Clicks</span>
