@@ -6,7 +6,7 @@ import Country from "./models/country";
 import BackLink from './models/backlink';
 import StatsDomain from './models/stats_domain';
 import Link from './models/link';
-import LinkStats from './models/link_stats';
+import LinkStatsNew from './models/link_stats_new';
 
 // const connection = new Sequelize({
 //    dialect: 'sqlite',
@@ -38,7 +38,7 @@ const connection = new Sequelize({
       idle: 10000,
    },
    logging: false,
-   models: [Domain, Keyword, Country, BackLink, StatsDomain, Link, LinkStats],
+   models: [Domain, Keyword, Country, BackLink, StatsDomain, Link, LinkStatsNew],
 });
 
 export default connection;

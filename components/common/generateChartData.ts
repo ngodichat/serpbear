@@ -93,6 +93,7 @@ export const generateStatChartData = (linkStats: any, time: string = '30'): Char
             // Then Generate Series. if past date's serp does not exist, use 0.
             // If have a missing serp in between dates, use the previous date's serp to fill the gap.
             const pastDateKey = `${pastDate.getFullYear()}-${(pastDate.getMonth() + 1) > 9 ? (pastDate.getMonth() + 1) : `0${(pastDate.getMonth() + 1)}`}-${pastDate.getDate()}`;
+            console.log('pastDateKey: ', pastDateKey);
             const serpVal = linkStats[pastDateKey];
             chartData.labels.push(pastDateKey);
             chartData.sreies.push(serpVal);

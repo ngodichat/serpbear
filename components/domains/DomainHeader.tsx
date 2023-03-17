@@ -93,7 +93,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
             <span className='domKeywords_keywords border-gray-200 min-h-[55vh] relative'>
                <span className='ml-4 mt-4 p-4 flex flex-col bg-[white] rounded-md text-sm border mb-8 w-fit'>
                   <span className='font-semibold text-lg'>Total Clicks</span>
-                  <span className='text-[#1ECDB0] text-2xl'>{linkStats ? Object.values(linkStats).reduce((a: number, b: any) => (a + parseInt(b, 10)), 0) : 0}</span>
+                  <span className='text-[#1ECDB0] text-2xl'>{chartData.sreies.reduce((a: number, b: any) => (a + parseInt(b ?? 0, 10)), 0)}</span>
                </span>
                <div className='keywordDetails__section__chart h-64'>
                   <StatChart labels={chartData.labels} sreies={chartData.sreies} />

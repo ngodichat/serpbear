@@ -25,7 +25,7 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
     const { domain } = domainObj;
 
-    const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats ls 
+    const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats_new ls 
     join link l on l.ID = ls.link_id
     where l.tags like '%${domain}%'
     group by date`);

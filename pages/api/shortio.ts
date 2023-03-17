@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { isArray } from 'util';
 import db from '../../database/database';
 import Link from '../../database/models/link';
-import LinkStats from '../../database/models/link_stats';
+import LinkStatsNew from '../../database/models/link_stats_new';
 import StatsDomain from '../../database/models/stats_domain';
 import verifyUser from '../../utils/verifyUser';
 
@@ -45,14 +45,22 @@ const updateContent = async (req: NextApiRequest, res_: NextApiResponse<any>) =>
             await StatsDomain.bulkCreate(statDomains, options);
             console.log('[SUCCESS] Updating New Domains from ShortIO successfully ');
             const allLinks = await Link.findAll({ where: { tags: { [Op.like]: '%http%' } } });
+            const linksGroupByDomain: any = {};
+            allLinks.forEach((link) => {
+                if (!(link.domain_id in linksGroupByDomain)) {
+                    linksGroupByDomain[link.domain_id] = [];
+                }
+                linksGroupByDomain[link.domain_id].push(link.ID);
+            });
             let date = req?.query?.date;
             if (isArray(date)) {
                 [date] = date;
             }
-            for await (const link of allLinks) {
-                await updateLinkStats(link.ID, date ?? null);
+            for await (const domainID of Object.keys(linksGroupByDomain)) {
+                await getLinksStatsByDomain(date, domainID, linksGroupByDomain[domainID]);
                 await sleep(100);
             }
+            console.log('[SUCCESS] DONE! ');
             return res_.status(200).json({ message: ' Updating New Domains from ShortIO successfully' });
         })
         .catch((err) => {
@@ -103,7 +111,36 @@ const fetchLinks = async (domainID: number, nextPageToken: string | null, fetchO
     return response.json();
 };
 
-const updateLinkStats = async (linkId: string, date_: string | null) => {
+// const updateLinkStats = async (linkId: string, date_: string | null) => {
+//     let retry = true;
+//     do {
+//         const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
+//         const endDate = date_ ? new Date(date_) : new Date();
+//         const startDate = new Date(endDate);
+//         startDate.setDate(startDate.getDate() - 1);
+//         console.log('StartDate: ', date_);
+//         const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
+//         const data = await res.json();
+//         if ('totalClicks' in data) {
+//             const stat = {
+//                 totalClicks: data.totalClicks,
+//                 humanClicks: data.humanClicks,
+//                 date: data.interval ? data.interval.startDate.substr(0, 10) : new Date().toJSON().substr(0, 10),
+//                 data: JSON.stringify(data),
+//                 last_updated: new Date().toJSON(),
+//                 link_id: linkId,
+//             };
+//             await LinkStats.upsert(stat);
+//             console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId, `https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`);
+//             retry = false;
+//         } else {
+//             // console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
+//             await sleep(500);
+//         }
+//     } while (retry);
+// };
+
+const getLinksStatsByDomain = async (date_: any, domainId: any, links: any[]) => {
     let retry = true;
     do {
         const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
@@ -111,23 +148,41 @@ const updateLinkStats = async (linkId: string, date_: string | null) => {
         const startDate = new Date(endDate);
         startDate.setDate(startDate.getDate() - 1);
         console.log('StartDate: ', date_);
-        const res = await fetch(`https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
+        const res = await fetch(`https://api-v2.short.cm/statistics/domain/${domainId}/link_clicks?ids=${links.join(',')}&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`, fetchOpts);
         const data = await res.json();
-        if ('totalClicks' in data) {
-            const stat = {
-                totalClicks: data.totalClicks,
-                humanClicks: data.humanClicks,
-                date: data.interval ? data.interval.startDate.substr(0, 10) : new Date().toJSON().substr(0, 10),
-                data: JSON.stringify(data),
-                last_updated: new Date().toJSON(),
-                link_id: linkId,
-            };
-            await LinkStats.upsert(stat);
-            console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId, `https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`);
-            retry = false;
-        } else {
-            // console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
+        // if ('totalClicks' in data) {
+        //     const stat = {
+        //         totalClicks: data.totalClicks,
+        //         humanClicks: data.humanClicks,
+        //         date: date_,
+        //         data: JSON.stringify(data),
+        //         last_updated: new Date().toJSON(),
+        //         link_id: linkId,
+        //     };
+        //     await LinkStats.upsert(stat);
+        //     console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, linkId, `https://api-v2.short.io/statistics/link/${linkId}?period=total&tzOffset=0&startDate=${startDate.valueOf()}&endDate=${endDate.valueOf()}`);
+        //     retry = false;
+        // } else {
+        //     // console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, linkId);
+        //     await sleep(500);
+        // }
+        const allLinks = Object.keys(data);
+        if (allLinks.includes('statusCode')) {
+            console.log(`[${new Date().toJSON()}][FAILURE] Updating Stats for link --> Retry `, domainId);
             await sleep(500);
+        } else {
+            allLinks.forEach(async (link) => {
+                const stat = {
+                    humanClicks: data[link],
+                    date: `${startDate.getFullYear()}-${(startDate.getMonth() + 1) > 9 ? (startDate.getMonth() + 1) : `0${(startDate.getMonth() + 1)}`}-${startDate.getDate()}`,
+                    data: JSON.stringify(data),
+                    last_updated: new Date().toJSON(),
+                    link_id: link,
+                };
+                await LinkStatsNew.upsert(stat);
+                console.log(`[${new Date().toJSON()}][SUCCESS] Updating Stats for link `, link);
+            });
+            retry = false;
         }
     } while (retry);
 };
