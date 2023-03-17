@@ -91,7 +91,7 @@ const updateLinksInfo = async (domainID: number) => {
         }
 
         const options = {
-            updateOnDuplicate: ['data'],
+            updateOnDuplicate: ['data', 'tags'],
         };
         await Link.bulkCreate(links, options);
         console.log('[SUCCESS] Updating Links for domain ', domainID);
