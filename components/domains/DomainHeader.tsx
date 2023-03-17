@@ -3,13 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useQueryClient } from 'react-query';
 import { useRefreshKeywords } from '../../services/keywords';
 import Icon from '../common/Icon';
 import SelectField from '../common/SelectField';
 import { useFetchLinkStats } from '../../services/shortio';
 import StatChart from '../common/StatChart';
 import { generateStatChartData } from '../common/generateChartData';
-import { useQueryClient } from 'react-query';
 
 type DomainHeaderProps = {
    domain: DomainType,

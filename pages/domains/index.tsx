@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { CSSTransition } from 'react-transition-group';
+import { useQueryClient } from 'react-query';
 import TopBar from '../../components/common/TopBar';
 import AddDomain from '../../components/domains/AddDomain';
 import Settings from '../../components/settings/Settings';
@@ -15,7 +16,6 @@ import StatChart from '../../components/common/StatChart';
 import { generateStatChartData } from '../../components/common/generateChartData';
 import { useFetchLinkStats } from '../../services/shortio';
 import SelectField from '../../components/common/SelectField';
-import { useQueryClient } from 'react-query';
 
 const SingleDomain: NextPage = () => {
    const router = useRouter();
