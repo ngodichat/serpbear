@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 export const getDomains = async (req: NextApiRequest, res: NextApiResponse<DomainsGetRes>) => {
    const withStats = !!req?.query?.withstats;
-   const dateRange = req?.query?.dateRange ?? 30;
+   const dateRange = (req?.query?.dateRange as string) ?? '30';
    console.log('dateRange: ', dateRange);
    try {
       // const allDomains: Domain[] = await Domain.findAll();
@@ -57,7 +57,7 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          SELECT l.tags as domainTags, sum(humanClicks) as totalClicks from link_stats_new ls 
          join link l on l.ID = ls.link_id
          where l.tags like '%http%'
-         and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${dateRange} DAY)
+         and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)
          group by l.tags)
          select d.*, totalClicks from domain d
          left join tmp on tmp.domainTags like CONCAT('%', d.domain, '%')

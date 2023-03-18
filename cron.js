@@ -166,7 +166,7 @@ const runAppCronJobs = () => {
 const runShortIOCronJobs = () => {
    const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
-   console.log('runAppCronJobs: ', scrapeCronTime);
+   console.log('runShortIOCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, () => {
       console.log('### Running Cron Job to Update ShortIO content!');
       const fetchOpts = { method: 'GET', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
