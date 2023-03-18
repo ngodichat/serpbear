@@ -5,6 +5,7 @@ import HttpsProxyAgent from 'https-proxy-agent';
 import countries from './countries';
 import allScrapers from '../scrapers/index';
 import { logWithColor } from './logs';
+import sleep from './sleep';
 
 type SearchResult = {
    title: string,
@@ -110,37 +111,33 @@ export const scrapeKeywordFromGoogle = async (keyword: KeywordType, settings: Se
    if (!scraperClient) { return false; }
 
    let scraperError: any = null;
-   let retry = true;
-   do {
-      try {
-         const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await scraperClient.then((reslt: any) => reslt.json());
-         const scraperResult = scraperObj?.resultObjectKey && res[scraperObj.resultObjectKey] ? res[scraperObj.resultObjectKey] : '';
-         const scrapeResult: string = (res.data || res.html || res.results || scraperResult || '');
-         if (res && scrapeResult) {
-            const extracted = scraperObj?.serpExtractor ? scraperObj.serpExtractor(scrapeResult) : extractScrapedResult(scrapeResult, keyword.device);
-            // await writeFile('result.txt', JSON.stringify(scrapeResult), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
-            const serp = getSerp(keyword.domain, extracted);
-            refreshedResults = { ID: keyword.ID, keyword: keyword.keyword, position: serp.postion, url: serp.url, result: extracted, error: false };
-            logWithColor(`[SERP]: ${keyword.keyword} ${serp.postion} ${serp.url}`, 'green');
-            // console.log('[SERP]: ', keyword.keyword, serp.postion, serp.url);
-            retry = false;
-         } else {
-            scraperError = res.detail || res.error || 'Unknown Error';
-            throw new Error(res);
-         }
-      } catch (error: any) {
-         refreshedResults.error = scraperError;
-         if (settings.scraper_type === 'proxy' && error && error.response && error.response.statusText) {
-            refreshedResults.error = `[${error.response.status}] ${error.response.statusText}`;
-         }
-
-         // console.log('[ERROR] Scraping Keyword : ', keyword.keyword, '. Error: ', error && error.response && error.response.statusText);
-         logWithColor(`[ERROR] Scraping Keyword : ${keyword.keyword}. Error:  ${error && error.response && error.response.statusText}`, 'red');
-         if (!(error && error.response && error.response.statusText)) {
-            console.log('[ERROR_MESSAGE]: ', error);
-         }
+   try {
+      const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await scraperClient.then((reslt: any) => reslt.json());
+      const scraperResult = scraperObj?.resultObjectKey && res[scraperObj.resultObjectKey] ? res[scraperObj.resultObjectKey] : '';
+      const scrapeResult: string = (res.data || res.html || res.results || scraperResult || '');
+      if (res && scrapeResult) {
+         const extracted = scraperObj?.serpExtractor ? scraperObj.serpExtractor(scrapeResult) : extractScrapedResult(scrapeResult, keyword.device);
+         // await writeFile('result.txt', JSON.stringify(scrapeResult), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
+         const serp = getSerp(keyword.domain, extracted);
+         refreshedResults = { ID: keyword.ID, keyword: keyword.keyword, position: serp.postion, url: serp.url, result: extracted, error: false };
+         logWithColor(`[SERP]: ${keyword.keyword} ${serp.postion} ${serp.url}`, 'green');
+         // console.log('[SERP]: ', keyword.keyword, serp.postion, serp.url);
+      } else {
+         scraperError = res.detail || res.error || 'Unknown Error';
+         throw new Error(res);
       }
-   } while (retry);
+   } catch (error: any) {
+      refreshedResults.error = scraperError;
+      if (settings.scraper_type === 'proxy' && error && error.response && error.response.statusText) {
+         refreshedResults.error = `[${error.response.status}] ${error.response.statusText}`;
+      }
+
+      // console.log('[ERROR] Scraping Keyword : ', keyword.keyword, '. Error: ', error && error.response && error.response.statusText);
+      logWithColor(`[ERROR] Scraping Keyword : ${keyword.keyword}. Error:  ${error && error.response && error.response.statusText}`, 'red');
+      if (!(error && error.response && error.response.statusText)) {
+         console.log('[ERROR_MESSAGE]: ', error);
+      }
+   }
 
    return refreshedResults;
 };

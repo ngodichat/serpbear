@@ -38,10 +38,10 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 const getAllStats = async (req: NextApiRequest, res: NextApiResponse) => {
-    const dateRange = req?.query?.dateRange ?? 30;
+    const dateRange = (req?.query?.dateRange as string) ?? '30';
     const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats_new ls 
     join link l on l.ID = ls.link_id
-    and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${dateRange} DAY)
+    and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)
     group by date`);
     const resultObj: any = {};
     result.forEach((r: any) => {
