@@ -1,5 +1,6 @@
 import { performance } from 'perf_hooks';
 import { RefreshResult, scrapeKeywordFromGoogle } from './scraper';
+import sleep from './sleep';
 
 /**
  * Refreshes the Keywords position by Scraping Google Search Result by
@@ -17,10 +18,11 @@ const refreshKeywords = async (keywords:KeywordType[], settings:SettingsType): P
    if (['scrapingant', 'serpapi'].includes(settings.scraper_type)) {
       refreshedResults = await refreshParallel(keywords, settings);
    } else {
-      for (const keyword of keywords) {
+      for await (const keyword of keywords) {
          console.log('START SCRAPE: ', keyword.keyword);
          const refreshedkeywordData = await scrapeKeywordFromGoogle(keyword, settings);
          refreshedResults.push(refreshedkeywordData);
+         await sleep(100);
       }
    }
 
