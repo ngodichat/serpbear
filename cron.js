@@ -2,7 +2,7 @@ const Cryptr = require('cryptr');
 const { promises } = require('fs');
 const { readFile } = require('fs');
 const cron = require('node-cron');
-// const fetch = require('isomorphic-fetch');
+const fetch = require('isomorphic-fetch');
 require('dotenv').config({ path: './.env.local' });
 
 const getAppSettings = async () => {
