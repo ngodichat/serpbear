@@ -24,17 +24,17 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false }: DomainIte
                   <img src={`https://image.thum.io/get/maxAge/96/width/200/https://${domain.domain}`} alt={domain.domain} />
                </div>
                <div className="domain_details flex-1">
-                  <h3 className='font-semibold text-base mb-2 capitalize'>{domain.domain}</h3>
+                  <h3 className='font-semibold text-base mb-2 capitalize break-all'>{domain.domain}</h3>
                  {keywordsUpdated && (
-                  <span className='flex'>
+                  <span className='flex flex-col lg:flex-row'>
                      <span className=' text-gray-600 text-xs'>
                         Updated <TimeAgo title={dayjs(keywordsUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={keywordsUpdated} />
                      </span>
-                     <span>
-                        <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>TF: {domain.target_trust_flow ?? 0}</span>
+                     <span className='mt-2 lg:mt-0'>
+                        <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} lg:ml-4 p-1 px-2 text-xs rounded-full`}>TF: {domain.target_trust_flow ?? 0}</span>
                         <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>CF: {domain.target_citation_flow ?? 0}</span>
                         {domain.target_topical_trust_flow_value && (
-                           <span className='ml-4'>{domain.target_topical_trust_flow_topic} ({domain.target_topical_trust_flow_value})</span>
+                           <span className='hidden lg:inline-block ml-4'>{domain.target_topical_trust_flow_topic} ({domain.target_topical_trust_flow_value})</span>
                         )}
                      </span>
                   </span>

@@ -69,7 +69,7 @@ const SingleDomain: NextPage = () => {
          </Head>
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
-         <div className="flex flex-col w-full max-w-5xl mx-auto p-6 lg:mt-24 lg:p-0">
+         <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-24 lg:p-0">
             <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
                <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
                   <span>Stats</span>
@@ -104,7 +104,7 @@ const SingleDomain: NextPage = () => {
                   <div className=' text-sm border-r-2 px-2'>{stats?.desktop || 0} Desktop</div>
                   <div className=' text-sm px-2'>{stats?.mobile || 0} Mobile</div>
                </div>
-               <div>
+               <div className='hidden lg:block'>
                   <button
                      className={'ml-2 inline-block py-2 text-blue-700 font-bold text-sm'}
                      onClick={() => setShowAddDomain(true)}>

@@ -85,7 +85,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
             {/* <h1 className="hidden lg:block text-xl font-bold my-3" data-testid="domain-header">
                {domain && domain.domain && <><i className=' capitalize font-bold not-italic'>{domain.domain.charAt(0)}</i>{domain.domain.slice(1)}</>}
             </h1> */}
-            <div className='domain_selector mt-2 flex-1 max-w-full'>
+            <div className='domain_selector flex-1 max-w-full w-[180px]'>
                <SelectField
                   options={domains && domains.length > 0 ? domains.map((d) => { return { label: d.domain, value: d.slug }; }) : []}
                   selected={[domain.slug]}
@@ -99,8 +99,8 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
                <button data-testid="add_domain" onClick={() => showAddDomainModal(true)} className='p-4 hover:text-blue-600'>+ Add Domain</button>
             </div> */}
             <div className='flex items-center'>
-               <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>TF: {domain.target_trust_flow ?? 0}</span>
-               <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full`}>CF: {domain.target_citation_flow ?? 0}</span>
+               <span className={`${domain.target_trust_flow && domain.target_trust_flow > 0 ? 'bg-[#DDFBE7]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full min-w-fit`}>TF: {domain.target_trust_flow ?? 0}</span>
+               <span className={`${domain.target_citation_flow && domain.target_citation_flow > 0 ? 'bg-[#FCECD6]' : 'bg-[#E5E5E5]'} ml-4 p-1 px-2 text-xs rounded-full min-w-fit`}>CF: {domain.target_citation_flow ?? 0}</span>
             </div>
          </div>
          <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
@@ -146,7 +146,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
                      </a>
                   </Link>
                </li>
-               <li className={`${tabStyle} ${router.pathname === '/domain/console/[slug]' ? 'bg-white border border-b-0 font-semibold' : ''}`}>
+               {/* <li className={`${tabStyle} ${router.pathname === '/domain/console/[slug]' ? 'bg-white border border-b-0 font-semibold' : ''}`}>
                   <Link href={`/domain/console/${domain.slug}`} passHref={true}>
                      <a className='px-4 py-2 inline-block'><Icon type="google" size={13} classes='hidden lg:inline-block' />
                         <span className='text-xs lg:text-sm lg:ml-2'>Discover</span>
@@ -161,7 +161,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
                         <Icon type='help' size={14} color="#aaa" classes="ml-2 hidden lg:inline-block" title='Insight for Google Search Console Data' />
                      </a>
                   </Link>
-               </li>
+               </li> */}
             </ul>
             <div className={'flex mt-3 mb-0 lg:mb-3'}>
                {!isInsight && <button className={`${buttonStyle} lg:hidden`} onClick={() => setShowOptions(!showOptions)}>

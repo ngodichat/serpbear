@@ -22,18 +22,18 @@ const BacklinksTable = (props: BacklinksTableProps) => {
                     <span className='flex-1 basis-28 grow-0'>URL</span>
                     <span className='flex-1 '>Domain</span>
                   </div>
-                  <div className={`domKeywords_head hidden lg:flex p-3 px-6 bg-[#FCFCFF]
+                  <div className={`domKeywords_head flex p-3 px-6 bg-[#FCFCFF]
                    text-gray-600 justify-between items-center font-semibold border-y`}>
                      <span className='domKeywords_head_keyword flex-1 w-auto '>
                         URL
                      </span>
-                     <span className='flex-1 basis-32 grow-0'>First Indexed</span>
+                     <span className='hidden lg:inline-block flex-1 basis-32 grow-0'>First Indexed</span>
                      <span className='flex-1 basis-16 grow-0'>TF</span>
-                     <span className='flex-1 basis-16 grow-0'>CF</span>
-                     <span className='flex-1 basis-16 grow-0'>TF</span>
-                     <span className='flex-1 basis-16 grow-0'>CF</span>
-                     <span className='flex-1 basis-44 grow-0'>Anchor Text</span>
-                     <span className='flex-1 basis-32 grow-0'>Updated</span>
+                     <span className='hidden lg:inline-block flex-1 basis-16 grow-0'>CF</span>
+                     <span className='hidden lg:inline-block flex-1 basis-16 grow-0'>TF</span>
+                     <span className='hidden lg:inline-block flex-1 basis-16 grow-0'>CF</span>
+                     <span className='hidden lg:inline-block flex-1 basis-44 grow-0'>Anchor Text</span>
+                     <span className='hidden lg:inline-block flex-1 basis-32 grow-0'>Updated</span>
                   </div>
                   <div className='domKeywords_keywords border-gray-200 min-h-[55vh] relative'>
                      {backlinks.length > 0

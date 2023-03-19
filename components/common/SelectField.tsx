@@ -68,7 +68,7 @@ const SelectField = (props: SelectFieldProps) => {
    return (
        <div className="select font-semibold bg-white text-gray-500">
          <div
-         className={`selected flex border ${rounded} p-1.5 px-4 cursor-pointer select-none w-[180px] min-w-[${minWidth}px] 
+         className={`selected flex border ${rounded} p-1.5 px-4 cursor-pointer select-none min-w-[${minWidth}px] 
          ${showOptions ? 'border-indigo-200' : ''}`}
          onClick={() => setShowOptions(!showOptions)}>
             <span className={`w-[${minWidth - 30}px] inline-block truncate mr-2 capitalize`}>

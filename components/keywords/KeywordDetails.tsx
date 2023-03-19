@@ -83,7 +83,7 @@ const KeywordDetails = ({ keyword, closeDetails, backlinks }:KeywordDetailsProps
 
    return (
        <div className="keywordDetails fixed w-full h-screen top-0 left-0 z-[99999]" onClick={closeOnBGClick} data-testid="keywordDetails">
-            <div className="keywordDetails absolute w-full lg:w-5/12 bg-white customShadow top-0 right-0 h-screen" >
+            <div className="keywordDetails absolute w-full lg:w-5/12 bg-white customShadow top-0 right-0 h-screen overflow-auto" >
                <div className='keywordDetails__header p-6 border-b border-b-slate-200 text-slate-500'>
                   <h3 className=' text-lg font-bold'>
                      <span title={countries[keyword.country][0]}
@@ -128,7 +128,7 @@ const KeywordDetails = ({ keyword, closeDetails, backlinks }:KeywordDetailsProps
                         </h3>
                         <span className=' text-xs text-gray-500'>{dayjs(updatedDate).format('MMMM D, YYYY')}</span>
                      </div>
-                     <div className='keywordDetails__section__results styled-scrollbar overflow-y-auto' ref={searchResultContainer}>
+                     <div className='keywordDetails__section__results styled-scrollbar' ref={searchResultContainer}>
                         {keywordSearchResult && Array.isArray(keywordSearchResult) && keywordSearchResult.length > 0 && (
                            keywordSearchResult.map((item, index) => {
                               const { position } = keyword;

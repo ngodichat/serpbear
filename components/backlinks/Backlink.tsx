@@ -19,10 +19,10 @@ const Backlink = (props: BacklinkProps) => {
 
     return (
         <div className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
-        lg:flex lg:justify-between lg:items-center`}>
-            <div className='hidden flex-1 lg:block'>{URL}</div>
+        flex lg:justify-between lg:items-center`}>
+            <div className='flex-1 break-all'>{URL}</div>
             <div className='hidden flex-1 lg:block basis-32 grow-0'>{dayjs(link_first_index_date, 'DD/MM/YYYY HH:mm').format('DD-MMM-YYYY')}</div>
-            <div className='hidden flex-1 lg:block basis-16 grow-0'>{source_trust_flow}</div>
+            <div className='flex-1 basis-16 grow-0'>{source_trust_flow}</div>
             <div className='hidden flex-1 lg:block basis-16 grow-0'>{source_citation_flow}</div>
             <div className='hidden flex-1 lg:block basis-16 grow-0'>{domain_trust_flow}</div>
             <div className='hidden flex-1 lg:block basis-16 grow-0'>{domain_citation_flow}</div>

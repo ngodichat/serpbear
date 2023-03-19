@@ -32,7 +32,7 @@ const TopBar = ({ showSettings, showAddModal, showAddDomainModal }:TopbarProps) 
 
    return (
        <div className={`topbar flex w-full mx-auto justify-between items-center lg:justify-between
-       ${isDomainsPage ? 'max-w-5xl' : 'max-w-7xl'}  bg-white lg:bg-transparent`}>
+       ${isDomainsPage ? 'max-w-7xl' : 'max-w-7xl'}  bg-white lg:bg-transparent`}>
          <div className='flex flex-row-reverse lg:flex-row md:flex-1 justify-between lg:justify-start items-center'>
             {!isDomainsPage && (
                <Link href={'/domains'} passHref={true}>
