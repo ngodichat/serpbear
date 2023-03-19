@@ -58,6 +58,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
 
    useEffect(() => {
       queryClient.invalidateQueries(['linkstats']);
+      console.log('Domain header, domains: ', domains);
    }, [chartTime]);
 
    const handleSubmit = async (file: any) => {

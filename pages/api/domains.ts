@@ -59,8 +59,9 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          where l.tags like '%http%'
          and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)
          group by l.tags)
-         select d.*, totalClicks from domain d
+         select d.*, sum(totalClicks) as totalClicks from domain d
          left join tmp on tmp.domainTags like CONCAT('%', d.domain, '%')
+         group by d.domain 
          order by totalClicks desc`);
       const results: DomainType[] = result.map((e: any) => ({
          ID: e.ID,
