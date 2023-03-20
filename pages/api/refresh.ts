@@ -76,13 +76,13 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
 export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings: SettingsType) => {
    const formattedKeywords = initKeywords.map((el) => el.get({ plain: true }));
    setTimeout(async () => {
-      for await (const k of initKeywords){
+      for await (const k of initKeywords) {
          console.log('kID: ', k.ID);
          k.updating = false;
          k.sticky = true;
          // console.log('Updating keyword: ', k);
          await k.save();
-      }    
+      }
    }, 180000);
    const refreshed: any = await refreshKeywords(formattedKeywords, settings);
    // const fetchKeywords = await refreshKeywords(initialKeywords.map( k=> k.keyword ));
