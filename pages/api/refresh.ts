@@ -10,7 +10,7 @@ import { removeFromRetryQueue, retryScrape } from '../../utils/scraper';
 
 type KeywordsRefreshRes = {
    keywords?: KeywordType[]
-   error?: string|null,
+   error?: string | null,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -73,8 +73,17 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
    }
 };
 
-export const refreshAndUpdateKeywords = async (initKeywords:Keyword[], settings:SettingsType) => {
+export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings: SettingsType) => {
    const formattedKeywords = initKeywords.map((el) => el.get({ plain: true }));
+   setTimeout(async () => {
+      for await (const k of initKeywords){
+         console.log('kID: ', k.ID);
+         k.updating = false;
+         k.sticky = true;
+         // console.log('Updating keyword: ', k);
+         await k.save();
+      }    
+   }, 180000);
    const refreshed: any = await refreshKeywords(formattedKeywords, settings);
    // const fetchKeywords = await refreshKeywords(initialKeywords.map( k=> k.keyword ));
    const updatedKeywords: KeywordType[] = [];
@@ -82,7 +91,7 @@ export const refreshAndUpdateKeywords = async (initKeywords:Keyword[], settings:
    for (const keywordRaw of initKeywords) {
       const keywordPrased = parseKeywords([keywordRaw.get({ plain: true })]);
       const keyword = keywordPrased[0];
-      const udpatedkeyword = refreshed.find((item:any) => item.ID && item.ID === keyword.ID);
+      const udpatedkeyword = refreshed.find((item: any) => item.ID && item.ID === keyword.ID);
 
       if (udpatedkeyword && keyword) {
          const newPos = udpatedkeyword.position;
