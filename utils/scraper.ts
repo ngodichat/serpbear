@@ -51,6 +51,7 @@ export const getScraperClient = (keyword: KeywordType, settings: SettingsType, s
       // Set Scraper Header
       const scrapeHeaders = scraper.headers ? scraper.headers(keyword, settings) : null;
       const scraperAPIURL = scraper.scrapeURL ? scraper.scrapeURL(keyword, settings, countries) : null;
+      console.log('scraperAPIURL: ', scraperAPIURL);
       if (scrapeHeaders && Object.keys(scrapeHeaders).length > 0) {
          Object.keys(scrapeHeaders).forEach((headerItemKey: string) => {
             headers[headerItemKey] = scrapeHeaders[headerItemKey as keyof object];
@@ -152,6 +153,7 @@ export const extractScrapedResult = (content: string, device: string): SearchRes
    const extractedResult = [];
 
    const $ = cheerio.load(content);
+   writeFile('result.txt', JSON.stringify($.root().html()), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
    const hasNumberofResult = $('body').find('#search  > div > div');
    const searchResult = hasNumberofResult.children();
    let lastPosition = 0;

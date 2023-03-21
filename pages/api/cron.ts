@@ -5,6 +5,7 @@ import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
 import { refreshAndUpdateKeywords } from './refresh';
 import Domain from '../../database/models/domain';
+import { Op } from 'sequelize';
 
 type CRONRefreshRes = {
    started: boolean
@@ -35,7 +36,7 @@ const cronRefreshkeywords = async (req: NextApiRequest, res: NextApiResponse<CRO
       }
       const allDomains: Domain[] = await Domain.findAll();
       const autoRefreshDomains: string[] = allDomains.filter((domain) => domain.auto_refresh === true).map((domain) => domain.domain);
-      await Keyword.update({ updating: true }, { where: {} });
+      await Keyword.update({ updating: true }, { where: { domain: { [Op.in]: autoRefreshDomains } } });
       const keywordQueries: Keyword[] = await Keyword.findAll();
       console.log('List of keyword before filtering: ', keywordQueries.map((k) => k.keyword));
       const keywordQueriesWithAutoRefresh: Keyword[] = keywordQueries.filter((keyword) => autoRefreshDomains.includes(keyword.domain));
