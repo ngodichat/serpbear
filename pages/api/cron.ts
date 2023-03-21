@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { Op } from 'sequelize';
 import db from '../../database/database';
 import Keyword from '../../database/models/keyword';
 import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
 import { refreshAndUpdateKeywords } from './refresh';
 import Domain from '../../database/models/domain';
-import { Op } from 'sequelize';
 
 type CRONRefreshRes = {
    started: boolean
