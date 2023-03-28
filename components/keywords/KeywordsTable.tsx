@@ -73,8 +73,8 @@ const KeywordsTable = (props: KeywordsTableProps) => {
    };
 
    const updateFavorite = () => {
-      favoriteMutate({ keywordID: selectedKeywords.join(','), sticky: !hasFavorite })
-   }
+      favoriteMutate({ keywordID: selectedKeywords.join(','), sticky: !hasFavorite });
+   };
 
    const selectedAllItems = selectedKeywords.length === processedKeywords[device].length;
 
