@@ -27,6 +27,7 @@ const defaultSettings = {
    keyword_volume_type: 'none',
    keyword_volume_username: '',
    keyword_volume_password: '',
+   scraping_frequency: 24,
 };
 
 const Settings = ({ closeSettings }:SettingsProps) => {
@@ -167,6 +168,19 @@ const Settings = ({ closeSettings }:SettingsProps) => {
                                  value={settings?.scaping_api || ''}
                                  placeholder={'API Key/Token'}
                                  onChange={(event) => updateSettings('scaping_api', event.target.value)}
+                              />
+                           </div>
+                        )}
+                        {['scrapingant', 'scrapingrobot', 'serply', 'serpapi'].includes(settings.scraper_type) && (
+                           <div className="settings__section__input mr-3">
+                              <label className={labelStyle}>Scraping Frequency (Hours)</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
+                                 ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.scraping_frequency}
+                                 placeholder={'12, 24, 48'}
+                                 onChange={(event) => updateSettings('scraping_frequency', event.target.value)}
                               />
                            </div>
                         )}

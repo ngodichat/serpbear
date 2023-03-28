@@ -5,6 +5,8 @@ const cron = require('node-cron');
 const fetch = require('isomorphic-fetch');
 require('dotenv').config({ path: './.env.local' });
 
+const refreshCron = null;
+
 const getAppSettings = async () => {
    const defaultSettings = {
       scraper_type: 'none',
@@ -84,21 +86,7 @@ const runAppCronJobs = () => {
    const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runAppCronJobs: ', scrapeCronTime);
-   cron.schedule(scrapeCronTime, () => {
-      console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
-      const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
-      try {
-         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
-         .then((res) => res.json())
-         .then((data) => console.log(data))
-         .catch((err) => {
-            console.log('ERROR Making Daily Scraper Cron Request..');
-            console.log(err);
-         });
-      } catch (error){
-         //  console.log(error);
-      };
-   }, { scheduled: true });
+   
 
    // fetch('https://google.com.vn').then((res) => console.log(res));
 
@@ -159,6 +147,24 @@ const runAppCronJobs = () => {
                });
             }, { scheduled: true });
          }
+      }
+      const scraping_frequency = (!settings.scraping_frequency || settings.scraping_frequency === 'never') ? 24 : settings.scraping_frequency;
+      if (scraping_frequency) {
+         cron.schedule(scrapeCronTime, () => {
+            console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
+            const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
+            try {
+               fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
+               .then((res) => res.json())
+               .then((data) => console.log(data))
+               .catch((err) => {
+                  console.log('ERROR Making Daily Scraper Cron Request..');
+                  console.log(err);
+               });
+            } catch (error){
+               //  console.log(error);
+            };
+         }, { scheduled: true });
       }
    });
 };
