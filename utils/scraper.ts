@@ -157,15 +157,17 @@ export const extractScrapedResult = (content: string, device: string): SearchRes
    const hasNumberofResult = $('body').find('#search  > div > div');
    const searchResult = hasNumberofResult.children();
    let lastPosition = 0;
-
+   console.log('searchResult: ', searchResult.length);
    for (let i = 0; i < searchResult.length; i += 1) {
       if (searchResult[i]) {
          const title = $(searchResult[i]).find('h3').html();
+         if (title === 'Images') continue;
          const url = $(searchResult[i]).find('a').attr('href');
          // console.log(i, url?.slice(0, 40), title?.slice(0, 40));
          if (title && url) {
             lastPosition += 1;
             extractedResult.push({ title, url, position: lastPosition });
+            if (extractedResult.length === 100) break;
          }
       }
    }
