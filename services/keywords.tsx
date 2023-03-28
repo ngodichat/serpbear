@@ -93,7 +93,7 @@ export function useDeleteKeywords(onSuccess:Function) {
 
 export function useFavKeywords(onSuccess:Function) {
    const queryClient = useQueryClient();
-   return useMutation(async ({ keywordID, sticky }:{keywordID:number, sticky:boolean}) => {
+   return useMutation(async ({ keywordID, sticky }:{keywordID:string, sticky:boolean}) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
       const fetchOpts = { method: 'PUT', headers, body: JSON.stringify({ sticky }) };
       const res = await fetch(`${window.location.origin}/api/keywords?id=${keywordID}`, fetchOpts);

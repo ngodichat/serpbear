@@ -27,19 +27,20 @@ const KeywordsTable = (props: KeywordsTableProps) => {
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
-   const [showKeyDetails, setShowKeyDetails] = useState<KeywordType|null>(null);
+   const [showKeyDetails, setShowKeyDetails] = useState<KeywordType | null>(null);
    const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
-   const [showTagManager, setShowTagManager] = useState<null|number>(null);
+   const [showTagManager, setShowTagManager] = useState<null | number>(null);
    const [showAddTags, setShowAddTags] = useState<boolean>(false);
    const [filterParams, setFilterParams] = useState<KeywordFilters>({ countries: [], tags: [], search: '' });
    const [sortBy, setSortBy] = useState<string>('date_asc');
    const [scDataType, setScDataType] = useState<string>('threeDays');
    const [showScDataTypes, setShowScDataTypes] = useState<boolean>(false);
-   const { mutate: deleteMutate } = useDeleteKeywords(() => {});
-   const { mutate: favoriteMutate } = useFavKeywords(() => {});
-   const { mutate: refreshMutate } = useRefreshKeywords(() => {});
+   const { mutate: deleteMutate } = useDeleteKeywords(() => { });
+   const { mutate: favoriteMutate } = useFavKeywords(() => { });
+   const { mutate: refreshMutate } = useRefreshKeywords(() => { });
+   const [hasFavorite, setHasFavorite] = useState<boolean>(false);
 
-   const scDataObject:{ [k:string] : string} = {
+   const scDataObject: { [k: string]: string } = {
       threeDays: 'Last Three Days',
       sevenDays: 'Last Seven Days',
       thirtyDays: 'Last Thirty Days',
@@ -48,7 +49,7 @@ const KeywordsTable = (props: KeywordsTableProps) => {
       avgThirtyDays: 'Last Thirty Days Avg',
    };
 
-   const processedKeywords: {[key:string] : KeywordType[]} = useMemo(() => {
+   const processedKeywords: { [key: string]: KeywordType[] } = useMemo(() => {
       const procKeywords = keywords.filter((x) => x.device === device);
       const filteredKeywords = filterKeywords(procKeywords, filterParams);
       const sortedKeywords = sortKeywords(filteredKeywords, sortBy, scDataType);
@@ -66,8 +67,14 @@ const KeywordsTable = (props: KeywordsTableProps) => {
       if (selectedKeywords.includes(keywordID)) {
          updatedSelectd = selectedKeywords.filter((keyID) => keyID !== keywordID);
       }
+      const allFavorite = processedKeywords[device].filter((item) => (updatedSelectd.includes(item.ID))).filter((i) => i.sticky === true);
+      setHasFavorite(allFavorite.length > 0);
       setSelectedKeywords(updatedSelectd);
    };
+
+   const updateFavorite = () => {
+      favoriteMutate({ keywordID: selectedKeywords.join(','), sticky: !hasFavorite })
+   }
 
    const selectedAllItems = selectedKeywords.length === processedKeywords[device].length;
 
@@ -79,25 +86,32 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                   <ul className=''>
                      <li className='inline-block mr-4'>
                         <a
-                        className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
-                        onClick={() => { refreshMutate({ ids: selectedKeywords }); setSelectedKeywords([]); }}
+                           className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
+                           onClick={() => { refreshMutate({ ids: selectedKeywords }); setSelectedKeywords([]); }}
                         >
                            <span className=' bg-indigo-100 text-blue-700 px-1 rounded'><Icon type="reload" size={11} /></span> Refresh Keywords
                         </a>
                      </li>
                      <li className='inline-block mr-4'>
                         <a
-                        className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
-                        onClick={() => setShowRemoveModal(true)}
+                           className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
+                           onClick={() => setShowRemoveModal(true)}
                         >
                            <span className=' bg-red-100 text-red-600 px-1 rounded'><Icon type="trash" size={14} /></span> Remove Keywords</a>
                      </li>
                      <li className='inline-block mr-4'>
                         <a
-                        className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
-                        onClick={() => setShowAddTags(true)}
+                           className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
+                           onClick={() => setShowAddTags(true)}
                         >
                            <span className=' bg-green-100 text-green-500  px-1 rounded'><Icon type="tags" size={14} /></span> Tag Keywords</a>
+                     </li>
+                     <li className='inline-block mr-4'>
+                        <a
+                           className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
+                           onClick={() => { updateFavorite(); setSelectedKeywords([]); }}
+                        >
+                           <span className=' bg-yellow-100 text-yellow-500  px-1 rounded'><Icon type="star" size={14} /></span> {hasFavorite ? 'Unfavorite Keyword' : 'Favorite Keyword'}</a>
                      </li>
                   </ul>
                </div>
@@ -106,8 +120,8 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                <KeywordFilters
                   allTags={allDomainTags}
                   filterParams={filterParams}
-                  filterKeywords={(params:KeywordFilters) => setFilterParams(params)}
-                  updateSort={(sorted:string) => setSortBy(sorted)}
+                  filterKeywords={(params: KeywordFilters) => setFilterParams(params)}
+                  updateSort={(sorted: string) => setSortBy(sorted)}
                   sortBy={sortBy}
                   keywords={keywords}
                   device={device}
@@ -121,15 +135,15 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                   <div className={`domKeywords_head domKeywords_head--${sortBy} hidden lg:flex p-3 px-6 bg-[#FCFCFF]
                    text-gray-600 justify-between items-center font-semibold border-y`}>
                      <span className='domKeywords_head_keyword flex-1 basis-36 w-auto '>
-                     {processedKeywords[device].length > 0 && (
-                        <button
-                           className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px]  border border-slate-300 
+                        {processedKeywords[device].length > 0 && (
+                           <button
+                              className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px]  border border-slate-300 
                            ${selectedAllItems ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
-                           onClick={() => setSelectedKeywords(selectedAllItems ? [] : processedKeywords[device].map((k: KeywordType) => k.ID))}
+                              onClick={() => setSelectedKeywords(selectedAllItems ? [] : processedKeywords[device].map((k: KeywordType) => k.ID))}
                            >
                               <Icon type="check" size={10} />
-                        </button>
-                     )}
+                           </button>
+                        )}
                         Keyword
                      </span>
                      <span className='domKeywords_head_position flex-1 basis-40 grow-0 text-center'>Position</span>
@@ -144,9 +158,9 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                            {/* Search Console */}
                            <div>
                               <div
-                              className=' w-48 select-none cursor-pointer absolute bg-white rounded-full
+                                 className=' w-48 select-none cursor-pointer absolute bg-white rounded-full
                               px-2 py-[2px] mt-[-22px] ml-3 border border-gray-200 z-50'
-                              onClick={() => setShowScDataTypes(!showScDataTypes)}>
+                                 onClick={() => setShowScDataTypes(!showScDataTypes)}>
                                  <Icon type="google" size={13} /> {scDataObject[scDataType]}
                                  <Icon classes="ml-2" type={showScDataTypes ? 'caret-up' : 'caret-down'} size={10} />
                               </div>
@@ -154,12 +168,12 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                                  <div className='absolute bg-white border border-gray-200 z-50 w-44 rounded mt-2 ml-5 text-gray-500'>
                                     {Object.keys(scDataObject).map((itemKey) => {
                                        return <span
-                                                className={`block p-2 cursor-pointer hover:bg-indigo-50 hover:text-indigo-600
+                                          className={`block p-2 cursor-pointer hover:bg-indigo-50 hover:text-indigo-600
                                                  ${scDataType === itemKey ? 'bg-indigo-100 text-indigo-600' : ''}`}
-                                                key={itemKey}
-                                                onClick={() => { setScDataType(itemKey); setShowScDataTypes(false); }}>
-                                                   {scDataObject[itemKey]}
-                                                </span>;
+                                          key={itemKey}
+                                          onClick={() => { setScDataType(itemKey); setShowScDataTypes(false); }}>
+                                          {scDataObject[itemKey]}
+                                       </span>;
                                     })}
                                  </div>
                               )}
@@ -176,19 +190,19 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                   <div className='domKeywords_keywords border-gray-200 min-h-[55vh] relative'>
                      {processedKeywords[device] && processedKeywords[device].length > 0
                         && processedKeywords[device].map((keyword, index) => <Keyword
-                                                      key={keyword.ID}
-                                                      selected={selectedKeywords.includes(keyword.ID)}
-                                                      selectKeyword={selectKeyword}
-                                                      keywordData={keyword}
-                                                      refreshkeyword={() => refreshMutate({ ids: [keyword.ID] })}
-                                                      favoriteKeyword={favoriteMutate}
-                                                      manageTags={() => setShowTagManager(keyword.ID)}
-                                                      removeKeyword={() => { setSelectedKeywords([keyword.ID]); setShowRemoveModal(true); }}
-                                                      showKeywordDetails={() => setShowKeyDetails(keyword)}
-                                                      lastItem={index === (processedKeywords[device].length - 1)}
-                                                      showSCData={showSCData}
-                                                      scDataType={scDataType}
-                                                      />)}
+                           key={keyword.ID}
+                           selected={selectedKeywords.includes(keyword.ID)}
+                           selectKeyword={selectKeyword}
+                           keywordData={keyword}
+                           refreshkeyword={() => refreshMutate({ ids: [keyword.ID] })}
+                           favoriteKeyword={favoriteMutate}
+                           manageTags={() => setShowTagManager(keyword.ID)}
+                           removeKeyword={() => { setSelectedKeywords([keyword.ID]); setShowRemoveModal(true); }}
+                           showKeywordDetails={() => setShowKeyDetails(keyword)}
+                           lastItem={index === (processedKeywords[device].length - 1)}
+                           showSCData={showSCData}
+                           scDataType={scDataType}
+                        />)}
                      {!isLoading && processedKeywords[device].length === 0 && (
                         <p className=' p-9 pt-[10%] text-center text-gray-500'>No Keywords Added for this Device Type.</p>
                      )}
@@ -204,21 +218,21 @@ const KeywordsTable = (props: KeywordsTableProps) => {
          )}
          {showRemoveModal && selectedKeywords.length > 0 && (
             <Modal closeModal={() => { setSelectedKeywords([]); setShowRemoveModal(false); }} title={'Remove Keywords'}>
-                  <div className='text-sm'>
-                     <p>Are you sure you want to remove {selectedKeywords.length > 1 ? 'these' : 'this'} Keyword?</p>
-                     <div className='mt-6 text-right font-semibold'>
-                        <button
+               <div className='text-sm'>
+                  <p>Are you sure you want to remove {selectedKeywords.length > 1 ? 'these' : 'this'} Keyword?</p>
+                  <div className='mt-6 text-right font-semibold'>
+                     <button
                         className=' py-1 px-5 rounded cursor-pointer bg-indigo-50 text-slate-500 mr-3'
                         onClick={() => { setSelectedKeywords([]); setShowRemoveModal(false); }}>
-                           Cancel
-                        </button>
-                        <button
+                        Cancel
+                     </button>
+                     <button
                         className=' py-1 px-5 rounded cursor-pointer bg-red-400 text-white'
                         onClick={() => { deleteMutate(selectedKeywords); setShowRemoveModal(false); setSelectedKeywords([]); }}>
-                           Remove
-                        </button>
-                     </div>
+                        Remove
+                     </button>
                   </div>
+               </div>
             </Modal>
          )}
          <CSSTransition in={showAddModal} timeout={300} classNames="modal_anim" unmountOnExit mountOnEnter>
@@ -226,24 +240,24 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                domain={domain?.domain || ''}
                keywords={keywords}
                closeModal={() => setShowAddModal(false)}
-               />
+            />
          </CSSTransition>
          {showTagManager && (
             <KeywordTagManager
                allTags={allDomainTags}
                keyword={keywords.find((k) => k.ID === showTagManager)}
                closeModal={() => setShowTagManager(null)}
-               />
+            />
          )}
          {showAddTags && (
             <AddTags
                keywords={keywords.filter((k) => selectedKeywords.includes(k.ID))}
                closeModal={() => setShowAddTags(false)}
-               />
+            />
          )}
          <Toaster position='bottom-center' containerClassName="react_toaster" />
       </div>
    );
- };
+};
 
- export default KeywordsTable;
+export default KeywordsTable;

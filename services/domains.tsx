@@ -21,7 +21,6 @@ export async function fetchDomains(router: NextRouter, dateRange: string, withSt
 }
 
 export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false) {
-   console.log('useFetchDomains with dateRange: ', dateRange);
    return useQuery(['domains', dateRange] , () => fetchDomains(router, dateRange, withStats));
 }
 
