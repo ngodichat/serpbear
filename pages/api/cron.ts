@@ -16,11 +16,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
    console.log('Cron called');
    await db.sync();
    console.log('Cron called 1');
-   // const authorized = verifyUser(req, res);
-   // console.log('Cron called 2: ', authorized);
-   // if (authorized !== 'authorized') {
-   //    return res.status(401).json({ error: authorized });
-   // }
+   const authorized = verifyUser(req, res);
+   console.log('Cron called 2: ', authorized);
+   if (authorized !== 'authorized') {
+      return res.status(401).json({ error: authorized });
+   }
    if (req.method === 'POST') {
       return cronRefreshkeywords(req, res);
    }
