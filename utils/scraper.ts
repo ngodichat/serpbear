@@ -136,7 +136,7 @@ export const scrapeKeywordFromGoogle = async (keyword: KeywordType, settings: Se
       // console.log('[ERROR] Scraping Keyword : ', keyword.keyword, '. Error: ', error && error.response && error.response.statusText);
       logWithColor(`[ERROR] Scraping Keyword : ${keyword.keyword}. Error:  ${error && error.response && error.response.statusText}`, 'red');
       if (!(error && error.response && error.response.statusText)) {
-         console.log('[ERROR_MESSAGE]: ', error);
+         console.log('[ERROR_MESSAGE]: ', JSON.stringify(error));
       }
    }
 
