@@ -9,18 +9,18 @@ import Domain from '../../database/models/domain';
 
 type CRONRefreshRes = {
    started: boolean
-   error?: string|null,
+   error?: string | null,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
    console.log('Cron called');
    await db.sync();
    console.log('Cron called 1');
-   const authorized = verifyUser(req, res);
-   console.log('Cron called 2: ', authorized);
-   if (authorized !== 'authorized') {
-      return res.status(401).json({ error: authorized });
-   }
+   // const authorized = verifyUser(req, res);
+   // console.log('Cron called 2: ', authorized);
+   // if (authorized !== 'authorized') {
+   //    return res.status(401).json({ error: authorized });
+   // }
    if (req.method === 'POST') {
       return cronRefreshkeywords(req, res);
    }
@@ -36,8 +36,8 @@ const cronRefreshkeywords = async (req: NextApiRequest, res: NextApiResponse<CRO
       }
       const allDomains: Domain[] = await Domain.findAll();
       const autoRefreshDomains: string[] = allDomains.filter((domain) => domain.auto_refresh === true).map((domain) => domain.domain);
-      await Keyword.update({ updating: true }, { where: { domain: { [Op.in]: autoRefreshDomains } } });
-      const keywordQueries: Keyword[] = await Keyword.findAll();
+      await Keyword.update({ updating: true }, { where: { [Op.or]: [{ domain: { [Op.in]: autoRefreshDomains } }, { sticky: true }] } });
+      const keywordQueries: Keyword[] = await Keyword.findAll({ where: { sticky: true } });
       console.log('List of keyword before filtering: ', keywordQueries.map((k) => k.keyword));
       const keywordQueriesWithAutoRefresh: Keyword[] = keywordQueries.filter((keyword) => autoRefreshDomains.includes(keyword.domain));
       console.log('List of keyword after filtering: ', keywordQueriesWithAutoRefresh.map((k) => k.keyword));
