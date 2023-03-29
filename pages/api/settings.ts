@@ -3,6 +3,7 @@ import Cryptr from 'cryptr';
 import { writeFile, readFile } from 'fs/promises';
 import verifyUser from '../../utils/verifyUser';
 import allScrapers from '../../scrapers/index';
+import { tryTest } from '../../cron';
 
 type SettingsGetResponse = {
    settings?: object | null,
@@ -15,6 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: authorized });
    }
    if (req.method === 'GET') {
+      tryTest();
       return getSettings(req, res);
    }
    if (req.method === 'PUT') {
@@ -51,7 +53,7 @@ const updateSettings = async (req: NextApiRequest, res: NextApiResponse<Settings
    }
 };
 
-export const getAppSettings = async () : Promise<SettingsType> => {
+export const getAppSettings = async (): Promise<SettingsType> => {
    try {
       const settingsRaw = await readFile(`${process.cwd()}/data/settings.json`, { encoding: 'utf-8' });
       const settings: SettingsType = settingsRaw ? JSON.parse(settingsRaw) : {};

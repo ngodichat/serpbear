@@ -203,47 +203,32 @@ const test = (str, cronTime) => {
       console.log(str);
       // scrapeCronTime = generateCronTime('2-minute');
       // console.log(x);
-   })
+   }, { name: 'scrape' })
 }
 
 // test('Run from origin', scrapeCronTime);
 // refreshCron.stop();
 
 const tryTest = () => {
-   console.log('Calling try test: ', scrapeCronTime, x);
+   console.log('Calling try test: ');
+   // const scrape = cron.getTasks().get('scrape');
+   // scrape.start();
+   test('Run from origin', scrapeCronTime);
    // scrapeCronTime = generateCronTime('2-minute');
    // refreshCron.stop();
-   const cron = generateCronTime('2-minute');
-   test('Run from api', cron);
+   // const cron = generateCronTime('2-minute');
+   // test('Run from api', cron);
 }
 
-const callCron = () => {
-   const fetchOpts = { method: 'GET' };
-      try {
-         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/test`, fetchOpts)
-            .then((res) => res.json())
-            .then((data) => console.log(data))
-            .catch((err) => {
-               console.log('ERROR Making Daily SHORT IO Cron Request..');
-               console.log(err);
-            });
-      } catch (error) {
-         console.log(error);
-      };
+const stop = () => {
+   const scrape = cron.getTasks().get('scrape');
+   scrape.stop();
+   const cronTime = generateCronTime('2-minute');
+   test('New run', cronTime);
 }
-
-const tryTest1 = () => {
-   console.log('Calling try test: ', scrapeCronTime, x);
-   // scrapeCronTime = generateCronTime('2-minute');
-   // refreshCron.stop();
-   const cron = generateCronTime('minute');
-   test('Run from calling', cron);
-}
-
-setTimeout(() => callCron(), 1000); 
 
 module.exports = {
    tryTest: () => tryTest(),
-   tryTest1: () => tryTest1(),
+   stop,
    getX: () => x
 };
