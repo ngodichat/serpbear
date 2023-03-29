@@ -5,7 +5,7 @@ const cron = require('node-cron');
 const fetch = require('isomorphic-fetch');
 require('dotenv').config({ path: './.env.local' });
 
-const refreshCron = null;
+let refreshCron = null;
 
 const getAppSettings = async () => {
    const defaultSettings = {
@@ -50,10 +50,10 @@ const getAppSettings = async () => {
             await promises.mkdir(`${process.cwd()}/data`, { recursive: true });
             await promises.writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(defaultSettings), { encoding: 'utf-8' });
             return defaultSettings;
-          } else {
+         } else {
             // some other error occurred
             throw err;
-          }
+         }
       }
    }
 };
@@ -74,8 +74,10 @@ const generateCronTime = (interval) => {
    }
    else if (interval === 'monthly') {
       cronTime = '0 0 1 * *'; // Run every first day of the month at 00:00(midnight)
-   } else if(interval === 'minute') {
+   } else if (interval === 'minute') {
       cronTime = '* * * * *';
+   } else if (interval === '2-minute') {
+      cronTime = '*/2 * * * *';
    }
 
    return cronTime;
@@ -86,7 +88,7 @@ const runAppCronJobs = () => {
    const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runAppCronJobs: ', scrapeCronTime);
-   
+
 
    // fetch('https://google.com.vn').then((res) => console.log(res));
 
@@ -101,12 +103,12 @@ const runAppCronJobs = () => {
             if (keywordsToRetry.length > 0) {
                const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
                fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/refresh?id=${keywordsToRetry.join(',')}`, fetchOpts)
-               .then((res) => res.json())
-               .then((refreshedData) => console.log(refreshedData))
-               .catch((fetchErr) => {
-               console.log('ERROR Making failed_queue Cron Request..');
-                  console.log(fetchErr);
-               });
+                  .then((res) => res.json())
+                  .then((refreshedData) => console.log(refreshedData))
+                  .catch((fetchErr) => {
+                     console.log('ERROR Making failed_queue Cron Request..');
+                     console.log(fetchErr);
+                  });
             }
          } else {
             console.log('ERROR Reading Failed Scrapes Queue File..', err);
@@ -120,12 +122,12 @@ const runAppCronJobs = () => {
       cron.schedule(searchConsoleCRONTime, () => {
          const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/searchconsole`, fetchOpts)
-         .then((res) => res.json())
-         .then((data) => console.log(data))
-         .catch((err) => {
-            console.log('ERROR Making Google Search Console Scraper Cron Request..');
-            console.log(err);
-         });
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch((err) => {
+               console.log('ERROR Making Google Search Console Scraper Cron Request..');
+               console.log(err);
+            });
       }, { scheduled: true });
    }
 
@@ -139,12 +141,12 @@ const runAppCronJobs = () => {
                // console.log('### Sending Notification Email...');
                const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
                fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify`, fetchOpts)
-               .then((res) => res.json())
-               .then((data) => console.log(data))
-               .catch((err) => {
-                  console.log('ERROR Making Cron Email Notification Request..');
-                  console.log(err);
-               });
+                  .then((res) => res.json())
+                  .then((data) => console.log(data))
+                  .catch((err) => {
+                     console.log('ERROR Making Cron Email Notification Request..');
+                     console.log(err);
+                  });
             }, { scheduled: true });
          }
       }
@@ -155,13 +157,13 @@ const runAppCronJobs = () => {
             const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
             try {
                fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
-               .then((res) => res.json())
-               .then((data) => console.log(data))
-               .catch((err) => {
-                  console.log('ERROR Making Daily Scraper Cron Request..');
-                  console.log(err);
-               });
-            } catch (error){
+                  .then((res) => res.json())
+                  .then((data) => console.log(data))
+                  .catch((err) => {
+                     console.log('ERROR Making Daily Scraper Cron Request..');
+                     console.log(err);
+                  });
+            } catch (error) {
                //  console.log(error);
             };
          }, { scheduled: true });
@@ -178,14 +180,14 @@ const runShortIOCronJobs = () => {
       const fetchOpts = { method: 'GET', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
       try {
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/shortio`, fetchOpts)
-         .then((res) => res.json())
-         .then((data) => console.log(data))
-         .catch((err) => {
-            console.log('ERROR Making Daily SHORT IO Cron Request..');
-            console.log(err);
-         });
-      } catch (error){
-          console.log(error);
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch((err) => {
+               console.log('ERROR Making Daily SHORT IO Cron Request..');
+               console.log(err);
+            });
+      } catch (error) {
+         console.log(error);
       };
    }, { scheduled: true });
 }
@@ -193,3 +195,55 @@ const runShortIOCronJobs = () => {
 runAppCronJobs();
 
 runShortIOCronJobs();
+
+const scrapeCronTime = generateCronTime('minute');
+let x = 2;
+const test = (str, cronTime) => {
+   refreshCron = cron.schedule(cronTime, () => {
+      console.log(str);
+      // scrapeCronTime = generateCronTime('2-minute');
+      // console.log(x);
+   })
+}
+
+// test('Run from origin', scrapeCronTime);
+// refreshCron.stop();
+
+const tryTest = () => {
+   console.log('Calling try test: ', scrapeCronTime, x);
+   // scrapeCronTime = generateCronTime('2-minute');
+   // refreshCron.stop();
+   const cron = generateCronTime('2-minute');
+   test('Run from api', cron);
+}
+
+const callCron = () => {
+   const fetchOpts = { method: 'GET' };
+      try {
+         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/test`, fetchOpts)
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch((err) => {
+               console.log('ERROR Making Daily SHORT IO Cron Request..');
+               console.log(err);
+            });
+      } catch (error) {
+         console.log(error);
+      };
+}
+
+const tryTest1 = () => {
+   console.log('Calling try test: ', scrapeCronTime, x);
+   // scrapeCronTime = generateCronTime('2-minute');
+   // refreshCron.stop();
+   const cron = generateCronTime('minute');
+   test('Run from calling', cron);
+}
+
+setTimeout(() => callCron(), 1000); 
+
+module.exports = {
+   tryTest: () => tryTest(),
+   tryTest1: () => tryTest1(),
+   getX: () => x
+};
