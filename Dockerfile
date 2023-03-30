@@ -36,4 +36,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["concurrently","node server.js", "node cron.js"]
+CMD ["concurrently","node server.js"]
