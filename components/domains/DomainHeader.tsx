@@ -105,7 +105,10 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
          </div>
          <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
             <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
-               <span>Stats</span>
+               <span>
+                  <span>Stats</span>
+                  <a href={'http://www.' + domain.domain} target='_blank'>Link</a>
+               </span>
                <div className='flex items-center'>
                   <Icon type="date" />
                   <div className="keywordDetails__section__chart_select ml-3">
