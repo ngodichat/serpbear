@@ -83,20 +83,53 @@ const generateCronTime = (interval) => {
    return cronTime;
 };
 
+const generateCronTimeByHours = (hours) => {
+   if (hours <= 0) {
+      throw new Error('Invalid input. Hours must be a positive number.');
+   }
+
+   let expression;
+
+   if (hours <= 24) {
+      // For input values up to 24, construct the cron expression as before
+      const minutes = 0;
+      expression = `0 ${minutes} */${hours} * * *`;
+   } else {
+      // For larger input values, break the expression into two parts
+      const remainder = hours % 24;
+      const days = Math.floor(hours / 24);
+
+      // Construct the first part of the expression to run once per day
+      const minutes = 0;
+      const hoursOfDay = '*';
+      const daysOfMonth = `*/${days}`;
+      const month = '*';
+      const dayOfWeek = '?';
+      const part1 = `0 ${minutes} ${hoursOfDay} ${daysOfMonth} ${month} ${dayOfWeek}`;
+
+      // Construct the second part of the expression to run every {remainder} hours
+      const minutes2 = 0;
+      const hours2 = `*/${remainder}`;
+      const part2 = `${minutes2} ${hours2} * * * *`;
+
+      // Combine the two parts into a single expression
+      expression = `${part1}\n${part2}`;
+   }
+
+   return expression;
+}
+
 const runAppCronJobs = () => {
    // RUN SERP Scraping CRON (EveryDay at Midnight) 0 0 0 * *
    const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runAppCronJobs: ', scrapeCronTime);
 
-
-   // fetch('https://google.com.vn').then((res) => console.log(res));
-
    // Run Failed scraping CRON (Every Hour)
    const failedCronTime = generateCronTime('hourly');
-   cron.schedule(failedCronTime, () => {
+   cron.schedule(failedCronTime, async () => {
       // console.log('### Retrying Failed Scrapes...');
-
+      await promises.appendFile(`${process.cwd()}/logs/keyword_cron.txt`, `${JSON.stringify(new Date())} - Retrying Failed Scrapes...\n`, { encoding: 'utf-8' });
       readFile(`${process.cwd()}/data/failed_queue.json`, { encoding: 'utf-8' }, (err, data) => {
          if (data) {
             const keywordsToRetry = data ? JSON.parse(data) : [];
@@ -119,8 +152,9 @@ const runAppCronJobs = () => {
    // Run Google Search Console Scraper Daily
    if (process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL) {
       const searchConsoleCRONTime = generateCronTime('daily');
-      cron.schedule(searchConsoleCRONTime, () => {
+      cron.schedule(searchConsoleCRONTime, async () => {
          const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
+         await promises.appendFile(`${process.cwd()}/logs/searchconsole.txt`, `${JSON.stringify(new Date())} - Running Google Search Console Scraper\n`, { encoding: 'utf-8' });
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/searchconsole`, fetchOpts)
             .then((res) => res.json())
             .then((data) => console.log(data))
@@ -151,22 +185,9 @@ const runAppCronJobs = () => {
          }
       }
       const scraping_frequency = (!settings.scraping_frequency || settings.scraping_frequency === 'never') ? 24 : settings.scraping_frequency;
+      console.log('scraping_frequency in setting file: ', scraping_frequency);
       if (scraping_frequency) {
-         cron.schedule(scrapeCronTime, () => {
-            console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
-            const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
-            try {
-               fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
-                  .then((res) => res.json())
-                  .then((data) => console.log(data))
-                  .catch((err) => {
-                     console.log('ERROR Making Daily Scraper Cron Request..');
-                     console.log(err);
-                  });
-            } catch (error) {
-               //  console.log(error);
-            };
-         }, { scheduled: true });
+         updateScrapeFrequency(scraping_frequency);
       }
    });
 };
@@ -175,8 +196,9 @@ const runShortIOCronJobs = () => {
    const scrapeCronTime = generateCronTime('daily');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runShortIOCronJobs: ', scrapeCronTime);
-   cron.schedule(scrapeCronTime, () => {
+   cron.schedule(scrapeCronTime, async () => {
       console.log('### Running Cron Job to Update ShortIO content!');
+      await promises.appendFile(`${process.cwd()}/logs/shortio_cron.txt`, `${JSON.stringify(new Date())} - Running Cron Job to Update ShortIO content\n`, { encoding: 'utf-8' });
       const fetchOpts = { method: 'GET', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
       try {
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/shortio`, fetchOpts)
@@ -196,39 +218,40 @@ runAppCronJobs();
 
 runShortIOCronJobs();
 
-const scrapeCronTime = generateCronTime('minute');
-let x = 2;
-const test = (str, cronTime) => {
-   refreshCron = cron.schedule(cronTime, () => {
-      console.log(str);
-      // scrapeCronTime = generateCronTime('2-minute');
-      // console.log(x);
-   }, { name: 'scrape' })
-}
-
-// test('Run from origin', scrapeCronTime);
-// refreshCron.stop();
-
-const tryTest = () => {
-   console.log('Calling try test: ');
-   // const scrape = cron.getTasks().get('scrape');
-   // scrape.start();
-   test('Run from origin', scrapeCronTime);
-   // scrapeCronTime = generateCronTime('2-minute');
-   // refreshCron.stop();
-   // const cron = generateCronTime('2-minute');
-   // test('Run from api', cron);
-}
-
-const stop = () => {
+const updateScrapeFrequency = (scraping_frequency) => {
+   console.log('Running updateScrapeFrequency');
    const scrape = cron.getTasks().get('scrape');
-   scrape.stop();
-   const cronTime = generateCronTime('2-minute');
-   test('New run', cronTime);
+   if (scrape) {
+      console.log('Stopping old scheduler');
+      scrape.stop();
+   }
+   if (scraping_frequency > 0) {
+      // const cronTime = generateCronTimeByHours(scraping_frequency);
+      const cronTime = generateCronTime('minute');
+      cron.schedule(cronTime, async () => {
+         console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
+         const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
+         try {
+            await promises.appendFile(`${process.cwd()}/logs/keyword_cron.txt`, `${JSON.stringify(new Date())} - Running Keyword Position\n`, { encoding: 'utf-8' });
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
+               .then((res) => res.json())
+               .then((data) => console.log(data))
+               .catch((err) => {
+                  console.log('ERROR Making Daily Scraper Cron Request..');
+                  console.log(err);
+               });
+         } catch (error) {
+             console.log(error);
+         };
+      }, { scheduled: true, name: 'scrape' });
+   }
+}
+
+const startCron = () => {
+   console.log('Cron started');
 }
 
 module.exports = {
-   tryTest: () => tryTest(),
-   stop,
-   getX: () => x
+   updateScrapeFrequency,
+   startCron
 };

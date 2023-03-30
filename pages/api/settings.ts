@@ -3,12 +3,14 @@ import Cryptr from 'cryptr';
 import { writeFile, readFile } from 'fs/promises';
 import verifyUser from '../../utils/verifyUser';
 import allScrapers from '../../scrapers/index';
-import { tryTest } from '../../cron';
+import { startCron, updateScrapeFrequency } from '../../cron';
 
 type SettingsGetResponse = {
    settings?: object | null,
    error?: string,
 }
+
+let currentScrapingFrequency: number | null = null;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
    const authorized = verifyUser(req, res);
@@ -16,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: authorized });
    }
    if (req.method === 'GET') {
-      tryTest();
+      startCron();
       return getSettings(req, res);
    }
    if (req.method === 'PUT') {
@@ -28,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getSettings = async (req: NextApiRequest, res: NextApiResponse<SettingsGetResponse>) => {
    const settings = await getAppSettings();
    if (settings) {
+      currentScrapingFrequency = settings.scraping_frequency;
       return res.status(200).json({ settings });
    }
    return res.status(400).json({ error: 'Error Loading Settings!' });
@@ -44,7 +47,11 @@ const updateSettings = async (req: NextApiRequest, res: NextApiResponse<Settings
       const scaping_api = settings.scaping_api ? cryptr.encrypt(settings.scaping_api) : '';
       const smtp_password = settings.smtp_password ? cryptr.encrypt(settings.smtp_password) : '';
       const securedSettings = { ...settings, scaping_api, smtp_password };
-
+      console.log('Settings: ', securedSettings);
+      if (currentScrapingFrequency !== securedSettings.scraping_frequency) {
+         currentScrapingFrequency = securedSettings.scraping_frequency;
+         updateScrapeFrequency(currentScrapingFrequency);
+      }
       await writeFile(`${process.cwd()}/data/settings.json`, JSON.stringify(securedSettings), { encoding: 'utf-8' });
       return res.status(200).json({ settings });
    } catch (error) {
