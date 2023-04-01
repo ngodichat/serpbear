@@ -154,7 +154,7 @@ const runAppCronJobs = () => {
       const searchConsoleCRONTime = generateCronTime('daily');
       cron.schedule(searchConsoleCRONTime, async () => {
          const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
-         await promises.appendFile(`${process.cwd()}/logs/searchconsole.txt`, `${JSON.stringify(new Date())} - Running Google Search Console Scraper\n`, { encoding: 'utf-8' });
+         await promises.appendFile(`${process.cwd()}/data/searchconsole.txt`, `${JSON.stringify(new Date())} - Running Google Search Console Scraper\n`, { encoding: 'utf-8' });
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/searchconsole`, fetchOpts)
             .then((res) => res.json())
             .then((data) => console.log(data))
@@ -198,7 +198,7 @@ const runShortIOCronJobs = () => {
    console.log('runShortIOCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, async () => {
       console.log('### Running Cron Job to Update ShortIO content!');
-      await promises.appendFile(`${process.cwd()}/logs/shortio_cron.txt`, `${JSON.stringify(new Date())} - Running Cron Job to Update ShortIO content\n`, { encoding: 'utf-8' });
+      await promises.appendFile(`${process.cwd()}/data/shortio_cron.txt`, `${JSON.stringify(new Date())} - Running Cron Job to Update ShortIO content\n`, { encoding: 'utf-8' });
       const fetchOpts = { method: 'GET', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
       try {
          fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/shortio`, fetchOpts)
@@ -232,7 +232,7 @@ const updateScrapeFrequency = (scraping_frequency) => {
          console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
          const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
          try {
-            await promises.appendFile(`${process.cwd()}/logs/keyword_cron.txt`, `${JSON.stringify(new Date())} - Running Keyword Position\n`, { encoding: 'utf-8' });
+            await promises.appendFile(`${process.cwd()}/data/keyword_cron.txt`, `${JSON.stringify(new Date())} - Running Keyword Position\n`, { encoding: 'utf-8' });
             fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron`, fetchOpts)
                .then((res) => res.json())
                .then((data) => console.log(data))
