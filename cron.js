@@ -67,7 +67,7 @@ const generateCronTime = (interval) => {
       cronTime = '0 0 0 * * *';
    }
    else if (interval === 'daily_morning') {
-      cronTime = '0 0 3 * * *';
+      cronTime = '0 0 1 * * *';
    }
    else if (interval === 'weekly') {
       cronTime = '0 0 0 */7 * *';
@@ -193,7 +193,7 @@ const runAppCronJobs = () => {
 };
 
 const runShortIOCronJobs = () => {
-   const scrapeCronTime = generateCronTime('daily');
+   const scrapeCronTime = generateCronTime('daily_morning');
    // const scrapeCronTime = generateCronTime('minute');
    console.log('runShortIOCronJobs: ', scrapeCronTime);
    cron.schedule(scrapeCronTime, async () => {
