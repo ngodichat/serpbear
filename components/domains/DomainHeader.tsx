@@ -107,7 +107,7 @@ const DomainHeader = ({ domain, showAddModal, showSettingsModal, exportCsv, doma
             <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
                <span>
                   <span>Stats</span>
-                  <a href={'http://www.' + domain.domain} target='_blank'>Link</a>
+                  {/* <a href={'http://www.' + domain.domain} target='_blank'>Link</a> */}
                </span>
                <div className='flex items-center'>
                   <Icon type="date" />
