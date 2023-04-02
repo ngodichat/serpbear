@@ -226,8 +226,8 @@ const updateScrapeFrequency = (scraping_frequency) => {
       scrape.stop();
    }
    if (scraping_frequency > 0) {
-      // const cronTime = generateCronTimeByHours(scraping_frequency);
-      const cronTime = generateCronTime('minute');
+      const cronTime = generateCronTimeByHours(scraping_frequency);
+      // const cronTime = generateCronTime('minute');
       cron.schedule(cronTime, async () => {
          console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
          const fetchOpts = { method: 'POST', headers: { Authorization: `Bearer ${process.env.APIKEY}` } };
