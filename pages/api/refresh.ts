@@ -90,10 +90,10 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
    const updatedKeywords: KeywordType[] = [];
 
    for (const keywordRaw of initKeywords) {
-      console.log('Raw keyword: ', keywordRaw);
       const keywordPrased = parseKeywords([keywordRaw.get({ plain: true })]);
       const keyword = keywordPrased[0];
       const udpatedkeyword = refreshed.find((item: any) => item.ID && item.ID === keyword.ID);
+      console.log('udpatedkeyword keyword: ', udpatedkeyword, keyword);
 
       if (udpatedkeyword && keyword) {
          const newPos = udpatedkeyword.position;
@@ -117,8 +117,10 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
 
          // If failed, Add to Retry Queue Cron
          if (udpatedkeyword.error) {
+            console.log('Retry scrape');
             await retryScrape(keyword.ID);
          } else {
+            console.log('removeFromRetryQueue');
             await removeFromRetryQueue(keyword.ID);
          }
 
