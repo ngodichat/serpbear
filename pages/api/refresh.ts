@@ -121,7 +121,11 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
             await retryScrape(keyword.ID);
          } else {
             console.log('removeFromRetryQueue');
-            await removeFromRetryQueue(keyword.ID);
+            try {
+               await removeFromRetryQueue(keyword.ID);
+            } catch (error) {
+               console.log('[ERROR] removeFromRetryQueue', error);
+            }
          }
 
          // Update the Keyword Position in Database
