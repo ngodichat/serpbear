@@ -122,6 +122,7 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
 
          // Update the Keyword Position in Database
          try {
+            console.log('Updating keyword: ', keyword.keyword);
             await keywordRaw.update({
                ...updatedVal,
                lastResult: Array.isArray(udpatedkeyword.result) ? JSON.stringify(udpatedkeyword.result) : udpatedkeyword.result,
