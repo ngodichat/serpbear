@@ -79,16 +79,18 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
       for await (const k of initKeywords) {
          console.log('kID: ', k.ID);
          k.updating = false;
-         k.sticky = true;
+         // k.sticky = true;
          // console.log('Updating keyword: ', k);
          await k.save();
       }
    }, 180000);
    const refreshed: any = await refreshKeywords(formattedKeywords, settings);
+   console.log('Refreshed keywords: ', refreshed);
    // const fetchKeywords = await refreshKeywords(initialKeywords.map( k=> k.keyword ));
    const updatedKeywords: KeywordType[] = [];
 
    for (const keywordRaw of initKeywords) {
+      console.log('Raw keyword: ', keywordRaw);
       const keywordPrased = parseKeywords([keywordRaw.get({ plain: true })]);
       const keyword = keywordPrased[0];
       const udpatedkeyword = refreshed.find((item: any) => item.ID && item.ID === keyword.ID);
