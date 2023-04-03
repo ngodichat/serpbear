@@ -144,7 +144,7 @@ const getLinksStatsByDomain = async (date_: any, domainId: any, links: any[]) =>
     let retry = true;
     do {
         const fetchOpts = { method: 'GET', headers: { Authorization: `${process.env.SHORT_API}` } };
-        const endDate = date_ ? new Date(date_) : new Date();
+        const endDate = date_ ? new Date(date_) : new Date(new Date().toISOString().slice(0, 10));
         const startDate = new Date(endDate);
         startDate.setDate(startDate.getDate() - 1);
         console.log('StartDate: ', date_);
