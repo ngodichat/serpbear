@@ -157,7 +157,7 @@ export const extractScrapedResult = (content: string, device: string): SearchRes
    const hasNumberofResult = $('body').find('#search  > div > div');
    const searchResult = hasNumberofResult.children();
    let lastPosition = 0;
-   console.log('searchResult: ', searchResult.length);
+   // console.log('searchResult: ', searchResult.length);
    for (let i = 0; i < searchResult.length; i += 1) {
       if (searchResult[i]) {
          const title = $(searchResult[i]).find('h3').html();

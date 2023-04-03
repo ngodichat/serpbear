@@ -29,7 +29,7 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
     join link l on l.ID = ls.link_id
     where l.tags like '%${domain}%'
     group by date`);
-    console.log('result: ', result);
+    // console.log('result: ', result);
     const resultObj: any = {};
     result.forEach((r: any) => {
         resultObj[r.date] = r.totalClicks;
