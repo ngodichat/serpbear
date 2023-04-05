@@ -38,7 +38,7 @@ class Keyword extends Model {
    @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
    position!: number;
 
-   @Column({ type: DataType.STRING, allowNull: true, defaultValue: JSON.stringify([]) })
+   @Column({ type: DataType.TEXT, allowNull: true})
    history!: string;
 
    @Column({ type: DataType.STRING, allowNull: true, defaultValue: JSON.stringify([]) })
