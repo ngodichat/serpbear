@@ -83,6 +83,42 @@ const generateCronTime = (interval) => {
    return cronTime;
 };
 
+// const generateCronTimeByHours = (hours) => {
+//    if (hours <= 0) {
+//       throw new Error('Invalid input. Hours must be a positive number.');
+//    }
+
+//    let expression;
+
+//    if (hours <= 24) {
+//       // For input values up to 24, construct the cron expression as before
+//       const minutes = 0;
+//       expression = `0 ${minutes} */${hours} * * *`;
+//    } else {
+//       // For larger input values, break the expression into two parts
+//       const remainder = hours % 24;
+//       const days = Math.floor(hours / 24);
+
+//       // Construct the first part of the expression to run once per day
+//       const minutes = 0;
+//       const hoursOfDay = '*';
+//       const daysOfMonth = `*/${days}`;
+//       const month = '*';
+//       const dayOfWeek = '?';
+//       const part1 = `0 ${minutes} ${hoursOfDay} ${daysOfMonth} ${month} ${dayOfWeek}`;
+
+//       // Construct the second part of the expression to run every {remainder} hours
+//       const minutes2 = 0;
+//       const hours2 = `*/${remainder}`;
+//       const part2 = `${minutes2} ${hours2} * * * *`;
+
+//       // Combine the two parts into a single expression
+//       expression = `${part1}\n${part2}`;
+//    }
+
+//    return expression;
+// }
+
 const generateCronTimeByHours = (hours) => {
    if (hours <= 0) {
       throw new Error('Invalid input. Hours must be a positive number.');
@@ -100,20 +136,7 @@ const generateCronTimeByHours = (hours) => {
       const days = Math.floor(hours / 24);
 
       // Construct the first part of the expression to run once per day
-      const minutes = 0;
-      const hoursOfDay = '*';
-      const daysOfMonth = `*/${days}`;
-      const month = '*';
-      const dayOfWeek = '?';
-      const part1 = `0 ${minutes} ${hoursOfDay} ${daysOfMonth} ${month} ${dayOfWeek}`;
-
-      // Construct the second part of the expression to run every {remainder} hours
-      const minutes2 = 0;
-      const hours2 = `*/${remainder}`;
-      const part2 = `${minutes2} ${hours2} * * * *`;
-
-      // Combine the two parts into a single expression
-      expression = `${part1}\n${part2}`;
+      expression = `0 0 0/${remainder} 1/${days} * *`
    }
 
    return expression;
