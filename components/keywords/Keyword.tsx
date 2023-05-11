@@ -18,6 +18,8 @@ type KeywordProps = {
    lastItem?:boolean,
    showSCData: boolean,
    scDataType: string,
+   showHistory?: boolean,
+   showPosition?: boolean,
 }
 
 const Keyword = (props: KeywordProps) => {
@@ -33,6 +35,8 @@ const Keyword = (props: KeywordProps) => {
       lastItem,
       showSCData = true,
       scDataType = 'threeDays',
+      showHistory = true,
+      showPosition = true
    } = props;
    const {
       keyword, domain, ID, position, url = '', lastUpdated, country, sticky, history = {}, updating = false, lastUpdateError = false, volume, low_top_of_page_bid, high_top_of_page_bid,
@@ -100,25 +104,32 @@ const Keyword = (props: KeywordProps) => {
                </button>
             }
          </div>
-         <div
-         className={`keyword_position absolute bg-[#f8f9ff] w-fit min-w-[50px] h-12 p-2 text-base mt-[-20px] rounded right-5 lg:relative
-          lg:bg-transparent lg:w-auto lg:h-auto lg:mt-0 lg:p-0 lg:text-sm lg:flex-1 lg:basis-40 lg:grow-0 lg:right-0 text-center font-semibold`}>
-            {renderPosition(position)}
-            {!updating && positionChange > 0 && <i className=' not-italic ml-1 text-xs text-[#5ed7c3]'>▲ {positionChange}</i>}
-            {!updating && positionChange < 0 && <i className=' not-italic ml-1 text-xs text-red-300'>▼ {positionChange}</i>}
-         </div>
-         {chartData.labels.length > 0 && (
+         {showPosition && (
+            <div
+            className={`keyword_position absolute bg-[#f8f9ff] w-fit min-w-[50px] h-12 p-2 text-base mt-[-20px] rounded right-5 lg:relative
+            lg:bg-transparent lg:w-auto lg:h-auto lg:mt-0 lg:p-0 lg:text-sm lg:flex-1 lg:basis-40 lg:grow-0 lg:right-0 text-center font-semibold`}>
+               {renderPosition(position)}
+               {!updating && positionChange > 0 && <i className=' not-italic ml-1 text-xs text-[#5ed7c3]'>▲ {positionChange}</i>}
+               {!updating && positionChange < 0 && <i className=' not-italic ml-1 text-xs text-red-300'>▼ {positionChange}</i>}
+            </div>
+         )}
+         {showHistory && chartData.labels.length > 0 && (
             <div className='lg:flex-1 hidden lg:block basis-32 grow-0'>
                <ChartSlim labels={chartData.labels} sreies={chartData.sreies} />
             </div>
          )}
-         <div className='hidden lg:block basis-12 grow-0 text-center'>{history[Object.keys(history)[0]]}</div>
+         {showHistory && (
+            <div className='hidden lg:block basis-12 grow-0 text-center'>{history[Object.keys(history)[0]]}</div>
+         )}
          <div className='hidden lg:block basis-16 grow-0 text-center'>{volume?.toLocaleString('en-US', { style: 'decimal' })}</div>
          <div className='hidden lg:block basis-40 grow-0 text-center'>${low_top_of_page_bid} - ${high_top_of_page_bid}</div>
-         <div
-         className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
-         overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-none lg:pr-5`}>
-            <span className='mr-3 lg:hidden'><Icon type="link-alt" size={14} color="#999" /></span>{turncatedURL || '-'}</div>
+         
+         {showHistory && (
+            <div
+            className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
+            overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-none lg:pr-5`}>
+               <span className='mr-3 lg:hidden'><Icon type="link-alt" size={14} color="#999" /></span>{turncatedURL || '-'}</div>
+         )}
          <div
          className='inline-block mt-[4] top-[-5px] relative lg:flex-1 lg:m-0'>
             <span className='mr-2 lg:hidden'><Icon type="clock" size={14} color="#999" /></span>

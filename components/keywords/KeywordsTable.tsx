@@ -20,10 +20,12 @@ type KeywordsTableProps = {
    showAddModal: boolean,
    setShowAddModal: Function,
    isConsoleIntegrated: boolean,
+   showPosition?: boolean,
+   showHistory?: boolean,
 }
 
 const KeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [] } = props;
+   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -146,12 +148,18 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                         )}
                         Keyword
                      </span>
-                     <span className='domKeywords_head_position flex-1 basis-40 grow-0 text-center'>Position</span>
-                     <span className='domKeywords_head_history flex-1 basis-32 grow-0'>History (7d)</span>
-                     <span className='domKeywords_head_start flex-1 basis-12 grow-0 text-center'>Start</span>
+                     {showPosition && (
+                        <span className='domKeywords_head_position flex-1 basis-40 grow-0 text-center'>Position</span>
+                     )}
+                     {showHistory && (
+                        <span className='domKeywords_head_history flex-1 basis-32 grow-0'>History (7d)</span>
+                     )}
+                     {showHistory && (
+                        <span className='domKeywords_head_start flex-1 basis-12 grow-0 text-center'>Start</span>
+                     )}
                      <span className='domKeywords_head_volume flex-1 basis-16 grow-0 text-center'>Volume</span>
                      <span className='domKeywords_head_ppc flex-1 basis-40 grow-0 text-center'>PPC Low - High</span>
-                     <span className='domKeywords_head_url flex-1'>URL</span>
+                     {showHistory && (<span className='domKeywords_head_url flex-1'>URL</span>)}
                      <span className='domKeywords_head_updated flex-1'>Updated</span>
                      {showSCData && (
                         <div className='domKeywords_head_sc flex-1 min-w-[170px] mr-7 text-center'>
@@ -202,6 +210,8 @@ const KeywordsTable = (props: KeywordsTableProps) => {
                            lastItem={index === (processedKeywords[device].length - 1)}
                            showSCData={showSCData}
                            scDataType={scDataType}
+                           showHistory={showHistory}
+                           showPosition={showPosition}
                         />)}
                      {!isLoading && processedKeywords[device].length === 0 && (
                         <p className=' p-9 pt-[10%] text-center text-gray-500'>No Keywords Added for this Device Type.</p>

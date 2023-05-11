@@ -8,6 +8,13 @@ export const fetchKeywords = async (router: NextRouter) => {
    return res.json();
 };
 
+export const fetchCustomKeywords = async (router: NextRouter) => {
+   let page = router.query.page;
+   if (!router.query.page) {page = '1'};
+   const res = await fetch(`${window.location.origin}/api/custom_keywords?page=${page}`, { method: 'GET' });
+   return res.json();
+};
+
 export const fetchKeywordsStats = async (router: NextRouter) => {
    const res = await fetch(`${window.location.origin}/api/keywords?withstats=true`, { method: 'GET' });
    return res.json();
@@ -22,6 +29,32 @@ export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?:Fu
    const { data: keywordsData, isLoading: keywordsLoading, isError } = useQuery(
       ['keywords', router.query.slug],
       () => fetchKeywords(router),
+      {
+         refetchInterval: keywordSPollInterval,
+         onSuccess: (data) => {
+            // If Keywords are Manually Refreshed check if the any of the keywords position are still being fetched
+            // If yes, then refecth the keywords every 5 seconds until all the keywords position is updated by the server
+            if (data.keywords && data.keywords.length > 0 && setKeywordSPollInterval) {
+               const hasRefreshingKeyword = data.keywords.some((x:KeywordType) => x.updating);
+               if (hasRefreshingKeyword) {
+                  setKeywordSPollInterval(5000);
+               } else {
+                  if (keywordSPollInterval) {
+                     toast('Keywords Refreshed!', { icon: '✔️' });
+                  }
+                  setKeywordSPollInterval(undefined);
+               }
+            }
+         },
+      },
+   );
+   return { keywordsData, keywordsLoading, isError };
+}
+
+export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterval?:Function, keywordSPollInterval:undefined|number = undefined) {
+   const { data: keywordsData, isLoading: keywordsLoading, isError } = useQuery(
+      ['custom_keywords', router.query.page],
+      () => fetchCustomKeywords(router),
       {
          refetchInterval: keywordSPollInterval,
          onSuccess: (data) => {
