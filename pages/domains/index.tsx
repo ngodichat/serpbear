@@ -70,7 +70,7 @@ const SingleDomain: NextPage = () => {
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
          <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-24 lg:p-0">
-            <div className='stat-chart hidden lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
+            <div className='stat-chart lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
                <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
                   <span>Stats</span>
                   <div className='flex items-center'>
