@@ -1,9 +1,6 @@
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
 import Icon from '../common/Icon';
 
 type KeywordsHeaderProps = {
@@ -13,43 +10,43 @@ type KeywordsHeaderProps = {
    setScFilter?: Function
 }
 
-const KeywordsHeader = ({ showAddModal, exportCsv, scFilter = 'thirtyDays', setScFilter }: KeywordsHeaderProps) => {
+const KeywordsHeader = ({ showAddModal, exportCsv }: KeywordsHeaderProps) => {
    const router = useRouter();
-   const [showOptions, setShowOptions] = useState<boolean>(false);
+   const [showOptions] = useState<boolean>(false);
 
    const buttonStyle = 'leading-6 inline-block px-2 py-2 text-gray-500 hover:text-gray-700';
    const buttonLabelStyle = 'ml-2 text-sm not-italic lg:invisible lg:opacity-0';
    const tabStyle = 'rounded rounded-b-none cursor-pointer border-[#e9ebff] border-b-0';
 
-   const handleFileChange = (event: any) => {
-      handleSubmit(event.target.files[0]);
-   };
+   // const handleFileChange = (event: any) => {
+   //    handleSubmit(event.target.files[0]);
+   // };
 
-   const handleSubmit = async (file: any) => {
-      const formData = new FormData();
-      formData.append('csv', file);
+   // const handleSubmit = async (file: any) => {
+   //    const formData = new FormData();
+   //    formData.append('csv', file);
 
-      try {
-         const response = await axios.post('/api/backlinks', formData, {
-            headers: {
-               'Content-Type': 'multipart/form-data',
-            },
-         });
-         toast('Import Backlinks Successfully!', { icon: '✔️' });
-         console.log(response.data);
-      } catch (error) {
-         console.error(error);
-         toast('Failed to import Backlinks!', { icon: '⚠️' });
-      }
-   };
+   //    try {
+   //       const response = await axios.post('/api/backlinks', formData, {
+   //          headers: {
+   //             'Content-Type': 'multipart/form-data',
+   //          },
+   //       });
+   //       toast('Import Backlinks Successfully!', { icon: '✔️' });
+   //       console.log(response.data);
+   //    } catch (error) {
+   //       console.error(error);
+   //       toast('Failed to import Backlinks!', { icon: '⚠️' });
+   //    }
+   // };
 
    return (
       <div className='domain_kewywords_head w-full '>
          <div className='flex w-full justify-between'>
             <ul className=' flex items-end text-sm relative top-[2px]'>
                <li className={`${tabStyle} ${router.pathname === '/keywords' ? 'bg-white border border-b-0 font-semibold' : ''}`}>
-                  <Link href={`/keywords`} passHref={true}>
-                     <a className='px-4 py-2 inline-block'><Icon type="tracking" color='#999' classes='hidden lg:inline-block' />
+                  <Link href={'/keywords'} passHref={true}>
+                     <a className='px-4 py-2 inline-block'><Icon type='tracking' color='#999' classes='hidden lg:inline-block' />
                         <span className='text-xs lg:text-sm lg:ml-2'>Tracking</span>
                      </a>
                   </Link>

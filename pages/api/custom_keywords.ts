@@ -1,32 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Op, Sequelize } from 'sequelize';
 import db from '../../database/database';
 import Keyword from '../../database/models/keyword';
-import { refreshAndUpdateKeywords } from './refresh';
-import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
-import parseKeywords from '../../utils/parseKeywords';
-import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConsole';
-import Domain from '../../database/models/domain';
 
 type KeywordsGetResponse = {
     keywords?: Keyword[],
-    count?: number, 
-    error?: string | null,
-}
-
-type KeywordsDeleteRes = {
-    domainRemoved?: number,
-    keywordsRemoved?: number,
+    count?: number,
     error?: string | null,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     await db.sync();
-    //    const authorized = verifyUser(req, res);
-    //    if (authorized !== 'authorized') {
-    //       return res.status(401).json({ error: authorized });
-    //    }
+    const authorized = verifyUser(req, res);
+    if (authorized !== 'authorized') {
+        return res.status(401).json({ error: authorized });
+    }
 
     if (req.method === 'GET') {
         return getKeywords(req, res);
@@ -37,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     const pageSize = 100;
     const currentPage = parseInt((req.query.page as string), 10);
-    const url = req.query.url;
+    const { url } = req.query;
     try {
         // const processedKeywords = await Keyword.findAll({
         //     attributes: [
@@ -64,7 +52,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             ) b
                 ON a.keyword = b.keyword AND
                     a.id = b.id
-        where lastResult like '%${url ?? ""}%'`;
+        where lastResult like '%${url ?? ''}%'`;
         const [result] = await db.query(`${baseQuery} limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
         const processedKeywords: any = [];
         result.forEach((r: any) => {

@@ -20,7 +20,7 @@ const Paginator = ({ currentPage, totalPages, onPageChange }: PaginatorProps) =>
       )}
 
       {/* Show page numbers */}
-      {pagesArray.map(pageNum => (
+      {pagesArray.map((pageNum) => (
         <button
           key={pageNum}
           className={`hidden md:flex w-10 h-10 mx-1 justify-center items-center rounded-full border border-gray-200 hover:border-gray-300 ${

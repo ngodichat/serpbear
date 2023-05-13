@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { CSSTransition } from 'react-transition-group';
-import { useQueryClient } from 'react-query';
 import TopBar from '../../components/common/TopBar';
 import AddDomain from '../../components/domains/AddDomain';
 import Settings from '../../components/settings/Settings';
@@ -14,7 +13,6 @@ import Paginator from '../../components/keywords/Paginator';
 
 const KeywordsPage: NextPage = () => {
    const router = useRouter();
-   const queryClient = useQueryClient();
    const [noScrapprtError, setNoScrapprtError] = useState(false);
    const [showSettings, setShowSettings] = useState(false);
    const [showAddKeywords, setShowAddKeywords] = useState(false);

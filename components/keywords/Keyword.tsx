@@ -36,7 +36,7 @@ const Keyword = (props: KeywordProps) => {
       showSCData = true,
       scDataType = 'threeDays',
       showHistory = true,
-      showPosition = true
+      showPosition = true,
    } = props;
    const {
       keyword, domain, ID, position, url = '', lastUpdated, country, sticky, history = {}, updating = false, lastUpdateError = false, volume, low_top_of_page_bid, high_top_of_page_bid,
@@ -123,7 +123,6 @@ const Keyword = (props: KeywordProps) => {
          )}
          <div className='hidden lg:block basis-16 grow-0 text-center'>{volume?.toLocaleString('en-US', { style: 'decimal' })}</div>
          <div className='hidden lg:block basis-40 grow-0 text-center'>${low_top_of_page_bid} - ${high_top_of_page_bid}</div>
-         
          {showHistory && (
             <div
             className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
