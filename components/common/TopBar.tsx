@@ -55,6 +55,20 @@ const TopBar = ({ showSettings, showAddModal, showAddDomainModal }:TopbarProps) 
             className={`text-sm font-semibold text-gray-500 absolute mt-[-10px] right-3 bg-white z-10
             border border-gray-200 lg:mt-2 lg:relative lg:block lg:border-0 lg:bg-transparent ${showMobileMenu ? 'block' : 'hidden'}`}>
                <li className='block lg:inline-block lg:ml-5'>
+                  <Link href={'https://short.clickhub.io/image-generator'} passHref={true}>
+                     <a className='block px-3 py-2 cursor-pointer'>
+                        Hero
+                     </a>
+                  </Link>
+               </li>
+               <li className='block lg:inline-block lg:ml-5'>
+                  <Link href={'https://short.clickhub.io'} passHref={true}>
+                     <a className='block px-3 py-2 cursor-pointer'>
+                        Short
+                     </a>
+                  </Link>
+               </li>
+               <li className='block lg:inline-block lg:ml-5'>
                   <button data-testid="add_domain" onClick={() => showAddDomainModal(true)} className='p-4 hover:text-blue-600'>+ Add Domain</button>
                </li>
                <li className='block lg:inline-block lg:ml-5'>
