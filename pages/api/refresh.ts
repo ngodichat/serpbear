@@ -6,7 +6,7 @@ import refreshKeywords from '../../utils/refresh';
 import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
 import parseKeywords from '../../utils/parseKeywords';
-import { removeFromRetryQueue, retryScrape } from '../../utils/scraper';
+import { getSerp, removeFromRetryQueue, retryScrape } from '../../utils/scraper';
 
 type KeywordsRefreshRes = {
    keywords?: KeywordType[]
@@ -111,8 +111,11 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
       // console.log('udpatedkeyword keyword found: ', udpatedkeyword);
 
       if (udpatedkeyword && keyword) {
-         const newPos = udpatedkeyword.position;
-         const newPosition = newPos !== false ? newPos : keyword.position;
+         // const newPos = udpatedkeyword.position;
+         // const newPosition = newPos !== false ? newPos : keyword.position;
+         const newPos = getSerp(keyword.domain, udpatedkeyword.result).postion as number;
+         const newPosition = newPos;
+         console.log(`New position for keyword: ${keyword.keyword} and domain: ${keyword.domain} is ${newPosition}`);
          const { history } = keyword;
          const theDate = new Date();
          history[`${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}`] = newPosition;
