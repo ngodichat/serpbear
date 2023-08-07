@@ -21,6 +21,7 @@ type SERPObject = {
 export type RefreshResult = false | {
    ID: number,
    keyword: string,
+   country: string,
    position: number | boolean,
    url: string,
    result: SearchResult[],
@@ -100,6 +101,7 @@ export const scrapeKeywordFromGoogle = async (keyword: KeywordType, settings: Se
    let refreshedResults: RefreshResult = {
       ID: keyword.ID,
       keyword: keyword.keyword,
+      country: keyword.country,
       position: keyword.position,
       url: keyword.url,
       result: keyword.lastResult,
@@ -120,7 +122,7 @@ export const scrapeKeywordFromGoogle = async (keyword: KeywordType, settings: Se
          const extracted = scraperObj?.serpExtractor ? scraperObj.serpExtractor(scrapeResult) : extractScrapedResult(scrapeResult, keyword.device);
          // await writeFile('result.txt', JSON.stringify(scrapeResult), { encoding: 'utf-8' }).catch((err) => { console.log(err); });
          const serp = getSerp(keyword.domain, extracted);
-         refreshedResults = { ID: keyword.ID, keyword: keyword.keyword, position: serp.postion, url: serp.url, result: extracted, error: false };
+         refreshedResults = { ID: keyword.ID, keyword: keyword.keyword, position: serp.postion, url: serp.url, result: extracted, error: false, country: keyword.country };
          logWithColor(`[SERP]: ${keyword.keyword} ${serp.postion} ${serp.url}`, 'green');
          // console.log('[SERP]: ', keyword.keyword, serp.postion, serp.url);
       } else {

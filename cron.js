@@ -120,26 +120,34 @@ const generateCronTime = (interval) => {
 // }
 
 const generateCronTimeByHours = (hours) => {
-   if (hours <= 0) {
-      throw new Error('Invalid input. Hours must be a positive number.');
-   }
+   // if (hours <= 0) {
+   //    throw new Error('Invalid input. Hours must be a positive number.');
+   // }
 
-   let expression;
+   // let expression;
 
-   if (hours <= 24) {
-      // For input values up to 24, construct the cron expression as before
-      const minutes = 0;
-      expression = `0 ${minutes} */${hours} * * *`;
-   } else {
-      // For larger input values, break the expression into two parts
-      const remainder = hours % 24;
-      const days = Math.floor(hours / 24);
+   // if (hours <= 24) {
+   //    // For input values up to 24, construct the cron expression as before
+   //    const minutes = 0;
+   //    expression = `0 ${minutes} */${hours} * * *`;
+   // } else {
+   //    // For larger input values, break the expression into two parts
+   //    const remainder = hours % 24;
+   //    const days = Math.floor(hours / 24);
 
-      // Construct the first part of the expression to run once per day
-      expression = `0 0 0/${remainder} 1/${days} * *`
-   }
+   //    // Construct the first part of the expression to run once per day
+   //    expression = `0 0 0/${remainder} 1/${days} * *`
+   // }
 
-   return expression;
+   // return expression;
+   // Calculate the number of days to skip between runs.
+   const daysToSkip = hours / 24;
+
+   // Set the day of month field to the first day of the month plus the number of days to skip.
+   const dayOfMonth = 1 + daysToSkip;
+
+   // Return the cron expression.
+   return `0 0 ${dayOfMonth} * *`;
 }
 
 const runAppCronJobs = () => {
@@ -250,6 +258,7 @@ const updateScrapeFrequency = (scraping_frequency) => {
    }
    if (scraping_frequency > 0) {
       const cronTime = generateCronTimeByHours(scraping_frequency);
+      console.log('cron time: ', cronTime)
       // const cronTime = generateCronTime('minute');
       cron.schedule(cronTime, async () => {
          console.log('### Running Keyword Position Cron Job!', `${process.env.NEXT_PUBLIC_APP_URL}/api/cron`);
@@ -264,7 +273,7 @@ const updateScrapeFrequency = (scraping_frequency) => {
                   console.log(err);
                });
          } catch (error) {
-             console.log(error);
+            console.log(error);
          };
       }, { scheduled: true, name: 'scrape' });
    }

@@ -85,15 +85,30 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
       }
    }, 180000);
    const refreshed: any = await refreshKeywords(formattedKeywords, settings);
-   console.log('Refreshed keywords: ', refreshed);
    // const fetchKeywords = await refreshKeywords(initialKeywords.map( k=> k.keyword ));
    const updatedKeywords: KeywordType[] = [];
 
-   for (const keywordRaw of initKeywords) {
-      const keywordPrased = parseKeywords([keywordRaw.get({ plain: true })]);
-      const keyword = keywordPrased[0];
-      const udpatedkeyword = refreshed.find((item: any) => item.ID && item.ID === keyword.ID);
-      console.log('udpatedkeyword keyword: ', udpatedkeyword, keyword);
+   /**
+    * update list of initial keywords to add all keywords which have same pair of keyword and country
+    * 1. Clone the list of initkewords
+    * 2. Find all keywords which has the same pair of keyword and country with the initial keywords
+    * */
+   const extendedKeywords: Keyword[] = [];
+   for await (const k of initKeywords) {
+      const found = await Keyword.findAll({ where: [{ keyword: k.keyword, country: k.country }] });
+      found.forEach((f: Keyword) => {
+         extendedKeywords.push(f);
+      });
+   }
+
+   for (const keywordRaw of extendedKeywords) {
+      // console.log('RAW:', keywordRaw);
+      const keywordParsed = parseKeywords([keywordRaw.get({ plain: true })]);
+      const keyword = keywordParsed[0];
+      // const keyword = keywordRaw;
+      const udpatedkeyword = refreshed.find((item: any) => item.keyword === keyword.keyword && item.country === keyword.country);
+      console.log('udpatedkeyword keyword: ', keyword.ID);
+      // console.log('udpatedkeyword keyword found: ', udpatedkeyword);
 
       if (udpatedkeyword && keyword) {
          const newPos = udpatedkeyword.position;
