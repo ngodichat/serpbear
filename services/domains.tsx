@@ -20,7 +20,7 @@ export async function fetchDomains(router: NextRouter, dateRange: string, withSt
    return res.json();
 }
 
-export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number) {
+export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number=1) {
    return useQuery(['domains', dateRange, currentPage] , () => fetchDomains(router, dateRange, withStats, currentPage));
 }
 
