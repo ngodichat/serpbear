@@ -7,9 +7,9 @@ type UpdatePayload = {
    domain: DomainType
 }
 
-export async function fetchDomains(router: NextRouter, dateRange: string, withStats: boolean) {
+export async function fetchDomains(router: NextRouter, dateRange: string, withStats: boolean, currentPage: number) {
    console.log('fetchDomains with dateRange: ', dateRange);
-   const res = await fetch(`${window.location.origin}/api/domains?dateRange=${dateRange}${withStats ? '&withstats=true' : ''}`, { method: 'GET' });
+   const res = await fetch(`${window.location.origin}/api/domains?dateRange=${dateRange}${withStats ? '&withstats=true' : ''}&page=${currentPage}`, { method: 'GET' });
    if (res.status >= 400 && res.status < 600) {
       if (res.status === 401) {
          console.log('Unauthorized!!');
@@ -20,8 +20,8 @@ export async function fetchDomains(router: NextRouter, dateRange: string, withSt
    return res.json();
 }
 
-export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false) {
-   return useQuery(['domains', dateRange] , () => fetchDomains(router, dateRange, withStats));
+export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number) {
+   return useQuery(['domains', dateRange, currentPage] , () => fetchDomains(router, dateRange, withStats, currentPage));
 }
 
 export function useAddDomain(onSuccess: Function) {

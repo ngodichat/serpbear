@@ -7,23 +7,26 @@ import verifyUser from '../../utils/verifyUser';
 
 type DomainsGetRes = {
    domains: DomainType[]
-   error?: string|null,
+   error?: string | null,
+   totalDomains?: number,
+   totalKeywords?: number,
+   totalPages?: number,
 }
 
 type DomainsAddResponse = {
-   domain: Domain|null,
-   error?: string|null,
+   domain: Domain | null,
+   error?: string | null,
 }
 
 type DomainsDeleteRes = {
    domainRemoved: number,
    keywordsRemoved: number,
-   error?: string|null,
+   error?: string | null,
 }
 
 type DomainsUpdateRes = {
-   domain: Domain|null,
-   error?: string|null,
+   domain: Domain | null,
+   error?: string | null,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -50,7 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 export const getDomains = async (req: NextApiRequest, res: NextApiResponse<DomainsGetRes>) => {
    const withStats = !!req?.query?.withstats;
    const dateRange = (req?.query?.dateRange as string) ?? '30';
-   console.log('dateRange: ', dateRange);
+   const page = req.query.page ? parseInt(req.query.page[0], 10) : 1;
+   const resultsPerPage = 20;
    try {
       // const allDomains: Domain[] = await Domain.findAll();
       const [result] = await db.query(`with tmp as (
@@ -87,7 +91,9 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          totalClicks: e.totalClicks,
       }));
       const theDomains: any[] = withStats ? await getdomainStats(results) : results;
-      return res.status(200).json({ domains: theDomains });
+      const totalKeywords = theDomains.reduce((prev, current) => prev + current.keywordCount, 0);
+      const paginated = theDomains.slice(resultsPerPage * (page - 1), resultsPerPage * (page - 1) + resultsPerPage);
+      return res.status(200).json({ domains: paginated, totalDomains: theDomains.length, totalKeywords, totalPages: Math.ceil(theDomains.length / resultsPerPage) });
    } catch (error) {
       return res.status(400).json({ domains: [], error: 'Error Getting Domains.' });
    }
@@ -101,7 +107,7 @@ export const addDomain = async (req: NextApiRequest, res: NextApiResponse<Domain
    const domainData = {
       domain: domain.trim().toLowerCase(),
       slug: domain.trim().replaceAll('-', '_').replaceAll('.', '-').replaceAll('/', '=')
-      .toLowerCase(),
+         .toLowerCase(),
       lastUpdated: new Date().toJSON(),
       added: new Date().toJSON(),
    };
@@ -123,9 +129,9 @@ export const deleteDomain = async (req: NextApiRequest, res: NextApiResponse<Dom
       const removedDomCount: number = await Domain.destroy({ where: { domain } });
       const removedKeywordCount: number = await Keyword.destroy({ where: { domain } });
       return res.status(200).json({
-            domainRemoved: removedDomCount,
-            keywordsRemoved: removedKeywordCount,
-         });
+         domainRemoved: removedDomCount,
+         keywordsRemoved: removedKeywordCount,
+      });
    } catch (error) {
       console.log('[ERROR] Deleting Domain: ', req.query.domain, error);
       return res.status(400).json({ domainRemoved: 0, keywordsRemoved: 0, error: 'Error Deleting Domain' });
@@ -140,7 +146,7 @@ export const updateDomain = async (req: NextApiRequest, res: NextApiResponse<Dom
    const { notification_interval, notification_emails, auto_refresh } = req.body;
 
    try {
-      const domainToUpdate: Domain|null = await Domain.findOne({ where: { domain } });
+      const domainToUpdate: Domain | null = await Domain.findOne({ where: { domain } });
       if (domainToUpdate) {
          domainToUpdate.set({ notification_interval, notification_emails, auto_refresh });
          await domainToUpdate.save();

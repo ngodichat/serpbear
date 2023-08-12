@@ -16,6 +16,7 @@ import StatChart from '../../components/common/StatChart';
 import { generateStatChartData } from '../../components/common/generateChartData';
 import { useFetchLinkStats } from '../../services/shortio';
 import SelectField from '../../components/common/SelectField';
+import Paginator from '../../components/common/Paginator';
 
 const SingleDomain: NextPage = () => {
    const router = useRouter();
@@ -34,12 +35,22 @@ const SingleDomain: NextPage = () => {
       { label: '1 Year', value: '360' },
       { label: 'All Time', value: 'all' },
    ];
-   const { data: domainsData, isLoading } = useFetchDomains(router, chartTime, true);
+   const [currentPage, setCurrentPage] = useState(1);
+   const [totalPages, setTotalPages] = useState<number>(1);
+   const { data: domainsData, isLoading } = useFetchDomains(router, chartTime, true, currentPage);
+
+   const onPageChange = (pageNum: number) => {
+      setCurrentPage(pageNum);
+   };
 
    useEffect(() => {
       console.log('Domains Data: ', domainsData);
       queryClient.invalidateQueries(['domains', 'linkstats']);
    }, [chartTime]);
+
+   useEffect(() => {
+        setTotalPages(domainsData ? domainsData.totalPages : 1);
+   }, [domainsData])
 
    useEffect(() => {
       console.log('Keywords Data: ', stats);
@@ -99,8 +110,8 @@ const SingleDomain: NextPage = () => {
             </div>
             <div className='flex justify-between mb-2 items-center'>
                <div className='flex'>
-                  <div className=' text-sm border-r-2 pr-2'>{domainsData?.domains?.length || 0} Domains</div>
-                  <div className=' text-sm border-r-2 px-2'>{domainsData?.domains.reduce((a: number, b: any) => (a + b.keywordCount), 0) || 0} Keywords</div>
+                  <div className=' text-sm border-r-2 pr-2'>{domainsData?.totalDomains || 0} Domains</div>
+                  <div className=' text-sm border-r-2 px-2'>{domainsData?.totalKeywords || 0} Keywords</div>
                   <div className=' text-sm border-r-2 px-2'>{stats?.desktop || 0} Desktop</div>
                   <div className=' text-sm px-2'>{stats?.mobile || 0} Mobile</div>
                </div>
@@ -137,6 +148,13 @@ const SingleDomain: NextPage = () => {
             </div>
          </div>
 
+         <div className='mb-8'>
+            <Paginator
+               currentPage={currentPage}
+               totalPages={totalPages}
+               onPageChange={onPageChange}
+            />
+         </div>
          <CSSTransition in={showAddDomain} timeout={300} classNames="modal_anim" unmountOnExit mountOnEnter>
             <AddDomain closeModal={() => setShowAddDomain(false)} />
          </CSSTransition>

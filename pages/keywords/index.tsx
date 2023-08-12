@@ -9,7 +9,7 @@ import { useFetchSettings } from '../../services/settings';
 import KeywordsTable from '../../components/keywords/KeywordsTable';
 import { useFetchCustomKeywords } from '../../services/keywords';
 import KeywordsHeader from '../../components/keywords/KeywordsHeader';
-import Paginator from '../../components/keywords/Paginator';
+import Paginator from '../../components/common/Paginator';
 
 const KeywordsPage: NextPage = () => {
    const router = useRouter();

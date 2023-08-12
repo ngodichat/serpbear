@@ -13,6 +13,7 @@ const getdomainStats = async (domains:DomainType[]): Promise<DomainType[]> => {
       const allKeywords:Keyword[] = await Keyword.findAll({ where: { domain: domain.domain } });
       const keywords: KeywordType[] = parseKeywords(allKeywords.map((e) => e.get({ plain: true })));
       domainWithStat.keywordCount = keywords.length;
+      // console.log(domain.domain, keywords.length);
       const keywordPositions = keywords.reduce((acc, itm) => (acc + itm.position), 0);
       const KeywordsUpdateDates: number[] = keywords.reduce((acc: number[], itm) => [...acc, new Date(itm.lastUpdated).getTime()], [0]);
       domainWithStat.keywordsUpdated = new Date(Math.max(...KeywordsUpdateDates)).toJSON();
