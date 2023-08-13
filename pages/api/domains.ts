@@ -33,15 +33,14 @@ type DomainsUpdateRes = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
    await db.sync();
    const authorized = verifyUser(req, res);
-   // if (authorized !== 'authorized') {
-   //    return res.status(401).json({ error: authorized });
-   // }
+   if (authorized !== 'authorized') {
+      return res.status(401).json({ error: authorized });
+   }
    if (req.method === 'GET') {
       if (req.query.page) {
          return getDomains(req, res);
-      } else {
-         return getAllDomains(res);
       }
+      return getAllDomains(res);
    }
    if (req.method === 'POST') {
       return addDomain(req, res);
@@ -62,8 +61,8 @@ export const getAllDomains = async (res: NextApiResponse<any>) => {
    } catch (error) {
       return res.status(500).json({ domains: [], error: 'Error Getting Domains.' });
    }
-
 };
+
 export const getDomains = async (req: NextApiRequest, res: NextApiResponse<DomainsGetRes>) => {
    const withStats = !!req?.query?.withstats;
    const dateRange = (req?.query?.dateRange as string) ?? '30';
@@ -74,13 +73,14 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
    console.log('Tag filters: ', tagFilters);
    const page = req.query.page ? parseInt(req.query.page[0], 10) : 1;
    const resultsPerPage = 20;
+   const dateRangeCond = `and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)`;
    try {
       // const allDomains: Domain[] = await Domain.findAll();
       const [result] = await db.query(`with tmp as (
          SELECT l.tags as domainTags, sum(humanClicks) as totalClicks from link_stats_new ls 
          join link l on l.ID = ls.link_id
          where l.tags like '%http%'
-         and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)
+         ${dateRange !== 'all' ? dateRangeCond : ''}
          group by l.tags)
          select d.*, sum(totalClicks) as totalClicks from domain d
          left join tmp on tmp.domainTags like CONCAT('%', d.domain, '%')
@@ -112,7 +112,7 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
       const filteredByTags: DomainType[] = results.filter((domain: DomainType) => {
          if (tagFilters.length === 0) return true;
          const domainTags = domain.tags;
-         for (let i = 0; i < domainTags.length; i++) {
+         for (let i = 0; i < domainTags.length; i += 1) {
             const t = domainTags[i];
             if (tagFilters.includes(t)) return true;
          }

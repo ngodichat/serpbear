@@ -18,7 +18,7 @@ const BacklinkPage: NextPage = () => {
    const [showDomainSettings, setShowDomainSettings] = useState(false);
    const [showSettings, setShowSettings] = useState(false);
    const [showAddDomain, setShowAddDomain] = useState(false);
-   const { data: domainsData } = useFetchDomains(router, '30');
+   const { data: domainsData } = useFetchDomains(router, '30', false, null);
    const [keywordSPollInterval, setKeywordSPollInterval] = useState<undefined|number>(undefined);
    const { backlinksData, backlinksLoading } = useFetchBacklinks(router, setKeywordSPollInterval, keywordSPollInterval);
 

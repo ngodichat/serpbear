@@ -10,7 +10,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: authorized });
     }
     if (req.method === 'GET') {
-        console.log('Get');
         return getStatsByDomain(req, res);
     }
     return res.status(405).json({ message: 'Method not allowed' });
@@ -39,10 +38,46 @@ const getStatsByDomain = async (req: NextApiRequest, res: NextApiResponse) => {
 
 const getAllStats = async (req: NextApiRequest, res: NextApiResponse) => {
     const dateRange = (req?.query?.dateRange as string) ?? '30';
+    let tagFilters = req.query.tags ?? [];
+    if (!Array.isArray(tagFilters)) {
+        tagFilters = [tagFilters];
+    }
+    const dateRangeCond = `and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)`;
+    if (tagFilters.length === 0) {
+        const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats_new ls 
+        join link l on l.ID = ls.link_id
+        ${dateRange !== 'all' ? dateRangeCond : ''}
+        group by date`);
+        const resultObj: any = {};
+        result.forEach((r: any) => {
+            resultObj[r.date] = r.totalClicks;
+        });
+        return res.status(200).json({ stats: resultObj });
+    }
+    const allDomains = await Domain.findAll({});
+    const filteredDomains = allDomains.filter((domain) => {
+        if (tagFilters.length === 0) return true;
+        const tags = JSON.parse(domain.tags);
+        for (let i = 0; i < tags.length; i += 1) {
+            const tag = tags[i];
+            if (tagFilters.includes(tag)) return true;
+        }
+        return false;
+    });
+    let domainFilterCond = '';
+    if (filteredDomains.length > 0) {
+        domainFilterCond = `where l.tags like '%${filteredDomains[0].domain}%'`;
+        for (let i = 1; i < filteredDomains.length; i += 1) {
+            const domain = filteredDomains[i];
+            domainFilterCond = `${domainFilterCond} or l.tags like '%${domain.domain}%'`;
+        }
+    }
+    console.log('domainFilterCond: ', domainFilterCond);
     const [result] = await db.query(`SELECT date, sum(ls.humanClicks) as totalClicks from link_stats_new ls 
-    join link l on l.ID = ls.link_id
-    and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)
-    group by date`);
+        join link l on l.ID = ls.link_id
+        ${dateRange !== 'all' ? dateRangeCond : ''}
+        ${domainFilterCond}
+        group by date`);
     const resultObj: any = {};
     result.forEach((r: any) => {
         resultObj[r.date] = r.totalClicks;

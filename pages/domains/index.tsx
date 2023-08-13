@@ -25,9 +25,10 @@ const SingleDomain: NextPage = () => {
    const [showSettings, setShowSettings] = useState(false);
    const [showAddDomain, setShowAddDomain] = useState(false);
    const { data: appSettings } = useFetchSettings();
+   const [filterParams, setFilterParams] = useState<any>({ tags: [] });
    const { stats } = useFetchKeywordsStats(router);
    const [chartTime, setChartTime] = useState<string>('30');
-   const { linkStatsData } = useFetchLinkStats(router, chartTime);
+   const { linkStatsData } = useFetchLinkStats(router, chartTime, filterParams);
    const dateOptions = [
       { label: 'Last 7 Days', value: '7' },
       { label: 'Last 30 Days', value: '30' },
@@ -37,7 +38,6 @@ const SingleDomain: NextPage = () => {
    ];
    const [currentPage, setCurrentPage] = useState(1);
    const [totalPages, setTotalPages] = useState<number>(1);
-   const [filterParams, setFilterParams] = useState<any>({ tags: [] });
    const { data: domainsData, isLoading } = useFetchDomains(router, chartTime, true, currentPage, filterParams);
    const [allDomainTags, setAllDomainTags] = useState<string[]>([]);
 
@@ -53,7 +53,7 @@ const SingleDomain: NextPage = () => {
    useEffect(() => {
       setTotalPages(domainsData ? domainsData.totalPages : 1);
       setAllDomainTags(domainsData ? domainsData.tags : []);
-   }, [domainsData])
+   }, [domainsData]);
 
    useEffect(() => {
       console.log('Keywords Data: ', stats);
@@ -69,7 +69,7 @@ const SingleDomain: NextPage = () => {
    const filterTags = (updated: any) => {
       console.log(updated);
       setFilterParams({ ...filterParams, tags: updated });
-   }
+   };
 
    const linkStats = linkStatsData && linkStatsData.stats;
    const chartData = useMemo(() => {

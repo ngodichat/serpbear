@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icon';
 
 export type SelectionOption = {
@@ -18,6 +18,7 @@ type SelectFieldProps = {
    emptyMsg?: string
 }
 const SelectField = (props: SelectFieldProps) => {
+   const wrapperRef = useRef<HTMLDivElement>(null);
    const {
       options,
       selected,
@@ -65,8 +66,17 @@ const SelectField = (props: SelectFieldProps) => {
       setFilterdOptions(filteredItems);
    };
 
+   useEffect(() => {
+      const closeOptions = (event: MouseEvent) => {
+         if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+            setShowOptions(false);
+         }
+      };
+      document.addEventListener('click', closeOptions);
+   }, []);
+
    return (
-       <div className="select font-semibold bg-white text-gray-500">
+       <div ref={wrapperRef} className="select font-semibold bg-white text-gray-500">
          <div
          className={`selected flex border ${rounded} p-1.5 px-4 cursor-pointer select-none min-w-[${minWidth}px] 
          ${showOptions ? 'border-indigo-200' : ''}`}
