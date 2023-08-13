@@ -29,7 +29,7 @@ export async function fetchDomains(router: NextRouter, dateRange: string, withSt
 }
 
 export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number | null, filterParams: any = {}) {
-   return useQuery(['domains', dateRange, currentPage, filterParams], () => fetchDomains(router, dateRange, withStats, currentPage, filterParams));
+   return useQuery(['domains', currentPage, filterParams], () => fetchDomains(router, dateRange, withStats, currentPage, filterParams));
 }
 
 export function useAddDomain(onSuccess: Function) {
