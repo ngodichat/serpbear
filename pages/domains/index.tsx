@@ -53,6 +53,10 @@ const SingleDomain: NextPage = () => {
    useEffect(() => {
       setTotalPages(domainsData ? domainsData.totalPages : 1);
       setAllDomainTags(domainsData ? domainsData.tags : []);
+      if (sessionStorage.getItem('filterParams')) {
+         const filters = sessionStorage.getItem('filterParams');
+         setFilterParams(JSON.parse(filters!));
+      }
    }, [domainsData]);
 
    useEffect(() => {
@@ -67,8 +71,8 @@ const SingleDomain: NextPage = () => {
    }, [appSettings]);
 
    const filterTags = (updated: any) => {
-      console.log(updated);
       setFilterParams({ ...filterParams, tags: updated });
+      sessionStorage.setItem('filterParams', JSON.stringify({ ...filterParams, tags: updated }));
    };
 
    const linkStats = linkStatsData && linkStatsData.stats;
@@ -88,8 +92,8 @@ const SingleDomain: NextPage = () => {
          </Head>
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
-         <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-8 lg:p-0">
-            <div className='flex justify-between mb-2 items-center'>
+         <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-8 lg:p-6">
+            <div className='hidden lg:flex justify-between mb-2 items-center'>
                <div className='flex'>
                   <div className=' text-sm border-r-2 pr-2'>{domainsData?.totalDomains || 0} Domains</div>
                   <div className=' text-sm border-r-2 px-2'>{domainsData?.totalKeywords || 0} Keywords</div>
@@ -107,7 +111,7 @@ const SingleDomain: NextPage = () => {
                </div>
             </div>
             <div className='stat-chart lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
-               <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
+               <span className='domKeywords_filters py-4 px-6 flex justify-between items-center text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
                   <span>Stats</span>
                   <div className='flex items-center'>
                      <Icon type="date" />
