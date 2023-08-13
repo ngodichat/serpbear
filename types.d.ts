@@ -3,7 +3,7 @@ type DomainType = {
    ID: number,
    domain: string,
    slug: string,
-   tags?: string,
+   tags: string[],
    notification: boolean,
    notification_interval: string,
    notification_emails: string,

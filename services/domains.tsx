@@ -7,9 +7,17 @@ type UpdatePayload = {
    domain: DomainType
 }
 
-export async function fetchDomains(router: NextRouter, dateRange: string, withStats: boolean, currentPage: number) {
+export async function fetchDomains(router: NextRouter, dateRange: string, withStats: boolean, currentPage: number | null, filterParams: any) {
    console.log('fetchDomains with dateRange: ', dateRange);
-   const res = await fetch(`${window.location.origin}/api/domains?dateRange=${dateRange}${withStats ? '&withstats=true' : ''}&page=${currentPage}`, { method: 'GET' });
+   let tagFilters = '';
+   if (filterParams.tags) {
+      filterParams.tags.forEach((tag: any) => {
+         tagFilters = tagFilters + `&tags=${tag}`
+      });
+   }
+   const res = await fetch(`${window.location.origin}/api/domains?dateRange=${dateRange}${withStats ? '&withstats=true' : ''}${currentPage ?
+      `&page=${currentPage}` : ''} ${tagFilters}`,
+      { method: 'GET' });
    if (res.status >= 400 && res.status < 600) {
       if (res.status === 401) {
          console.log('Unauthorized!!');
@@ -20,16 +28,16 @@ export async function fetchDomains(router: NextRouter, dateRange: string, withSt
    return res.json();
 }
 
-export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number=1) {
-   return useQuery(['domains', dateRange, currentPage] , () => fetchDomains(router, dateRange, withStats, currentPage));
+export function useFetchDomains(router: NextRouter, dateRange: string, withStats: boolean = false, currentPage: number | null, filterParams: any = {}) {
+   return useQuery(['domains', dateRange, currentPage, filterParams], () => fetchDomains(router, dateRange, withStats, currentPage, filterParams));
 }
 
 export function useAddDomain(onSuccess: Function) {
    const router = useRouter();
    const queryClient = useQueryClient();
-   return useMutation(async (domainName: string) => {
+   return useMutation(async (newDomain: any) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
-      const fetchOpts = { method: 'POST', headers, body: JSON.stringify({ domain: domainName }) };
+      const fetchOpts = { method: 'POST', headers, body: JSON.stringify(newDomain) };
       const res = await fetch(`${window.location.origin}/api/domains`, fetchOpts);
       if (res.status >= 400 && res.status < 600) {
          throw new Error('Bad response from server');

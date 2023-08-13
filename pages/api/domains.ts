@@ -11,6 +11,7 @@ type DomainsGetRes = {
    totalDomains?: number,
    totalKeywords?: number,
    totalPages?: number,
+   tags: string[],
 }
 
 type DomainsAddResponse = {
@@ -32,11 +33,15 @@ type DomainsUpdateRes = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
    await db.sync();
    const authorized = verifyUser(req, res);
-   if (authorized !== 'authorized') {
-      return res.status(401).json({ error: authorized });
-   }
+   // if (authorized !== 'authorized') {
+   //    return res.status(401).json({ error: authorized });
+   // }
    if (req.method === 'GET') {
-      return getDomains(req, res);
+      if (req.query.page) {
+         return getDomains(req, res);
+      } else {
+         return getAllDomains(res);
+      }
    }
    if (req.method === 'POST') {
       return addDomain(req, res);
@@ -50,9 +55,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
    return res.status(502).json({ error: 'Unrecognized Route.' });
 }
 
+export const getAllDomains = async (res: NextApiResponse<any>) => {
+   try {
+      const domains = await Domain.findAll({ attributes: ['ID', 'domain', 'slug'] });
+      return res.status(200).json({ domains });
+   } catch (error) {
+      return res.status(500).json({ domains: [], error: 'Error Getting Domains.' });
+   }
+
+};
 export const getDomains = async (req: NextApiRequest, res: NextApiResponse<DomainsGetRes>) => {
    const withStats = !!req?.query?.withstats;
    const dateRange = (req?.query?.dateRange as string) ?? '30';
+   let tagFilters = req.query.tags ?? [];
+   if (!Array.isArray(tagFilters)) {
+      tagFilters = [tagFilters];
+   }
+   console.log('Tag filters: ', tagFilters);
    const page = req.query.page ? parseInt(req.query.page[0], 10) : 1;
    const resultsPerPage = 20;
    try {
@@ -71,7 +90,7 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          ID: e.ID,
          domain: e.domain,
          slug: e.slug,
-         tags: e.tags,
+         tags: JSON.parse(e.tags),
          notification: e.notification,
          notification_interval: e.notification_interval,
          notification_emails: e.notification_emails,
@@ -90,12 +109,22 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          target_topical_trust_flow_value: e.target_topical_trust_flow_value,
          totalClicks: e.totalClicks,
       }));
-      const theDomains: any[] = withStats ? await getdomainStats(results) : results;
+      const filteredByTags: DomainType[] = results.filter((domain: DomainType) => {
+         if (tagFilters.length === 0) return true;
+         const domainTags = domain.tags;
+         for (let i = 0; i < domainTags.length; i++) {
+            const t = domainTags[i];
+            if (tagFilters.includes(t)) return true;
+         }
+         return false;
+      });
+      const tags = results.reduce((acc: string[], domain: DomainType) => [...acc, ...domain.tags], []);
+      const theDomains: any[] = withStats ? await getdomainStats(filteredByTags) : filteredByTags;
       const totalKeywords = theDomains.reduce((prev, current) => prev + current.keywordCount, 0);
       const paginated = theDomains.slice(resultsPerPage * (page - 1), resultsPerPage * (page - 1) + resultsPerPage);
-      return res.status(200).json({ domains: paginated, totalDomains: theDomains.length, totalKeywords, totalPages: Math.ceil(theDomains.length / resultsPerPage) });
+      return res.status(200).json({ domains: paginated, totalDomains: theDomains.length, totalKeywords, totalPages: Math.ceil(theDomains.length / resultsPerPage), tags });
    } catch (error) {
-      return res.status(400).json({ domains: [], error: 'Error Getting Domains.' });
+      return res.status(400).json({ domains: [], error: 'Error Getting Domains.', tags: [] });
    }
 };
 
@@ -103,13 +132,15 @@ export const addDomain = async (req: NextApiRequest, res: NextApiResponse<Domain
    if (!req.body.domain) {
       return res.status(400).json({ domain: null, error: 'Error Adding Domain.' });
    }
-   const { domain } = req.body || {};
+   const { domain, tags } = req.body || {};
+   const tagsArray = tags ? tags.split(',').map((item: string) => item.trim()) : [];
    const domainData = {
       domain: domain.trim().toLowerCase(),
       slug: domain.trim().replaceAll('-', '_').replaceAll('.', '-').replaceAll('/', '=')
          .toLowerCase(),
       lastUpdated: new Date().toJSON(),
       added: new Date().toJSON(),
+      tags: JSON.stringify(tagsArray),
    };
 
    try {

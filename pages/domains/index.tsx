@@ -37,7 +37,9 @@ const SingleDomain: NextPage = () => {
    ];
    const [currentPage, setCurrentPage] = useState(1);
    const [totalPages, setTotalPages] = useState<number>(1);
-   const { data: domainsData, isLoading } = useFetchDomains(router, chartTime, true, currentPage);
+   const [filterParams, setFilterParams] = useState<any>({ tags: [] });
+   const { data: domainsData, isLoading } = useFetchDomains(router, chartTime, true, currentPage, filterParams);
+   const [allDomainTags, setAllDomainTags] = useState<string[]>([]);
 
    const onPageChange = (pageNum: number) => {
       setCurrentPage(pageNum);
@@ -49,7 +51,8 @@ const SingleDomain: NextPage = () => {
    }, [chartTime]);
 
    useEffect(() => {
-        setTotalPages(domainsData ? domainsData.totalPages : 1);
+      setTotalPages(domainsData ? domainsData.totalPages : 1);
+      setAllDomainTags(domainsData ? domainsData.tags : []);
    }, [domainsData])
 
    useEffect(() => {
@@ -62,6 +65,11 @@ const SingleDomain: NextPage = () => {
          setNoScrapprtError(true);
       }
    }, [appSettings]);
+
+   const filterTags = (updated: any) => {
+      console.log(updated);
+      setFilterParams({ ...filterParams, tags: updated });
+   }
 
    const linkStats = linkStatsData && linkStatsData.stats;
    const chartData = useMemo(() => {
@@ -80,7 +88,24 @@ const SingleDomain: NextPage = () => {
          </Head>
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
-         <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-24 lg:p-0">
+         <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-8 lg:p-0">
+            <div className='flex justify-between mb-2 items-center'>
+               <div className='flex'>
+                  <div className=' text-sm border-r-2 pr-2'>{domainsData?.totalDomains || 0} Domains</div>
+                  <div className=' text-sm border-r-2 px-2'>{domainsData?.totalKeywords || 0} Keywords</div>
+                  <div className=' text-sm border-r-2 px-2'>{stats?.desktop || 0} Desktop</div>
+                  <div className=' text-sm px-2'>{stats?.mobile || 0} Mobile</div>
+               </div>
+               <div className={'tags_filter mb-2 lg:mb-0'}>
+                  <SelectField
+                     selected={filterParams.tags}
+                     options={allDomainTags.map((tag: string) => ({ label: tag, value: tag }))}
+                     defaultLabel='All Tags'
+                     updateField={(updated: string[]) => filterTags(updated)}
+                     emptyMsg="No Tags Found for this Domain"
+                  />
+               </div>
+            </div>
             <div className='stat-chart lg:block domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-8'>
                <span className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:flex-row'>
                   <span>Stats</span>
@@ -108,23 +133,7 @@ const SingleDomain: NextPage = () => {
                   </div>
                </span>
             </div>
-            <div className='flex justify-between mb-2 items-center'>
-               <div className='flex'>
-                  <div className=' text-sm border-r-2 pr-2'>{domainsData?.totalDomains || 0} Domains</div>
-                  <div className=' text-sm border-r-2 px-2'>{domainsData?.totalKeywords || 0} Keywords</div>
-                  <div className=' text-sm border-r-2 px-2'>{stats?.desktop || 0} Desktop</div>
-                  <div className=' text-sm px-2'>{stats?.mobile || 0} Mobile</div>
-               </div>
-               <div className='hidden lg:block'>
-                  <button
-                     className={'ml-2 inline-block py-2 text-blue-700 font-bold text-sm'}
-                     onClick={() => setShowAddDomain(true)}>
-                     <span
-                        className='text-center leading-4 mr-2 inline-block rounded-full w-7 h-7 pt-1 bg-blue-700 text-white font-bold text-lg'>+</span>
-                     <i className=' not-italic hidden lg:inline-block'>Add Domain</i>
-                  </button>
-               </div>
-            </div>
+
             <div className='flex w-full flex-col mb-8'>
                {domainsData?.domains && domainsData.domains.map((domain: DomainType) => {
                   return <DomainItem

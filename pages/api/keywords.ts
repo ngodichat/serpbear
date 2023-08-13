@@ -52,7 +52,6 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
    const domainObj: Domain | null = await Domain.findOne({ where: { slug: domainreq } });
    if (domainObj === null) return res.status(400).json({ error: 'Domain not found!' });
    const { domain } = domainObj;
-   console.log('domain: ', domain);
    const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
    const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
 
