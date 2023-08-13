@@ -102,7 +102,7 @@ const SingleDomain: NextPage = () => {
                      options={allDomainTags.map((tag: string) => ({ label: tag, value: tag }))}
                      defaultLabel='All Tags'
                      updateField={(updated: string[]) => filterTags(updated)}
-                     emptyMsg="No Tags Found for this Domain"
+                     emptyMsg="No Tags Found"
                   />
                </div>
             </div>
