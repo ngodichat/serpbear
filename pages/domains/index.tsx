@@ -93,14 +93,14 @@ const SingleDomain: NextPage = () => {
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
 
          <div className="flex flex-col w-full max-w-7xl mx-auto p-6 lg:mt-8 lg:p-6">
-            <div className='hidden lg:flex justify-between mb-2 items-center'>
-               <div className='flex'>
+            <div className='flex justify-between mb-2 items-center'>
+               <div className='hidden lg:flex'>
                   <div className=' text-sm border-r-2 pr-2'>{domainsData?.totalDomains || 0} Domains</div>
                   <div className=' text-sm border-r-2 px-2'>{domainsData?.totalKeywords || 0} Keywords</div>
                   <div className=' text-sm border-r-2 px-2'>{stats?.desktop || 0} Desktop</div>
                   <div className=' text-sm px-2'>{stats?.mobile || 0} Mobile</div>
                </div>
-               <div className={'tags_filter mb-2 lg:mb-0'}>
+               <div className={'tags_filter mb-2 lg:mb-0 w-full lg:w-[250px]'}>
                   <SelectField
                      selected={filterParams.tags}
                      options={allDomainTags.map((tag: string) => ({ label: tag, value: tag }))}
