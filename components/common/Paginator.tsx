@@ -1,14 +1,21 @@
 import React from 'react';
 
 type PaginatorProps = {
-    currentPage: number,
-    totalPages: number,
-    onPageChange: Function
+  currentPage: number,
+  totalPages: number,
+  onPageChange: Function
 }
 
 const Paginator = ({ currentPage, totalPages, onPageChange }: PaginatorProps) => {
+  const maxDisplayedPages = 10; // Set the maximum number of page buttons to display
+  const halfMaxDisplayedPages = Math.floor(maxDisplayedPages / 2);
+
+  // Calculate the range of pages to display
+  const startPage = Math.max(currentPage - halfMaxDisplayedPages, 1);
+  const endPage = Math.min(startPage + maxDisplayedPages - 1, totalPages);
+
   // Create an array with the page numbers to display
-  const pagesArray = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const pagesArray = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
   return (
     <div className="flex justify-center space-x-2">

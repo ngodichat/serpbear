@@ -206,10 +206,9 @@ export const getSerp = (domain: string, result: SearchResult[]): SERPObject => {
    const foundItem = result.find((item) => {
       // const itemDomain = item.url.replace('www.', '').match(/^(?:https?:)?(?:\/\/)?([^/?]+)/i);
       // console.log('item: ', item);
-      // console.log('itemDomain: ', itemDomain);
       // return itemDomain && itemDomain.includes(domain.replace('www.', '')+ '/special-features/real-money-online-uk-casinos-25818381');
       const itemDomain = item.url;
-      return itemDomain && itemDomain.includes(domain)
+      return itemDomain && itemDomain.toLowerCase().includes(domain.toLowerCase())
    });
    return { postion: foundItem ? foundItem.position : 0, url: foundItem && foundItem.url ? foundItem.url : '' };
 };

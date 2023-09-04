@@ -35,10 +35,11 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       isConsole = false,
       integratedConsole = false,
       SCcountries = [],
-    } = props;
+   } = props;
    const [keywordCounts, setKeywordCounts] = useState<KeywordCountState>({ desktop: 0, mobile: 0 });
    const [sortOptions, showSortOptions] = useState(false);
    const [filterOptions, showFilterOptions] = useState(false);
+   const [searchKeyword, setSearchKeyword] = useState('');
 
    useEffect(() => {
       const keyWordCount = { desktop: 0, mobile: 0 };
@@ -52,19 +53,27 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       setKeywordCounts(keyWordCount);
    }, [keywords]);
 
-   const filterCountry = (cntrs:string[]) => filterKeywords({ ...filterParams, countries: cntrs });
+   const filterCountry = (cntrs: string[]) => filterKeywords({ ...filterParams, countries: cntrs });
 
-   const filterTags = (tags:string[]) => filterKeywords({ ...filterParams, tags });
+   const filterTags = (tags: string[]) => filterKeywords({ ...filterParams, tags });
 
-   const searchKeywords = (event:React.FormEvent<HTMLInputElement>) => {
-      const filtered = filterKeywords({ ...filterParams, search: event.currentTarget.value });
-      return filtered;
+   // const searchKeywords = (event:React.FormEvent<HTMLInputElement>) => {
+   //    const filtered = filterKeywords({ ...filterParams, search: event.currentTarget.value });
+   //    return filtered;
+   // };
+
+   const handleKeyDown = (event: any) => {
+      if (event.key === 'Enter') {
+         const filtered = filterKeywords({ ...filterParams, search: searchKeyword });
+         return filtered;
+      }
+      return [];
    };
 
    const countryOptions = useMemo(() => {
-      const optionObject:{label:string, value:string}[] = [];
+      const optionObject: { label: string, value: string }[] = [];
 
-      Object.keys(countries).forEach((countryISO:string) => {
+      Object.keys(countries).forEach((countryISO: string) => {
          if (!isConsole || (isConsole && SCcountries.includes(countryISO))) {
             optionObject.push({ label: countries[countryISO][0], value: countryISO });
          }
@@ -92,7 +101,7 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       sortOptionChoices.push({ value: 'ctr_asc', label: 'Highest CTR' });
       sortOptionChoices.push({ value: 'ctr_desc', label: 'Lowest CTR' });
    }
-   const sortItemStyle = (sortType:string) => {
+   const sortItemStyle = (sortType: string) => {
       return `cursor-pointer py-2 px-3 hover:bg-[#FCFCFF] ${sortBy === sortType ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-50' : ''}`;
    };
    const deviceTabStyle = 'select-none cursor-pointer px-3 py-2 rounded-3xl mr-2';
@@ -104,30 +113,30 @@ const KeywordFilters = (props: KeywordFilterProps) => {
          <div>
             <ul className='flex text-xs'>
                <li
-                data-testid="desktop_tab"
-               className={`${deviceTabStyle} ${device === 'desktop' ? ' bg-[#F8F9FF] text-gray-700' : ''}`}
-               onClick={() => setDevice('desktop')}>
-                     <Icon type='desktop' classes='top-[3px]' size={15} />
-                     <i className='hidden not-italic lg:inline-block ml-1'>Desktop</i>
-                     <span className={`${deviceTabCountStyle}`}>{keywordCounts.desktop}</span>
+                  data-testid="desktop_tab"
+                  className={`${deviceTabStyle} ${device === 'desktop' ? ' bg-[#F8F9FF] text-gray-700' : ''}`}
+                  onClick={() => setDevice('desktop')}>
+                  <Icon type='desktop' classes='top-[3px]' size={15} />
+                  <i className='hidden not-italic lg:inline-block ml-1'>Desktop</i>
+                  <span className={`${deviceTabCountStyle}`}>{keywordCounts.desktop}</span>
                </li>
                <li
-               data-testid="mobile_tab"
-               className={`${deviceTabStyle} ${device === 'mobile' ? ' bg-[#F8F9FF] text-gray-700' : ''}`}
-               onClick={() => setDevice('mobile')}>
-                     <Icon type='mobile' />
-                     <i className='hidden not-italic lg:inline-block ml-1'>Mobile</i>
-                     <span className={`${deviceTabCountStyle}`}>{keywordCounts.mobile}</span>
+                  data-testid="mobile_tab"
+                  className={`${deviceTabStyle} ${device === 'mobile' ? ' bg-[#F8F9FF] text-gray-700' : ''}`}
+                  onClick={() => setDevice('mobile')}>
+                  <Icon type='mobile' />
+                  <i className='hidden not-italic lg:inline-block ml-1'>Mobile</i>
+                  <span className={`${deviceTabCountStyle}`}>{keywordCounts.mobile}</span>
                </li>
             </ul>
          </div>
          <div className='flex gap-5'>
             <div className=' lg:hidden'>
                <button
-               data-testid="filter_button"
-               className={`px-2 py-1 rounded ${filterOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
-               title='Filter'
-               onClick={() => showFilterOptions(!filterOptions)}>
+                  data-testid="filter_button"
+                  className={`px-2 py-1 rounded ${filterOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
+                  title='Filter'
+                  onClick={() => showFilterOptions(!filterOptions)}>
                   <Icon type="filter" size={18} />
                </button>
             </div>
@@ -137,7 +146,7 @@ const KeywordFilters = (props: KeywordFilterProps) => {
                      selected={filterParams.countries}
                      options={countryOptions}
                      defaultLabel='All Countries'
-                     updateField={(updated:string[]) => filterCountry(updated)}
+                     updateField={(updated: string[]) => filterCountry(updated)}
                      flags={true}
                   />
                </div>
@@ -145,9 +154,9 @@ const KeywordFilters = (props: KeywordFilterProps) => {
                   <div className={'tags_filter mb-2 lg:mb-0'}>
                      <SelectField
                         selected={filterParams.tags}
-                        options={allTags.map((tag:string) => ({ label: tag, value: tag }))}
+                        options={allTags.map((tag: string) => ({ label: tag, value: tag }))}
                         defaultLabel='All Tags'
-                        updateField={(updated:string[]) => filterTags(updated)}
+                        updateField={(updated: string[]) => filterTags(updated)}
                         emptyMsg="No Tags Found for this Domain"
                      />
                   </div>
@@ -158,35 +167,36 @@ const KeywordFilters = (props: KeywordFilterProps) => {
                      className={'border w-44 lg:w-36 focus:w-44 transition-all rounded-3xl p-1.5 px-4 outline-none ring-0 focus:border-indigo-200'}
                      type="text"
                      placeholder='Filter Keywords...'
-                     onChange={searchKeywords}
-                     value={filterParams.search}
+                     onKeyDown={handleKeyDown}
+                     onChange={(event) => { setSearchKeyword(event.target.value); }}
+                     value={searchKeyword}
                   />
                </div>
             </div>
-               <div className='relative'>
-                  <button
+            <div className='relative'>
+               <button
                   data-testid="sort_button"
                   className={`px-2 py-1 rounded ${sortOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
                   title='Sort'
                   onClick={() => showSortOptions(!sortOptions)}>
-                     <Icon type="sort" size={18} />
-                  </button>
-                  {sortOptions && (
-                     <ul
+                  <Icon type="sort" size={18} />
+               </button>
+               {sortOptions && (
+                  <ul
                      data-testid="sort_options"
                      className='sort_options mt-2 border absolute min-w-[0] right-0 rounded-lg
                      max-h-96 bg-white z-[9999] w-44 overflow-y-auto styled-scrollbar'>
-                        {sortOptionChoices.map((sortOption) => {
-                           return <li
-                                    key={sortOption.value}
-                                    className={sortItemStyle(sortOption.value)}
-                                    onClick={() => { updateSort(sortOption.value); showSortOptions(false); }}>
-                                       {sortOption.label}
-                                    </li>;
-                        })}
-                     </ul>
-                  )}
-               </div>
+                     {sortOptionChoices.map((sortOption) => {
+                        return <li
+                           key={sortOption.value}
+                           className={sortItemStyle(sortOption.value)}
+                           onClick={() => { updateSort(sortOption.value); showSortOptions(false); }}>
+                           {sortOption.label}
+                        </li>;
+                     })}
+                  </ul>
+               )}
+            </div>
          </div>
       </div>
    );

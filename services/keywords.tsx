@@ -10,8 +10,11 @@ export const fetchKeywords = async (router: NextRouter) => {
 
 export const fetchCustomKeywords = async (router: NextRouter) => {
    let page = router.query.page;
-   if (!router.query.page) {page = '1'};
-   const res = await fetch(`${window.location.origin}/api/custom_keywords?page=${page}`, { method: 'GET' });
+   let searchParam = router.query.search;
+   console.log('Filters: ', searchParam);
+   if (!router.query.page) { page = '1' };
+   //&kw=${filters?.filterParams.search}
+   const res = await fetch(`${window.location.origin}/api/custom_keywords?page=${page}${searchParam !== '' ? `&search=${searchParam}` : ''}`, { method: 'GET' });
    return res.json();
 };
 
@@ -21,11 +24,11 @@ export const fetchKeywordsStats = async (router: NextRouter) => {
 };
 
 export function useFetchKeywordsStats(router: NextRouter) {
-   const {data: stats} = useQuery([], () => fetchKeywordsStats(router),{});
-   return {stats};
+   const { data: stats } = useQuery([], () => fetchKeywordsStats(router), {});
+   return { stats };
 }
 
-export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?:Function, keywordSPollInterval:undefined|number = undefined) {
+export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?: Function, keywordSPollInterval: undefined | number = undefined) {
    const { data: keywordsData, isLoading: keywordsLoading, isError } = useQuery(
       ['keywords', router.query.slug],
       () => fetchKeywords(router),
@@ -35,7 +38,7 @@ export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?:Fu
             // If Keywords are Manually Refreshed check if the any of the keywords position are still being fetched
             // If yes, then refecth the keywords every 5 seconds until all the keywords position is updated by the server
             if (data.keywords && data.keywords.length > 0 && setKeywordSPollInterval) {
-               const hasRefreshingKeyword = data.keywords.some((x:KeywordType) => x.updating);
+               const hasRefreshingKeyword = data.keywords.some((x: KeywordType) => x.updating);
                if (hasRefreshingKeyword) {
                   setKeywordSPollInterval(5000);
                } else {
@@ -51,9 +54,9 @@ export function useFetchKeywords(router: NextRouter, setKeywordSPollInterval?:Fu
    return { keywordsData, keywordsLoading, isError };
 }
 
-export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterval?:Function, keywordSPollInterval:undefined|number = undefined) {
+export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterval?: Function, keywordSPollInterval: undefined | number = undefined) {
    const { data: keywordsData, isLoading: keywordsLoading, isError } = useQuery(
-      ['custom_keywords', router.query.page],
+      ['custom_keywords', router.query],
       () => fetchCustomKeywords(router),
       {
          refetchInterval: keywordSPollInterval,
@@ -61,7 +64,7 @@ export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterv
             // If Keywords are Manually Refreshed check if the any of the keywords position are still being fetched
             // If yes, then refecth the keywords every 5 seconds until all the keywords position is updated by the server
             if (data.keywords && data.keywords.length > 0 && setKeywordSPollInterval) {
-               const hasRefreshingKeyword = data.keywords.some((x:KeywordType) => x.updating);
+               const hasRefreshingKeyword = data.keywords.some((x: KeywordType) => x.updating);
                if (hasRefreshingKeyword) {
                   setKeywordSPollInterval(5000);
                } else {
@@ -77,9 +80,9 @@ export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterv
    return { keywordsData, keywordsLoading, isError };
 }
 
-export function useAddKeywords(onSuccess:Function) {
+export function useAddKeywords(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async (keywords:KeywordAddPayload[]) => {
+   return useMutation(async (keywords: KeywordAddPayload[]) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
       const fetchOpts = { method: 'POST', headers, body: JSON.stringify({ keywords }) };
       const res = await fetch(`${window.location.origin}/api/keywords`, fetchOpts);
@@ -101,9 +104,9 @@ export function useAddKeywords(onSuccess:Function) {
    });
 }
 
-export function useDeleteKeywords(onSuccess:Function) {
+export function useDeleteKeywords(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async (keywordIDs:number[]) => {
+   return useMutation(async (keywordIDs: number[]) => {
       const keywordIds = keywordIDs.join(',');
       const res = await fetch(`${window.location.origin}/api/keywords?id=${keywordIds}`, { method: 'DELETE' });
       if (res.status >= 400 && res.status < 600) {
@@ -124,9 +127,9 @@ export function useDeleteKeywords(onSuccess:Function) {
    });
 }
 
-export function useFavKeywords(onSuccess:Function) {
+export function useFavKeywords(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async ({ keywordID, sticky }:{keywordID:string, sticky:boolean}) => {
+   return useMutation(async ({ keywordID, sticky }: { keywordID: string, sticky: boolean }) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
       const fetchOpts = { method: 'PUT', headers, body: JSON.stringify({ sticky }) };
       const res = await fetch(`${window.location.origin}/api/keywords?id=${keywordID}`, fetchOpts);
@@ -148,9 +151,9 @@ export function useFavKeywords(onSuccess:Function) {
    });
 }
 
-export function useUpdateKeywordTags(onSuccess:Function) {
+export function useUpdateKeywordTags(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async ({ tags }:{tags:{ [ID:number]: string[] }}) => {
+   return useMutation(async ({ tags }: { tags: { [ID: number]: string[] } }) => {
       const keywordIds = Object.keys(tags).join(',');
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
       const fetchOpts = { method: 'PUT', headers, body: JSON.stringify({ tags }) };
@@ -172,9 +175,9 @@ export function useUpdateKeywordTags(onSuccess:Function) {
    });
 }
 
-export function useRefreshKeywords(onSuccess:Function) {
+export function useRefreshKeywords(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async ({ ids = [], domain = '' } : {ids?: number[], domain?: string}) => {
+   return useMutation(async ({ ids = [], domain = '' }: { ids?: number[], domain?: string }) => {
       const keywordIds = ids.join(',');
       console.log(keywordIds);
       const query = ids.length === 0 && domain ? `?id=all&domain=${domain}` : `?id=${keywordIds}`;

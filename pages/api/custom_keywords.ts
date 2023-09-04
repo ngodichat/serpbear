@@ -23,9 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
-    const pageSize = 100;
+    const pageSize = 20;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { url } = req.query;
+    const { url, search } = req.query;
     try {
         // const processedKeywords = await Keyword.findAll({
         //     attributes: [
@@ -52,7 +52,9 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             ) b
                 ON a.keyword = b.keyword AND
                     a.id = b.id
-        where lastResult like '%${url ?? ''}%'`;
+        where lastResult like '%${url ?? ''}%'
+        and a.keyword like '%${search ?? ''}%'
+        `;
         const [result] = await db.query(`${baseQuery} limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
         const processedKeywords: any = [];
         result.forEach((r: any) => {
@@ -62,6 +64,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         const [count] = await db.query(baseQuery);
         return res.status(200).json({ keywords: processedKeywords, count: count.length });
     } catch (error) {
+        console.log('Error loading keywords: ', error);
         return res.status(400).json({ error: 'Error Loading all Keywords.' });
     }
 };
