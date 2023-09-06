@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../database/database';
 import Keyword from '../../database/models/keyword';
 import verifyUser from '../../utils/verifyUser';
-import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConsole';
 
 type KeywordsGetResponse = {
     keywords?: Keyword[],
