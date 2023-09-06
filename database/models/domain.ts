@@ -39,7 +39,7 @@ class Domain extends Model {
    @Column({ type: DataType.STRING, allowNull: true, defaultValue: '' })
    notification_emails!: string;
 
-   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
+   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
    auto_refresh!: boolean;
 
    @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
