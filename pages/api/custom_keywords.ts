@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../database/database';
 import Keyword from '../../database/models/keyword';
 import verifyUser from '../../utils/verifyUser';
+import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConsole';
 
 type KeywordsGetResponse = {
     keywords?: Keyword[],
@@ -29,7 +30,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
     console.log(search, country);
 
     try {
-        let baseQuery = `SELECT a.id,  a.keyword, country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags
+        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history
         FROM    keyword a
             INNER JOIN
             (
@@ -52,9 +53,24 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         result.forEach((r: any) => {
             processedKeywords.push(r);
         });
+        // const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
+        // const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
+        const finalProcessedKeywords = processedKeywords.map((keyword: any) => {
+            const historyArray = Object.keys(keyword.history).map((dateKey: string) => ({
+               date: new Date(dateKey).getTime(),
+               dateRaw: dateKey,
+               position: keyword.history[dateKey],
+            }));
+            const historySorted = historyArray.sort((a, b) => a.date - b.date);
+            const lastWeekHistory: KeywordHistory = {};
+            historySorted.slice(-7).forEach((x: any) => { lastWeekHistory[x.dateRaw] = x.position; });
+            const keywordWithSlimHistory = { ...keyword, lastResult: [], history: lastWeekHistory };
+            // const finalKeyword = domainSCData ? integrateKeywordSCData(keywordWithSlimHistory, domainSCData) : keywordWithSlimHistory;
+            return keywordWithSlimHistory;
+         });
 
         const [count] = await db.query(baseQuery);
-        return res.status(200).json({ keywords: processedKeywords, count: count.length });
+        return res.status(200).json({ keywords: finalProcessedKeywords, count: count.length });
     } catch (error) {
         console.log('Error loading keywords: ', error);
         return res.status(400).json({ error: 'Error Loading all Keywords.' });

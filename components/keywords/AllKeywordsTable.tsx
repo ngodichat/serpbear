@@ -211,7 +211,9 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                            favoriteKeyword={favoriteMutate}
                            manageTags={() => setShowTagManager(keyword.ID)}
                            removeKeyword={() => { setSelectedKeywords([keyword.ID]); setShowRemoveModal(true); }}
-                           showKeywordDetails={() => setShowKeyDetails(keyword)}
+                           showKeywordDetails={() => {
+                              setShowKeyDetails(keyword); console.log('Show keywords', keyword);
+                           }}
                            lastItem={index === (processedKeywords[device].length - 1)}
                            showSCData={showSCData}
                            scDataType={scDataType}
