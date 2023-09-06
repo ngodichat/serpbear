@@ -25,24 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     const pageSize = 20;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { url, search } = req.query;
-    try {
-        // const processedKeywords = await Keyword.findAll({
-        //     attributes: [
-        //         [Sequelize.fn('DISTINCT', Sequelize.col('keyword')), 'keyword'],
-        //         'country',
-        //         'device',
-        //         'volume',
-        //         'low_top_of_page_bid',
-        //         'high_top_of_page_bid',
-        //         'lastUpdated',
-        //         'tags'
-        //     ],
-        //     limit: pageSize,
-        //     offset: (currentPage - 1) * pageSize
-        // });
+    const { url, search, country } = req.query;
+    console.log(search, country);
 
-        const baseQuery = `SELECT a.id,  a.keyword, country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags
+    try {
+        let baseQuery = `SELECT a.id,  a.keyword, country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags
         FROM    keyword a
             INNER JOIN
             (
@@ -55,6 +42,11 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         where lastResult like '%${url ?? ''}%'
         and a.keyword like '%${search ?? ''}%'
         `;
+        if (country) {
+            const transform = (country as string).split(',').map((i: any) => `'${i}'`).join(',');
+            baseQuery = `${baseQuery} and country in (${transform})`;
+        }
+
         const [result] = await db.query(`${baseQuery} limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
         const processedKeywords: any = [];
         result.forEach((r: any) => {

@@ -10,11 +10,18 @@ export const fetchKeywords = async (router: NextRouter) => {
 
 export const fetchCustomKeywords = async (router: NextRouter) => {
    let page = router.query.page;
-   let searchParam = router.query.search;
-   console.log('Filters: ', searchParam);
+   const searchParam = router.query.search;
    if (!router.query.page) { page = '1' };
-   //&kw=${filters?.filterParams.search}
-   const res = await fetch(`${window.location.origin}/api/custom_keywords?page=${page}${searchParam !== '' ? `&search=${searchParam}` : ''}`, { method: 'GET' });
+   let query = `${window.location.origin}/api/custom_keywords?`;
+   let queryParams: any = { page };
+   if (searchParam && searchParam !== '') {
+      queryParams = { ...queryParams, search: searchParam };
+   }
+   if (router.query.country) {
+      queryParams = { ...queryParams, country: router.query.country };
+   }
+   query = query + new URLSearchParams(queryParams).toString();
+   const res = await fetch(`${query}`, { method: 'GET' });
    return res.json();
 };
 

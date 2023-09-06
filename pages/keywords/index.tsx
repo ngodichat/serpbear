@@ -47,7 +47,11 @@ const KeywordsPage: NextPage = () => {
 
    const filterKeywords = (mFilters: any) => {
       setFilters(mFilters);
-      router.push({ pathname: '/keywords', query: { page: 1, search: mFilters.filterParams.search } });
+      let q: any = { page: 1, country: mFilters.filterParams.countries };
+      if (mFilters.filterParams.search !== '') {
+         q = { ...q, search: mFilters.filterParams.search };
+      }
+      router.push({ pathname: '/keywords', query: q });
    };
 
    return (
