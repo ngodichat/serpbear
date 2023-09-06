@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 export const getAllDomains = async (res: NextApiResponse<any>) => {
    try {
-      const domains = await Domain.findAll({ attributes: ['ID', 'domain', 'slug'] });
+      const domains = await Domain.findAll({ attributes: ['ID', 'domain', 'slug', 'auto_refresh'] });
       return res.status(200).json({ domains });
    } catch (error) {
       return res.status(500).json({ domains: [], error: 'Error Getting Domains.' });
