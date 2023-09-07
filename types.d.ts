@@ -60,6 +60,7 @@ type KeywordFilters = {
    countries: string[],
    tags: string[],
    search: string,
+   domain?: string,
 }
 
 type countryData = {

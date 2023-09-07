@@ -17,6 +17,9 @@ export const fetchCustomKeywords = async (router: NextRouter) => {
    if (searchParam && searchParam !== '') {
       queryParams = { ...queryParams, search: searchParam };
    }
+   if (router.query.domain && router.query.domain !== '') {
+      queryParams = { ...queryParams, domain: router.query.domain };
+   }
    if (router.query.country) {
       queryParams = { ...queryParams, country: router.query.country };
    }

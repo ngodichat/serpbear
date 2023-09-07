@@ -15,6 +15,7 @@ type KeywordFilterProps = {
    integratedConsole?: boolean,
    isConsole?: boolean,
    SCcountries?: string[];
+   showDomainFilter?: boolean,
 }
 
 type KeywordCountState = {
@@ -35,11 +36,13 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       isConsole = false,
       integratedConsole = false,
       SCcountries = [],
+      showDomainFilter = false,
    } = props;
    const [keywordCounts, setKeywordCounts] = useState<KeywordCountState>({ desktop: 0, mobile: 0 });
    const [sortOptions, showSortOptions] = useState(false);
    const [filterOptions, showFilterOptions] = useState(false);
    const [searchKeyword, setSearchKeyword] = useState('');
+   const [searchDomain, setSearchDomain] = useState('');
 
    useEffect(() => {
       const keyWordCount = { desktop: 0, mobile: 0 };
@@ -62,9 +65,17 @@ const KeywordFilters = (props: KeywordFilterProps) => {
    //    return filtered;
    // };
 
-   const handleKeyDown = (event: any) => {
+   const handleKeyDownSearchParam = (event: any) => {
       if (event.key === 'Enter') {
          const filtered = filterKeywords({ ...filterParams, search: searchKeyword });
+         return filtered;
+      }
+      return [];
+   };
+
+   const handleKeyDownSearchDomain = (event: any) => {
+      if (event.key === 'Enter') {
+         const filtered = filterKeywords({ ...filterParams, domain: searchDomain });
          return filtered;
       }
       return [];
@@ -167,11 +178,24 @@ const KeywordFilters = (props: KeywordFilterProps) => {
                      className={'border w-44 lg:w-36 focus:w-44 transition-all rounded-3xl p-1.5 px-4 outline-none ring-0 focus:border-indigo-200'}
                      type="text"
                      placeholder='Filter Keywords...'
-                     onKeyDown={handleKeyDown}
+                     onKeyDown={handleKeyDownSearchParam}
                      onChange={(event) => { setSearchKeyword(event.target.value); }}
                      value={searchKeyword}
                   />
                </div>
+               {showDomainFilter
+                  && <div className={'mb-2 lg:mb-0'}>
+                     <input
+                        data-testid="filter_input"
+                        className={'border w-44 lg:w-36 focus:w-44 transition-all rounded-3xl p-1.5 px-4 outline-none ring-0 focus:border-indigo-200'}
+                        type="text"
+                        placeholder='Filter by Domain...'
+                        onKeyDown={handleKeyDownSearchDomain}
+                        onChange={(event) => { setSearchDomain(event.target.value); }}
+                        value={searchDomain}
+                     />
+                  </div>
+               }
             </div>
             <div className='relative'>
                <button

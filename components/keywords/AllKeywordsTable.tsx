@@ -34,7 +34,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
    const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
    const [showTagManager, setShowTagManager] = useState<null | number>(null);
    const [showAddTags, setShowAddTags] = useState<boolean>(false);
-   const [filterParams, setFilterParams] = useState<KeywordFilters>({ countries: [], tags: [], search: '' });
+   const [filterParams, setFilterParams] = useState<KeywordFilters>({ countries: [], tags: [], search: '', domain: '' });
    const [sortBy, setSortBy] = useState<string>('date_asc');
    const [scDataType, setScDataType] = useState<string>('threeDays');
    const [showScDataTypes, setShowScDataTypes] = useState<boolean>(false);
@@ -134,6 +134,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                   device={device}
                   setDevice={setDevice}
                   integratedConsole={isConsoleIntegrated}
+                  showDomainFilter={true}
                />
             )}
             <div className={`domkeywordsTable domkeywordsTable--keywords ${showSCData ? 'domkeywordsTable--hasSC' : ''} 

@@ -51,6 +51,9 @@ const KeywordsPage: NextPage = () => {
       if (mFilters.filterParams.search !== '') {
          q = { ...q, search: mFilters.filterParams.search };
       }
+      if (mFilters.filterParams.domain !== '') {
+         q = { ...q, domain: mFilters.filterParams.domain };
+      }
       router.push({ pathname: '/keywords', query: q });
    };
 

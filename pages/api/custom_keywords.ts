@@ -25,8 +25,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     const pageSize = 20;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { url, search, country } = req.query;
-    console.log(search, country);
+    const { domain, search, country } = req.query;
+    console.log(domain, search, country);
 
     try {
         let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history
@@ -39,7 +39,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             ) b
                 ON a.keyword = b.keyword AND
                     a.id = b.id
-        where lastResult like '%${url ?? ''}%'
+        where lastResult like '%${domain ?? ''}%'
         and a.keyword like '%${search ?? ''}%'
         `;
         if (country) {
@@ -56,9 +56,9 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         // const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
         const finalProcessedKeywords = processedKeywords.map((keyword: any) => {
             const historyArray = Object.keys(keyword.history).map((dateKey: string) => ({
-               date: new Date(dateKey).getTime(),
-               dateRaw: dateKey,
-               position: keyword.history[dateKey],
+                date: new Date(dateKey).getTime(),
+                dateRaw: dateKey,
+                position: keyword.history[dateKey],
             }));
             const historySorted = historyArray.sort((a, b) => a.date - b.date);
             const lastWeekHistory: KeywordHistory = {};
@@ -66,7 +66,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             const keywordWithSlimHistory = { ...keyword, lastResult: [], history: lastWeekHistory };
             // const finalKeyword = domainSCData ? integrateKeywordSCData(keywordWithSlimHistory, domainSCData) : keywordWithSlimHistory;
             return keywordWithSlimHistory;
-         });
+        });
 
         const [count] = await db.query(baseQuery);
         return res.status(200).json({ keywords: finalProcessedKeywords, count: count.length });
