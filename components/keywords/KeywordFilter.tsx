@@ -59,6 +59,12 @@ const KeywordFilters = (props: KeywordFilterProps) => {
          setKeywordCounts(keyWordCount);
       } else {
          console.log('countByDevice: ', countByDevice);
+         if (!('desktop' in countByDevice)) {
+            countByDevice.desktop = 0;
+         }
+         if (!('mobile' in countByDevice)) {
+            countByDevice.mobile = 0;
+         }
          setKeywordCounts(countByDevice);
       }
    }, [keywords, countByDevice]);
