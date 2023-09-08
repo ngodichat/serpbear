@@ -23,10 +23,11 @@ type KeywordsTableProps = {
    isConsoleIntegrated: boolean,
    showPosition?: boolean,
    showHistory?: boolean,
+   countByDevice?: any,
 }
 
 const AllKeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter } = props;
+   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter, countByDevice = {} } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -53,15 +54,15 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
    };
 
    const processedKeywords: { [key: string]: KeywordType[] } = useMemo(() => {
-      // const procKeywords = keywords.filter((x) => x.device === device);
+      const procKeywords = keywords.filter((x) => x.device === device);
       // const filteredKeywords = filterKeywords(procKeywords, filterParams);
       // const sortedKeywords = sortKeywords(filteredKeywords, sortBy, scDataType);
-      return keywordsByDevice(keywords, device);
-   }, [keywords]);
+      return keywordsByDevice(procKeywords, device);
+   }, [keywords, device]);
 
    useEffect(() => {
-      filter({ device, sortBy, filterParams, scDataType });
-   }, [device, sortBy, filterParams, scDataType]);
+      filter({ sortBy, filterParams, scDataType });
+   }, [sortBy, filterParams, scDataType]);
 
    const allDomainTags: string[] = useMemo(() => {
       const allTags = keywords.reduce((acc: string[], keyword) => [...acc, ...keyword.tags], []);
@@ -135,6 +136,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                   setDevice={setDevice}
                   integratedConsole={isConsoleIntegrated}
                   showDomainFilter={true}
+                  countByDevice={countByDevice}
                />
             )}
             <div className={`domkeywordsTable domkeywordsTable--keywords ${showSCData ? 'domkeywordsTable--hasSC' : ''} 

@@ -23,10 +23,12 @@ const KeywordsPage: NextPage = () => {
    const [currentPage, setCurrentPage] = useState(1);
    const [totalPages, setTotalPages] = useState(1);
    const [filters, setFilters] = useState<any>('');
+   const [countByDevice, setCountByDevice] = useState<any>();
 
    const onPageChange = (pageNum: number) => {
       setCurrentPage(pageNum);
-      router.push({ pathname: '/keywords', query: { page: pageNum, search: filters.filterParams.search } });
+      // router.push({ pathname: '/keywords', query: { page: pageNum, search: filters.filterParams.search } });
+      filterKeywords({ ...filters, page: pageNum });
    };
    const { keywordsData, keywordsLoading } = useFetchCustomKeywords(router, setKeywordSPollInterval, keywordSPollInterval);
 
@@ -40,14 +42,15 @@ const KeywordsPage: NextPage = () => {
    }, [appSettings]);
 
    useEffect(() => {
-      const pages = keywordsData ? keywordsData.count / 20 : 1;
+      const pages = keywordsData ? Math.ceil(keywordsData.count / 20) : 1;
       setTotalPages(pages);
-      setCurrentPage(1);
+      if (keywordsData) { setCountByDevice(keywordsData.byDevice); }
    }, [keywordsData]);
 
    const filterKeywords = (mFilters: any) => {
       setFilters(mFilters);
-      let q: any = { page: 1, country: mFilters.filterParams.countries };
+      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries };
+      setCurrentPage(mFilters.page ?? 1);
       if (mFilters.filterParams.search !== '') {
          q = { ...q, search: mFilters.filterParams.search };
       }
@@ -66,7 +69,7 @@ const KeywordsPage: NextPage = () => {
          )}
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
          <div className="flex w-full max-w-7xl mx-auto">
-            <div className="domain_kewywords px-5 pt-10 lg:px-0 lg:pt-8 w-full">
+            <div className="domain_kewywords px-5 pt-10 lg:px-0 lg:pt-8 w-full mb-8">
                <KeywordsHeader showAddModal={setShowAddKeywords}
                />
                <AllKeywordsTable
@@ -75,6 +78,7 @@ const KeywordsPage: NextPage = () => {
                   showHistory={false}
                   domain={null}
                   keywords={theKeywords}
+                  countByDevice={countByDevice}
                   filter={filterKeywords}
                   backlinks={[]}
                   showAddModal={showAddKeywords}

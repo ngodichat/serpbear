@@ -6,6 +6,7 @@ import verifyUser from '../../utils/verifyUser';
 type KeywordsGetResponse = {
     keywords?: Keyword[],
     count?: number,
+    byDevice?: any,
     error?: string | null,
 }
 
@@ -46,8 +47,11 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             const transform = (country as string).split(',').map((i: any) => `'${i}'`).join(',');
             baseQuery = `${baseQuery} and country in (${transform})`;
         }
+        const countByDeviceQuery = `select device, count(1) as count from (${baseQuery}) as temp group by device`;
 
         const [result] = await db.query(`${baseQuery} limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
+        const [total] = await db.query(countByDeviceQuery);
+        console.log('total: ', total);
         const processedKeywords: any = [];
         result.forEach((r: any) => {
             processedKeywords.push(r);
@@ -68,8 +72,16 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             return keywordWithSlimHistory;
         });
 
-        const [count] = await db.query(baseQuery);
-        return res.status(200).json({ keywords: finalProcessedKeywords, count: count.length });
+        // const [count] = await db.query(baseQuery);
+        return res.status(200).json({
+            keywords: finalProcessedKeywords,
+            count: total.reduce((a: number, b: any) => a + b.count, 0),
+            byDevice: total.reduce((prev: any, item: any) => {
+                const temp = { ...prev };
+                temp[item.device] = item.count;
+                return temp;
+            }, {}),
+        });
     } catch (error) {
         console.log('Error loading keywords: ', error);
         return res.status(400).json({ error: 'Error Loading all Keywords.' });

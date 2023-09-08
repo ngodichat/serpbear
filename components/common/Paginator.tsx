@@ -21,18 +21,22 @@ const Paginator = ({ currentPage, totalPages, onPageChange }: PaginatorProps) =>
     <div className="flex justify-center space-x-2">
       {/* Show Previous button if not on first page */}
       {currentPage > 1 && (
-        <button onClick={() => onPageChange(currentPage - 1)}>
-          Previous
-        </button>
+        <>
+          <button onClick={() => onPageChange(1)}>
+            &lt;&lt;
+          </button>
+          <button onClick={() => onPageChange(currentPage - 1)}>
+            Previous
+          </button>
+        </>
       )}
 
       {/* Show page numbers */}
       {pagesArray.map((pageNum) => (
         <button
           key={pageNum}
-          className={`hidden md:flex w-10 h-10 mx-1 justify-center items-center rounded-full border border-gray-200 hover:border-gray-300 ${
-            pageNum === currentPage ? ' bg-blue-500 text-white' : ' bg-white text-black'
-          }`}
+          className={`hidden md:flex w-10 h-10 mx-1 justify-center items-center rounded-full border border-gray-200 hover:border-gray-300 ${pageNum === currentPage ? ' bg-blue-500 text-white' : ' bg-white text-black'
+            }`}
           onClick={() => onPageChange(pageNum)}
         >
           {pageNum}
@@ -41,9 +45,14 @@ const Paginator = ({ currentPage, totalPages, onPageChange }: PaginatorProps) =>
 
       {/* Show Next button if not on last page */}
       {currentPage < totalPages && (
-        <button onClick={() => onPageChange(currentPage + 1)}>
-          Next
-        </button>
+        <>
+          <button onClick={() => onPageChange(currentPage + 1)}>
+            Next
+          </button>
+          <button onClick={() => onPageChange(totalPages)}>
+            &gt;&gt;
+          </button>
+        </>
       )}
     </div>
   );

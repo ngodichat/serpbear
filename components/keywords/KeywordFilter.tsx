@@ -16,6 +16,7 @@ type KeywordFilterProps = {
    isConsole?: boolean,
    SCcountries?: string[];
    showDomainFilter?: boolean,
+   countByDevice?: any,
 }
 
 type KeywordCountState = {
@@ -37,6 +38,7 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       integratedConsole = false,
       SCcountries = [],
       showDomainFilter = false,
+      countByDevice = null,
    } = props;
    const [keywordCounts, setKeywordCounts] = useState<KeywordCountState>({ desktop: 0, mobile: 0 });
    const [sortOptions, showSortOptions] = useState(false);
@@ -45,16 +47,21 @@ const KeywordFilters = (props: KeywordFilterProps) => {
    const [searchDomain, setSearchDomain] = useState('');
 
    useEffect(() => {
-      const keyWordCount = { desktop: 0, mobile: 0 };
-      keywords.forEach((k) => {
-         if (k.device === 'desktop') {
-            keyWordCount.desktop += 1;
-         } else {
-            keyWordCount.mobile += 1;
-         }
-      });
-      setKeywordCounts(keyWordCount);
-   }, [keywords]);
+      if (!countByDevice) {
+         const keyWordCount = { desktop: 0, mobile: 0 };
+         keywords.forEach((k) => {
+            if (k.device === 'desktop') {
+               keyWordCount.desktop += 1;
+            } else {
+               keyWordCount.mobile += 1;
+            }
+         });
+         setKeywordCounts(keyWordCount);
+      } else {
+         console.log('countByDevice: ', countByDevice);
+         setKeywordCounts(countByDevice);
+      }
+   }, [keywords, countByDevice]);
 
    const filterCountry = (cntrs: string[]) => filterKeywords({ ...filterParams, countries: cntrs });
 
