@@ -20,6 +20,7 @@ type KeywordProps = {
    scDataType: string,
    showHistory?: boolean,
    showPosition?: boolean,
+   compareWithHistory?: boolean,
 }
 
 const Keyword = (props: KeywordProps) => {
@@ -37,6 +38,7 @@ const Keyword = (props: KeywordProps) => {
       scDataType = 'threeDays',
       showHistory = true,
       showPosition = true,
+      compareWithHistory = true,
    } = props;
    const {
       keyword, domain, ID, position, url = '', lastUpdated, country, sticky, history = {}, updating = false, lastUpdateError = false, volume, low_top_of_page_bid, high_top_of_page_bid,
@@ -109,8 +111,8 @@ const Keyword = (props: KeywordProps) => {
             className={`keyword_position absolute bg-[#f8f9ff] w-fit min-w-[50px] h-12 p-2 text-base mt-[-20px] rounded right-5 lg:relative
             lg:bg-transparent lg:w-auto lg:h-auto lg:mt-0 lg:p-0 lg:text-sm lg:flex-1 lg:basis-40 lg:grow-0 lg:right-0 text-center font-semibold`}>
                {renderPosition(position)}
-               {!updating && positionChange > 0 && <i className=' not-italic ml-1 text-xs text-[#5ed7c3]'>▲ {positionChange}</i>}
-               {!updating && positionChange < 0 && <i className=' not-italic ml-1 text-xs text-red-300'>▼ {positionChange}</i>}
+               {!updating && compareWithHistory && positionChange > 0 && <i className=' not-italic ml-1 text-xs text-[#5ed7c3]'>▲ {positionChange}</i>}
+               {!updating && compareWithHistory && positionChange < 0 && <i className=' not-italic ml-1 text-xs text-red-300'>▼ {positionChange}</i>}
             </div>
          )}
          {showHistory && chartData.labels.length > 0 && (

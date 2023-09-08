@@ -61,6 +61,7 @@ type KeywordFilters = {
    tags: string[],
    search: string,
    domain?: string,
+   device?: string,
 }
 
 type countryData = {

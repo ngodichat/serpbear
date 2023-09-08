@@ -42,14 +42,14 @@ const KeywordsPage: NextPage = () => {
    }, [appSettings]);
 
    useEffect(() => {
-      const pages = keywordsData ? Math.ceil(keywordsData.count / 20) : 1;
+      const pages = keywordsData ? Math.ceil(keywordsData.count / 100) : 1;
       setTotalPages(pages);
       if (keywordsData) { setCountByDevice(keywordsData.byDevice); }
    }, [keywordsData]);
 
    const filterKeywords = (mFilters: any) => {
       setFilters(mFilters);
-      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries };
+      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries, device: mFilters.filterParams.device ?? 'desktop' };
       setCurrentPage(mFilters.page ?? 1);
       if (mFilters.filterParams.search !== '') {
          q = { ...q, search: mFilters.filterParams.search };
@@ -75,6 +75,7 @@ const KeywordsPage: NextPage = () => {
                <AllKeywordsTable
                   isLoading={keywordsLoading}
                   showPosition={true && filters.filterParams && (filters.filterParams.domain !== '')}
+                  compareWithHistory={false}
                   showHistory={false}
                   domain={null}
                   keywords={theKeywords}

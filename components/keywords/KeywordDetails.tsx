@@ -10,9 +10,10 @@ type KeywordDetailsProps = {
    keyword: KeywordType,
    closeDetails: Function,
    backlinks: BacklinkType[],
+   showSerpHistory?: boolean,
 }
 
-const KeywordDetails = ({ keyword, closeDetails, backlinks }: KeywordDetailsProps) => {
+const KeywordDetails = ({ keyword, closeDetails, backlinks, showSerpHistory = false }: KeywordDetailsProps) => {
    const updatedDate = new Date(keyword.lastUpdated);
    const [keywordHistory, setKeywordHistory] = useState<KeywordHistory>(keyword.history);
    const [keywordSearchResult, setKeywordSearchResult] = useState<KeywordLastResult[]>([]);
@@ -99,25 +100,26 @@ const KeywordDetails = ({ keyword, closeDetails, backlinks }: KeywordDetailsProp
                </button>
             </div>
             <div className='keywordDetails__content p-6'>
-
-               <div className='keywordDetails__section'>
-                  <div className="keywordDetails__section__head flex justify-between mb-5">
-                     <h3 className=' font-bold text-gray-700 text-lg'>SERP History</h3>
-                     <div className="keywordDetails__section__chart_select mr-3">
-                        <SelectField
-                           options={dateOptions}
-                           selected={[chartTime]}
-                           defaultLabel="Select Date"
-                           updateField={(updatedTime: [string]) => setChartTime(updatedTime[0])}
-                           multiple={false}
-                           rounded={'rounded'}
-                        />
+               {showSerpHistory
+                  && <div className='keywordDetails__section'>
+                     <div className="keywordDetails__section__head flex justify-between mb-5">
+                        <h3 className=' font-bold text-gray-700 text-lg'>SERP History</h3>
+                        <div className="keywordDetails__section__chart_select mr-3">
+                           <SelectField
+                              options={dateOptions}
+                              selected={[chartTime]}
+                              defaultLabel="Select Date"
+                              updateField={(updatedTime: [string]) => setChartTime(updatedTime[0])}
+                              multiple={false}
+                              rounded={'rounded'}
+                           />
+                        </div>
+                     </div>
+                     <div className='keywordDetails__section__chart h-64'>
+                        <Chart labels={chartData.labels} sreies={chartData.sreies} backlinks={chartData.backlinks} backlinksData={chartData.backlinksData} />
                      </div>
                   </div>
-                  <div className='keywordDetails__section__chart h-64'>
-                     <Chart labels={chartData.labels} sreies={chartData.sreies} backlinks={chartData.backlinks} backlinksData={chartData.backlinksData} />
-                  </div>
-               </div>
+               }
                <div className='keywordDetails__section mt-10'>
                   <div className="keywordDetails__section__head flex justify-between items-center pb-4 mb-4 border-b border-b-slate-200">
                      <h3 className=' font-bold text-gray-700 lg:text-lg'>Google Search Result

@@ -13,7 +13,7 @@ export const fetchCustomKeywords = async (router: NextRouter) => {
    const searchParam = router.query.search;
    if (!router.query.page) { page = '1' };
    let query = `${window.location.origin}/api/custom_keywords?`;
-   let queryParams: any = { page };
+   let queryParams: any = { page, device: router.query.device };
    if (searchParam && searchParam !== '') {
       queryParams = { ...queryParams, search: searchParam };
    }

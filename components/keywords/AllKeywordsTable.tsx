@@ -23,11 +23,12 @@ type KeywordsTableProps = {
    isConsoleIntegrated: boolean,
    showPosition?: boolean,
    showHistory?: boolean,
+   compareWithHistory?: boolean,
    countByDevice?: any,
 }
 
 const AllKeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter, countByDevice = {} } = props;
+   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter, countByDevice = {}, compareWithHistory = true } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -35,7 +36,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
    const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
    const [showTagManager, setShowTagManager] = useState<null | number>(null);
    const [showAddTags, setShowAddTags] = useState<boolean>(false);
-   const [filterParams, setFilterParams] = useState<KeywordFilters>({ countries: [], tags: [], search: '', domain: '' });
+   const [filterParams, setFilterParams] = useState<KeywordFilters>({ countries: [], tags: [], search: '', domain: '', device: 'desktop' });
    const [sortBy, setSortBy] = useState<string>('date_asc');
    const [scDataType, setScDataType] = useState<string>('threeDays');
    const [showScDataTypes, setShowScDataTypes] = useState<boolean>(false);
@@ -54,15 +55,19 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
    };
 
    const processedKeywords: { [key: string]: KeywordType[] } = useMemo(() => {
-      const procKeywords = keywords.filter((x) => x.device === device);
+      // const procKeywords = keywords.filter((x) => x.device === device);
       // const filteredKeywords = filterKeywords(procKeywords, filterParams);
       // const sortedKeywords = sortKeywords(filteredKeywords, sortBy, scDataType);
-      return keywordsByDevice(procKeywords, device);
-   }, [keywords, device]);
+      return keywordsByDevice(keywords, device);
+   }, [keywords]);
 
    useEffect(() => {
       filter({ sortBy, filterParams, scDataType });
    }, [sortBy, filterParams, scDataType]);
+
+   useEffect(() => {
+      setFilterParams({ ...filterParams, device });
+   }, [device]);
 
    const allDomainTags: string[] = useMemo(() => {
       const allTags = keywords.reduce((acc: string[], keyword) => [...acc, ...keyword.tags], []);
@@ -222,6 +227,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                            scDataType={scDataType}
                            showHistory={showHistory}
                            showPosition={showPosition}
+                           compareWithHistory={compareWithHistory}
                         />)}
                      {!isLoading && processedKeywords[device].length === 0 && (
                         <p className=' p-9 pt-[10%] text-center text-gray-500'>No Keywords Added for this Device Type.</p>
@@ -234,7 +240,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
             </div>
          </div>
          {showKeyDetails && showKeyDetails.ID && (
-            <KeywordDetails keyword={showKeyDetails} backlinks={backlinks} closeDetails={() => setShowKeyDetails(null)} />
+            <KeywordDetails keyword={showKeyDetails} backlinks={backlinks} closeDetails={() => setShowKeyDetails(null)} showSerpHistory={false} />
          )}
          {showRemoveModal && selectedKeywords.length > 0 && (
             <Modal closeModal={() => { setSelectedKeywords([]); setShowRemoveModal(false); }} title={'Remove Keywords'}>

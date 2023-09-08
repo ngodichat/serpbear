@@ -24,10 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
-    const pageSize = 20;
+    const pageSize = 100;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { domain, search, country } = req.query;
-    console.log(domain, search, country);
+    const { device, domain, search, country } = req.query;
+    console.log(device, domain, search, country);
 
     try {
         let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
@@ -49,7 +49,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         }
         const countByDeviceQuery = `select device, count(1) as count from (${baseQuery}) as temp group by device`;
 
-        const [result] = await db.query(`${baseQuery} limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
+        const [result] = await db.query(`${baseQuery} and device = '${device}' limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
         const [total] = await db.query(countByDeviceQuery);
         console.log('total: ', total);
         const processedKeywords: any = [];
