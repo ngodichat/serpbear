@@ -74,7 +74,7 @@ const KeywordsPage: NextPage = () => {
                />
                <AllKeywordsTable
                   isLoading={keywordsLoading}
-                  showPosition={false}
+                  showPosition={true && filters.filterParams && (filters.filterParams.domain !== '')}
                   showHistory={false}
                   domain={null}
                   keywords={theKeywords}

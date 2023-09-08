@@ -30,7 +30,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
     console.log(domain, search, country);
 
     try {
-        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history
+        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
         FROM    keyword a
             INNER JOIN
             (
@@ -68,6 +68,15 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             const lastWeekHistory: KeywordHistory = {};
             historySorted.slice(-7).forEach((x: any) => { lastWeekHistory[x.dateRaw] = x.position; });
             const keywordWithSlimHistory = { ...keyword, lastResult: [], history: lastWeekHistory };
+            // update keyword position based on domain
+            if (domain) {
+                const lastResult = JSON.parse(keyword.lastResult);
+                lastResult.forEach((r: any) => {
+                    if (r.url.includes(domain)) {
+                        keywordWithSlimHistory.position = r.position;
+                    }
+                });
+            }
             // const finalKeyword = domainSCData ? integrateKeywordSCData(keywordWithSlimHistory, domainSCData) : keywordWithSlimHistory;
             return keywordWithSlimHistory;
         });
