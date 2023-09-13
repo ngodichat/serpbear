@@ -70,10 +70,12 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             const keywordWithSlimHistory = { ...keyword, lastResult: [], history: lastWeekHistory };
             // update keyword position based on domain
             if (domain) {
+                keywordWithSlimHistory.position = 0;
                 const lastResult = JSON.parse(keyword.lastResult);
                 lastResult.forEach((r: any) => {
                     if (r.url.includes(domain)) {
                         keywordWithSlimHistory.position = r.position;
+                        keywordWithSlimHistory.url = r.url;
                     }
                 });
             }

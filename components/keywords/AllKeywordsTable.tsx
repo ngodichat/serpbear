@@ -172,7 +172,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                      )}
                      <span className='domKeywords_head_volume flex-1 basis-16 grow-0 text-center'>Volume</span>
                      <span className='domKeywords_head_ppc flex-1 basis-40 grow-0 text-center'>PPC Low - High</span>
-                     {showHistory && (<span className='domKeywords_head_url flex-1'>URL</span>)}
+                     {showPosition && (<span className='domKeywords_head_url flex-1'>URL</span>)}
                      <span className='domKeywords_head_updated flex-1'>Updated</span>
                      {showSCData && (
                         <div className='domKeywords_head_sc flex-1 min-w-[170px] mr-7 text-center'>

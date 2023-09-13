@@ -125,14 +125,13 @@ const Keyword = (props: KeywordProps) => {
          )}
          <div className='hidden lg:block basis-16 grow-0 text-center'>{volume?.toLocaleString('en-US', { style: 'decimal' })}</div>
          <div className='hidden lg:block basis-40 grow-0 text-center'>${low_top_of_page_bid} - ${high_top_of_page_bid}</div>
-         {showHistory && (
+         {showPosition && (
             <div
             className={`keyword_url inline-block mt-4 mr-5 ml-5 lg:flex-1 text-gray-400 lg:m-0 max-w-[70px] 
             overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-none lg:pr-5`}>
                <span className='mr-3 lg:hidden'><Icon type="link-alt" size={14} color="#999" /></span>{turncatedURL || '-'}</div>
          )}
-         <div
-         className='inline-block mt-[4] top-[-5px] relative lg:flex-1 lg:m-0'>
+         <div className='inline-block mt-[4] top-[-5px] relative lg:flex-1 lg:m-0'>
             <span className='mr-2 lg:hidden'><Icon type="clock" size={14} color="#999" /></span>
             <TimeAgo title={dayjs(lastUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={lastUpdated} />
          </div>

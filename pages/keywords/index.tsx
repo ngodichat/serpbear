@@ -10,6 +10,7 @@ import { useFetchCustomKeywords } from '../../services/keywords';
 import KeywordsHeader from '../../components/keywords/KeywordsHeader';
 import Paginator from '../../components/common/Paginator';
 import AllKeywordsTable from '../../components/keywords/AllKeywordsTable';
+import exportCSV from '../../utils/exportcsv';
 
 const KeywordsPage: NextPage = () => {
    const router = useRouter();
@@ -70,7 +71,7 @@ const KeywordsPage: NextPage = () => {
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
          <div className="flex w-full max-w-7xl mx-auto">
             <div className="domain_kewywords px-5 pt-10 lg:px-0 lg:pt-8 w-full mb-8">
-               <KeywordsHeader showAddModal={setShowAddKeywords}
+               <KeywordsHeader showAddModal={setShowAddKeywords} exportCsv={() => exportCSV(theKeywords)}
                />
                <AllKeywordsTable
                   isLoading={keywordsLoading}

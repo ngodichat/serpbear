@@ -6,7 +6,7 @@ import countries from './countries';
    * @param {string} domain - The domain name.
    * @returns {void}
    */
-const exportCSV = (keywords: KeywordType[] | SCKeywordType[], domain:string, scDataDuration = 'lastThreeDays') => {
+const exportCSV = (keywords: KeywordType[] | SCKeywordType[], domain:string = 'Export', scDataDuration = 'lastThreeDays') => {
    const isSCKeywords = !!(keywords && keywords[0] && keywords[0].uid);
    let csvHeader = 'ID,Keyword,Position,URL,Country,Device,Updated,Added,Tags\r\n';
    let csvBody = '';
@@ -23,11 +23,18 @@ const exportCSV = (keywords: KeywordType[] | SCKeywordType[], domain:string, scD
          // eslint-disable-next-line max-len
          csvBody += `${index}, ${keyword}, ${position === 0 ? '-' : position}, ${impressions}, ${clicks}, ${ctr}, ${countries[country][0]}, ${device}\r\n`;
       });
-   } else {
+   } else if (domain !== 'Export') {
       keywords.forEach((keywordData) => {
          const { ID, keyword, position, url, country, device, lastUpdated, added, tags } = keywordData as KeywordType;
          // eslint-disable-next-line max-len
          csvBody += `${ID}, ${keyword}, ${position === 0 ? '-' : position}, ${url || '-'}, ${countries[country][0]}, ${device}, ${lastUpdated}, ${added}, ${tags.join(',')}\r\n`;
+      });
+   } else {
+      csvHeader = 'Keyword,Position,URL,Country,Device,Updated\r\n'
+      keywords.forEach((keywordData) => {
+         const { ID, keyword, position, url, country, device, lastUpdated } = keywordData as KeywordType;
+         // eslint-disable-next-line max-len
+         csvBody += `${keyword}, ${position === 0 ? '-' : position}, ${url || '-'}, ${countries[country][0]}, ${device}, ${lastUpdated}\r\n`;
       });
    }
 
