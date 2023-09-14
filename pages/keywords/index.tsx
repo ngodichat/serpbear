@@ -50,7 +50,7 @@ const KeywordsPage: NextPage = () => {
 
    const filterKeywords = (mFilters: any) => {
       setFilters(mFilters);
-      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries, device: mFilters.filterParams.device ?? 'desktop' };
+      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries, device: mFilters.filterParams.device ?? 'desktop', sort: mFilters.sortBy };
       setCurrentPage(mFilters.page ?? 1);
       if (mFilters.filterParams.search !== '') {
          q = { ...q, search: mFilters.filterParams.search };

@@ -142,6 +142,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
                   integratedConsole={isConsoleIntegrated}
                   showDomainFilter={true}
                   countByDevice={countByDevice}
+                  isAllKeywordsPage={true}
                />
             )}
             <div className={`domkeywordsTable domkeywordsTable--keywords ${showSCData ? 'domkeywordsTable--hasSC' : ''} 

@@ -13,7 +13,7 @@ type KeywordDetailsProps = {
    showSerpHistory?: boolean,
 }
 
-const KeywordDetails = ({ keyword, closeDetails, backlinks, showSerpHistory = false }: KeywordDetailsProps) => {
+const KeywordDetails = ({ keyword, closeDetails, backlinks, showSerpHistory = true }: KeywordDetailsProps) => {
    const updatedDate = new Date(keyword.lastUpdated);
    const [keywordHistory, setKeywordHistory] = useState<KeywordHistory>(keyword.history);
    const [keywordSearchResult, setKeywordSearchResult] = useState<KeywordLastResult[]>([]);

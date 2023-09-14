@@ -26,8 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     const pageSize = 100;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { device, domain, search, country } = req.query;
-    console.log(device, domain, search, country);
+    const { device, domain, search, country, sort } = req.query;
+    console.log(device, domain, search, country, sort);
 
     try {
         let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
@@ -49,16 +49,22 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         }
         const countByDeviceQuery = `select device, count(1) as count from (${baseQuery}) as temp group by device`;
 
-        const [result] = await db.query(`${baseQuery} and device = '${device}' limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
-        const [total] = await db.query(countByDeviceQuery);
-        console.log('total: ', total);
         const processedKeywords: any = [];
-        result.forEach((r: any) => {
-            processedKeywords.push(r);
-        });
+        const [total] = await db.query(countByDeviceQuery);
+        if (!domain) {
+            const [result] = await db.query(`${baseQuery} and device = '${device}' limit ${pageSize} offset ${(currentPage - 1) * pageSize}`);
+            result.forEach((r: any) => {
+                processedKeywords.push(r);
+            });
+        } else {
+            const [result] = await db.query(`${baseQuery} and device = '${device}'`);
+            result.forEach((r: any) => {
+                processedKeywords.push(r);
+            });
+        }
         // const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
         // const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
-        const finalProcessedKeywords = processedKeywords.map((keyword: any) => {
+        let finalProcessedKeywords = processedKeywords.map((keyword: any) => {
             const historyArray = Object.keys(keyword.history).map((dateKey: string) => ({
                 date: new Date(dateKey).getTime(),
                 dateRaw: dateKey,
@@ -83,6 +89,14 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             return keywordWithSlimHistory;
         });
 
+        if (domain && sort && sort.includes('pos_')) {
+            if (sort === 'pos_asc') {
+                finalProcessedKeywords.sort((a: any, b: any) => a.position - b.position);
+            } else {
+                finalProcessedKeywords.sort((a: any, b: any) => b.position - a.position);
+            }
+            finalProcessedKeywords = finalProcessedKeywords.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Math.min(pageSize, finalProcessedKeywords.length - (currentPage - 1) * pageSize));
+        }
         // const [count] = await db.query(baseQuery);
         return res.status(200).json({
             keywords: finalProcessedKeywords,

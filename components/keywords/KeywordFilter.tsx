@@ -14,6 +14,7 @@ type KeywordFilterProps = {
    sortBy: string,
    integratedConsole?: boolean,
    isConsole?: boolean,
+   isAllKeywordsPage?: boolean,
    SCcountries?: string[];
    showDomainFilter?: boolean,
    countByDevice?: any,
@@ -39,6 +40,7 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       SCcountries = [],
       showDomainFilter = false,
       countByDevice = null,
+      isAllKeywordsPage = false,
    } = props;
    const [keywordCounts, setKeywordCounts] = useState<KeywordCountState>({ desktop: 0, mobile: 0 });
    const [sortOptions, showSortOptions] = useState(false);
@@ -125,6 +127,9 @@ const KeywordFilters = (props: KeywordFilterProps) => {
       sortOptionChoices.push({ value: 'ctr_asc', label: 'Highest CTR' });
       sortOptionChoices.push({ value: 'ctr_desc', label: 'Lowest CTR' });
    }
+   if (isAllKeywordsPage) {
+      sortOptionChoices.splice(3, 3);
+   }
    const sortItemStyle = (sortType: string) => {
       return `cursor-pointer py-2 px-3 hover:bg-[#FCFCFF] ${sortBy === sortType ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-50' : ''}`;
    };
@@ -210,30 +215,32 @@ const KeywordFilters = (props: KeywordFilterProps) => {
                   </div>
                }
             </div>
-            <div className='relative'>
-               <button
-                  data-testid="sort_button"
-                  className={`px-2 py-1 rounded ${sortOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
-                  title='Sort'
-                  onClick={() => showSortOptions(!sortOptions)}>
-                  <Icon type="sort" size={18} />
-               </button>
-               {sortOptions && (
-                  <ul
-                     data-testid="sort_options"
-                     className='sort_options mt-2 border absolute min-w-[0] right-0 rounded-lg
+            {((isAllKeywordsPage && searchDomain) || (!isAllKeywordsPage))
+               && (<div className='relative'>
+                  <button
+                     data-testid="sort_button"
+                     className={`px-2 py-1 rounded ${sortOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
+                     title='Sort'
+                     onClick={() => showSortOptions(!sortOptions)}>
+                     <Icon type="sort" size={18} />
+                  </button>
+                  {sortOptions && (
+                     <ul
+                        data-testid="sort_options"
+                        className='sort_options mt-2 border absolute min-w-[0] right-0 rounded-lg
                      max-h-96 bg-white z-[9999] w-44 overflow-y-auto styled-scrollbar'>
-                     {sortOptionChoices.map((sortOption) => {
-                        return <li
-                           key={sortOption.value}
-                           className={sortItemStyle(sortOption.value)}
-                           onClick={() => { updateSort(sortOption.value); showSortOptions(false); }}>
-                           {sortOption.label}
-                        </li>;
-                     })}
-                  </ul>
-               )}
-            </div>
+                        {sortOptionChoices.map((sortOption) => {
+                           return <li
+                              key={sortOption.value}
+                              className={sortItemStyle(sortOption.value)}
+                              onClick={() => { updateSort(sortOption.value); showSortOptions(false); }}>
+                              {sortOption.label}
+                           </li>;
+                        })}
+                     </ul>
+                  )}
+               </div>)
+            }
          </div>
       </div>
    );
