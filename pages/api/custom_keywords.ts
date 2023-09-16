@@ -123,7 +123,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
 const exportCSV = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     try {
         const { device, domain, search, countries, sort } = req.body;
-        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
+        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid as 'PPC Low', high_top_of_page_bid as 'PPC High', lastUpdated, tags, a.history, a.position
         FROM    keyword a
             INNER JOIN
             (
@@ -171,9 +171,9 @@ const exportCSV = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetRe
             }
         }
 
-        let fields = ['keyword', 'country', 'device', 'lastUpdated'];
+        let fields = ['keyword', 'country', 'device', 'volume', 'PPC Low', 'PPC High', 'lastUpdated'];
         if (domain) {
-            fields = ['keyword', 'position', 'url', 'country', 'device', 'lastUpdated'];
+            fields = ['keyword', 'position', 'url', 'country', 'device', 'volume', 'PPC Low', 'PPC High', 'lastUpdated'];
         }
         const opts = { fields };
         const csv = parse(finalProcessedKeywords, opts);
