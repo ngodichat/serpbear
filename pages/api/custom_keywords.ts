@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { parse } from 'json2csv';
 import db from '../../database/database';
 import Keyword from '../../database/models/keyword';
 import verifyUser from '../../utils/verifyUser';
@@ -19,6 +20,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
         return getKeywords(req, res);
+    }
+
+    if (req.method === 'POST') {
+        if (req.query.export === 'csv') {
+            return exportCSV(req, res);
+        }
     }
     return res.status(502).json({ error: 'Unrecognized Route.' });
 }
@@ -110,5 +117,71 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
     } catch (error) {
         console.log('Error loading keywords: ', error);
         return res.status(400).json({ error: 'Error Loading all Keywords.' });
+    }
+};
+
+const exportCSV = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
+    try {
+        const { device, domain, search, countries, sort } = req.body;
+        let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
+        FROM    keyword a
+            INNER JOIN
+            (
+                SELECT keyword, MIN(id) id
+                FROM keyword 
+                GROUP BY keyword, country, device
+            ) b
+                ON a.keyword = b.keyword AND
+                    a.id = b.id
+        where lastResult like '%${domain ?? ''}%'
+        and a.keyword like '%${search ?? ''}%'
+        `;
+        const processedKeywords: any = [];
+        if (countries.length > 0) {
+            const transform = countries.map((i: any) => `'${i}'`).join(',');
+            baseQuery = `${baseQuery} and country in (${transform})`;
+        }
+        const [result] = await db.query(`${baseQuery} and device = '${device}'`);
+        result.forEach((r: any) => {
+            processedKeywords.push(r);
+        });
+
+        const finalProcessedKeywords = processedKeywords.map((keyword: any) => {
+            const keywordWithSlimHistory = { ...keyword };
+            // update keyword position based on domain
+            if (domain) {
+                keywordWithSlimHistory.position = 0;
+                const lastResult = JSON.parse(keyword.lastResult);
+                lastResult.forEach((r: any) => {
+                    if (r.url.includes(domain)) {
+                        keywordWithSlimHistory.position = r.position;
+                        keywordWithSlimHistory.url = r.url;
+                    }
+                });
+            }
+            // const finalKeyword = domainSCData ? integrateKeywordSCData(keywordWithSlimHistory, domainSCData) : keywordWithSlimHistory;
+            return keywordWithSlimHistory;
+        });
+
+        if (domain && sort && sort.includes('pos_')) {
+            if (sort === 'pos_asc') {
+                finalProcessedKeywords.sort((a: any, b: any) => a.position - b.position);
+            } else {
+                finalProcessedKeywords.sort((a: any, b: any) => b.position - a.position);
+            }
+        }
+
+        let fields = ['keyword', 'country', 'device', 'lastUpdated'];
+        if (domain) {
+            fields = ['keyword', 'position', 'url', 'country', 'device', 'lastUpdated'];
+        }
+        const opts = { fields };
+        const csv = parse(finalProcessedKeywords, opts);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=data.csv');
+        return res.status(200).end(csv);
+    } catch (error) {
+        console.log('Error exporting csv: ', error);
+        return res.status(500).json({ error: 'Error exporting csv' });
     }
 };

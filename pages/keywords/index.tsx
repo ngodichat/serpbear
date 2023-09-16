@@ -6,11 +6,10 @@ import TopBar from '../../components/common/TopBar';
 import AddDomain from '../../components/domains/AddDomain';
 import Settings from '../../components/settings/Settings';
 import { useFetchSettings } from '../../services/settings';
-import { useFetchCustomKeywords } from '../../services/keywords';
+import { downloadCSV, useFetchCustomKeywords } from '../../services/keywords';
 import KeywordsHeader from '../../components/keywords/KeywordsHeader';
 import Paginator from '../../components/common/Paginator';
 import AllKeywordsTable from '../../components/keywords/AllKeywordsTable';
-import exportCSV from '../../utils/exportcsv';
 
 const KeywordsPage: NextPage = () => {
    const router = useRouter();
@@ -25,6 +24,10 @@ const KeywordsPage: NextPage = () => {
    const [totalPages, setTotalPages] = useState(1);
    const [filters, setFilters] = useState<any>('');
    const [countByDevice, setCountByDevice] = useState<any>();
+
+   const exportCSV = () => {
+      downloadCSV({ ...filters.filterParams, sort: filters.sortBy });
+   };
 
    const onPageChange = (pageNum: number) => {
       setCurrentPage(pageNum);
@@ -71,7 +74,7 @@ const KeywordsPage: NextPage = () => {
          <TopBar showSettings={() => setShowSettings(true)} showAddModal={() => setShowAddDomain(true)} showAddDomainModal={() => setShowAddDomain(true)} />
          <div className="flex w-full max-w-7xl mx-auto">
             <div className="domain_kewywords px-5 pt-10 lg:px-0 lg:pt-8 w-full mb-8">
-               <KeywordsHeader showAddModal={setShowAddKeywords} exportCsv={() => exportCSV(theKeywords)}
+               <KeywordsHeader showAddModal={setShowAddKeywords} exportCsv={() => exportCSV()}
                />
                <AllKeywordsTable
                   isLoading={keywordsLoading}

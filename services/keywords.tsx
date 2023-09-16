@@ -212,3 +212,47 @@ export function useRefreshKeywords(onSuccess: Function) {
       },
    });
 }
+
+export const downloadCSV = async (filters: any) => {
+   try {
+      // Fetch the CSV data from the API
+      const response = await fetch(`${window.location.origin}/api/custom_keywords?export=csv`, {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(filters),
+      });
+
+      // Check if the request was successful
+      if (!response.ok) {
+         toast('Error Downloading csv file.', { icon: '⚠️' });
+         return;
+      }
+
+      // Convert the streamed response object to a Blob
+      const blob = await response.blob();
+
+      // Create an object URL for the Blob object
+      const url = URL.createObjectURL(blob);
+
+      // Generate current date string in 'YYYY-MM-DD' format
+      const currentDate = new Date().toISOString().slice(0, 10)
+
+      // Create a link element, hide it, direct it towards the object URL and trigger it
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `export_${currentDate}.csv`;  // the file name
+
+      // Add the link to the DOM and simulate a click to start the download
+      document.body.appendChild(a);
+      a.click();
+
+      // Dispose of the object URL and remove the link from the DOM
+      URL.revokeObjectURL(url);
+      a.remove();
+   } catch (error) {
+      console.error('There was a problem with the download:', error);
+   }
+};
