@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { CSSTransition } from 'react-transition-group';
 import AddKeywords from './AddKeywords';
@@ -19,13 +19,14 @@ type KeywordsTableProps = {
    isLoading: boolean,
    showAddModal: boolean,
    setShowAddModal: Function,
+   setFilter: Function,
    isConsoleIntegrated: boolean,
    showPosition?: boolean,
    showHistory?: boolean,
 }
 
 const KeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true } = props;
+   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, setFilter } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -56,7 +57,12 @@ const KeywordsTable = (props: KeywordsTableProps) => {
       const filteredKeywords = filterKeywords(procKeywords, filterParams);
       const sortedKeywords = sortKeywords(filteredKeywords, sortBy, scDataType);
       return keywordsByDevice(sortedKeywords, device);
-   }, [keywords, device, sortBy, filterParams, scDataType]);
+   }, [keywords, sortBy, filterParams, scDataType]);
+
+   useEffect(() => {
+      setFilterParams({ ...filterParams, device });
+      setFilter({ ...filterParams, device });
+   }, [device]);
 
    const allDomainTags: string[] = useMemo(() => {
       const allTags = keywords.reduce((acc: string[], keyword) => [...acc, ...keyword.tags], []);
