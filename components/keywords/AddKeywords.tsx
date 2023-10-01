@@ -41,7 +41,7 @@ const AddKeywords = ({ closeModal, domain, keywords }: AddKeywordsProps) => {
                return;
             }
             newKeywordsArray = newKeywordsArray.filter((k: any) => !keywordExist.includes(k.keyword));
-            console.log('newKeywordsArray', keywordExist, currentKeywords, newKeywordsArray);
+            console.log('newKeywordsArray', keywordExist, currentKeywords, newKeywordsArray, useExistingData);
             return;
          }
          addMutate(newKeywordsArray);
@@ -103,14 +103,14 @@ const AddKeywords = ({ closeModal, domain, keywords }: AddKeywordsProps) => {
                   <div className='flex-1'>
                      <div className="mt-5 mb-3 text-sm font-medium text-gray-900 dark:text-gray-300">Ignore duplicates</div>
                      <label className="relative inline-flex items-center cursor-pointer mb-8">
-                        <input type="checkbox" value="" className="sr-only peer" onChange={(event: any) => { setIgnoreDuplicates(event.target.checked) }} />
+                        <input type="checkbox" value="" className="sr-only peer" onChange={(event: any) => { setIgnoreDuplicates(event.target.checked); }} />
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                      </label>
                   </div>
                   <div className='flex-1'>
                      <div className="mt-5 mb-3 text-sm font-medium text-gray-900 dark:text-gray-300">Use existing data</div>
                      <label className="relative inline-flex items-center cursor-pointer mb-8">
-                        <input type="checkbox" value="" className="sr-only peer" onChange={(event: any) => { setUseExistingData(event.target.checked) }} />
+                        <input type="checkbox" value="" className="sr-only peer" onChange={(event: any) => { setUseExistingData(event.target.checked); }} />
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                      </label>
                   </div>

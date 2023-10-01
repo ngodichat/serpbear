@@ -113,7 +113,7 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
       if (udpatedkeyword && keyword) {
          // const newPos = udpatedkeyword.position;
          // const newPosition = newPos !== false ? newPos : keyword.position;
-         console.log('udpatedkeyword.result: ', udpatedkeyword.result);
+         // console.log('udpatedkeyword.result: ', udpatedkeyword.result);
          const serp = getSerp(keyword.domain, udpatedkeyword.result);
          const newPos = serp.postion as number;
          const newPosition = newPos;

@@ -95,6 +95,7 @@ type SettingsType = {
    keyword_volume_username: string,
    keyword_volume_password: string,
    scraping_frequency: number, 
+   keyword_volume_countries_limit: string,
 }
 
 type KeywordSCDataChild = {

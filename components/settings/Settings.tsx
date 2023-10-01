@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import TimeAgo from 'react-timeago';
+import dayjs from 'dayjs';
 import useUpdateKeywordVolume from '../../services/keywordVolume';
 // import { useQuery } from 'react-query';
 import useUpdateSettings, { useFetchSettings } from '../../services/settings';
 import Icon from '../common/Icon';
 import SelectField, { SelectionOption } from '../common/SelectField';
+import { useFetchKeywordsCountByCountry } from '../../services/keywords';
+import countries from '../../utils/countries';
 
 type SettingsProps = {
    closeSettings: Function,
@@ -13,6 +17,12 @@ type SettingsProps = {
 type SettingsError = {
    type: string,
    msg: string
+}
+
+interface KeywordCountByCountry {
+   country: string;
+   keyword_count: number;
+   max_lastUpdated: string;
 }
 
 const defaultSettings = {
@@ -27,16 +37,23 @@ const defaultSettings = {
    keyword_volume_type: 'none',
    keyword_volume_username: '',
    keyword_volume_password: '',
+   keyword_volume_countries_limit: '',
    scraping_frequency: 24,
 };
 
-const Settings = ({ closeSettings }:SettingsProps) => {
+const Settings = ({ closeSettings }: SettingsProps) => {
    const [currentTab, setCurrentTab] = useState<string>('scraper');
    const [settings, setSettings] = useState<SettingsType>(defaultSettings);
-   const [settingsError, setSettingsError] = useState<SettingsError|null>(null);
+   const [settingsError, setSettingsError] = useState<SettingsError | null>(null);
    const { mutate: updateMutate, isLoading: isUpdating } = useUpdateSettings(() => console.log(''));
    const { mutate: updateVolume, isLoading: isUpdatingVolume } = useUpdateKeywordVolume(() => console.log(''));
    const { data: appSettings, isLoading } = useFetchSettings();
+   const { keywordsCountByCountry: keywordsCountByCountryData } = useFetchKeywordsCountByCountry();
+   const [keywordsCountByCountry, setKeywordsCountByCountry] = useState<KeywordCountByCountry[]>([]);
+   const [selected, setSelected] = useState<Record<string, boolean>>({}); // To keep track of selected checkboxes
+   const [searchTerm, setSearchTerm] = useState(''); // To keep track of the search term
+
+   const filteredData = keywordsCountByCountry.filter(({ country }) => countries[country][0].toLowerCase().includes(searchTerm.toLowerCase()));
 
    useEffect(() => {
       if (appSettings && appSettings.settings) {
@@ -45,9 +62,21 @@ const Settings = ({ closeSettings }:SettingsProps) => {
    }, [appSettings]);
 
    useEffect(() => {
-      const closeModalonEsc = (event:KeyboardEvent) => {
+      if (keywordsCountByCountryData) {
+         setKeywordsCountByCountry(keywordsCountByCountryData.keywordsCountByCountry);
+         if (settings.keyword_volume_countries_limit) {
+            const selectedCountries = settings.keyword_volume_countries_limit.split(',').reduce((acc: any, country) => {
+               acc[country] = true;
+               return acc;
+            }, {});
+            setSelected(selectedCountries);
+         }
+      }
+   }, [keywordsCountByCountryData]);
+
+   useEffect(() => {
+      const closeModalonEsc = (event: KeyboardEvent) => {
          if (event.key === 'Escape') {
-            console.log(event.key);
             closeSettings();
          }
       };
@@ -57,28 +86,28 @@ const Settings = ({ closeSettings }:SettingsProps) => {
       };
    }, [closeSettings]);
 
-   const closeOnBGClick = (e:React.SyntheticEvent) => {
+   const closeOnBGClick = (e: React.SyntheticEvent) => {
       e.stopPropagation();
       e.nativeEvent.stopImmediatePropagation();
       if (e.target === e.currentTarget) { closeSettings(); }
    };
 
-   const updateSettings = (key: string, value:string|number) => {
+   const updateSettings = (key: string, value: string | number) => {
       setSettings({ ...settings, [key]: value });
    };
 
    const performUpdate = () => {
-      let error: null|SettingsError = null;
+      let error: null | SettingsError = null;
       const { notification_interval, notification_email, notification_email_from, scraper_type, smtp_port, smtp_server, scaping_api } = settings;
       if (notification_interval !== 'never') {
          if (!settings.notification_email) {
             error = { type: 'no_email', msg: 'Insert a Valid Email address' };
          }
          if (notification_email && (!smtp_port || !smtp_server || !notification_email_from)) {
-               let type = 'no_smtp_from';
-               if (!smtp_port) { type = 'no_smtp_port'; }
-               if (!smtp_server) { type = 'no_smtp_server'; }
-               error = { type, msg: 'Insert SMTP Server details that will be used to send the emails.' };
+            let type = 'no_smtp_from';
+            if (!smtp_port) { type = 'no_smtp_port'; }
+            if (!smtp_server) { type = 'no_smtp_server'; }
+            error = { type, msg: 'Insert SMTP Server details that will be used to send the emails.' };
          }
       }
 
@@ -93,6 +122,16 @@ const Settings = ({ closeSettings }:SettingsProps) => {
          // Perform Update
          updateMutate(settings);
       }
+   };
+
+   const handleCheckboxChange = (country: string) => {
+      const newSelected = {
+         ...selected,
+         [country]: !selected[country],
+      };
+      setSelected(newSelected);
+      const newSettings = Object.keys(newSelected).filter((mCountry) => newSelected[mCountry]).join(',');
+      updateSettings('keyword_volume_countries_limit', newSettings);
    };
 
    const labelStyle = 'mb-2 font-semibold inline-block text-sm text-gray-700 capitalize';
@@ -113,244 +152,271 @@ const Settings = ({ closeSettings }:SettingsProps) => {
 
    const tabStyle = 'inline-block px-4 py-1 rounded-full mr-3 cursor-pointer text-sm';
    return (
-       <div className="settings fixed w-full h-screen top-0 left-0 z-50" onClick={closeOnBGClick}>
-            <div className="absolute w-full max-w-xs bg-white customShadow top-0 right-0 h-screen" data-loading={isLoading} >
-               {isLoading && <div className='absolute flex content-center items-center h-full'><Icon type="loading" size={24} /></div>}
-               <div className='settings__header p-6 border-b border-b-slate-200 text-slate-500'>
-                  <h3 className=' text-black text-lg font-bold'>Settings</h3>
-                  <button
+      <div className="settings fixed w-full h-screen top-0 left-0 z-50" onClick={closeOnBGClick}>
+         <div className="absolute w-full max-w-xs bg-white customShadow top-0 right-0 h-screen" data-loading={isLoading} >
+            {isLoading && <div className='absolute flex content-center items-center h-full'><Icon type="loading" size={24} /></div>}
+            <div className='settings__header p-6 border-b border-b-slate-200 text-slate-500'>
+               <h3 className=' text-black text-lg font-bold'>Settings</h3>
+               <button
                   className=' absolute top-2 right-2 p-2 px-3 text-gray-400 hover:text-gray-700 transition-all hover:rotate-90'
                   onClick={() => closeSettings()}>
-                     <Icon type='close' size={24} />
-                  </button>
-               </div>
-               <div className=' px-4 mt-4 '>
-                  <ul className='flex'>
-                     <li
+                  <Icon type='close' size={24} />
+               </button>
+            </div>
+            <div className=' px-4 mt-4 '>
+               <ul className='flex'>
+                  <li
                      className={`${tabStyle} ${currentTab === 'scraper' ? ' bg-blue-50 text-blue-600' : ''}`}
                      onClick={() => setCurrentTab('scraper')}>
-                        Scraper
-                     </li>
-                     <li
+                     Scraper
+                  </li>
+                  <li
                      className={`${tabStyle} ${currentTab === 'notification' ? ' bg-blue-50 text-blue-600' : ''}`}
                      onClick={() => setCurrentTab('notification')}>
-                        Notification
-                     </li>
-                     <li
+                     Notification
+                  </li>
+                  <li
                      className={`${tabStyle} ${currentTab === 'volume' ? ' bg-blue-50 text-blue-600' : ''}`}
                      onClick={() => setCurrentTab('volume')}>
-                        Volume
-                     </li>
-                  </ul>
-               </div>
-               {currentTab === 'scraper' && (
-                  <div>
-                     <div className='settings__content styled-scrollbar p-6 text-sm'>
-                        <div className="settings__section__select mb-5">
-                           <label className={labelStyle}>Scraping Method</label>
-                           <SelectField
+                     Volume
+                  </li>
+               </ul>
+            </div>
+            {currentTab === 'scraper' && (
+               <div>
+                  <div className='settings__content styled-scrollbar p-6 text-sm'>
+                     <div className="settings__section__select mb-5">
+                        <label className={labelStyle}>Scraping Method</label>
+                        <SelectField
                            options={scraperOptions}
                            selected={[settings.scraper_type || 'none']}
                            defaultLabel="Select Scraper"
-                           updateField={(updatedTime:[string]) => updateSettings('scraper_type', updatedTime[0])}
+                           updateField={(updatedTime: [string]) => updateSettings('scraper_type', updatedTime[0])}
                            multiple={false}
                            rounded={'rounded'}
                            minWidth={270}
+                        />
+                     </div>
+                     {['scrapingant', 'scrapingrobot', 'serply', 'serpapi'].includes(settings.scraper_type) && (
+                        <div className="settings__section__input mr-3">
+                           <label className={labelStyle}>Scraper API Key or Token</label>
+                           <input
+                              className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
+                                 ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
+                              type="text"
+                              value={settings?.scaping_api || ''}
+                              placeholder={'API Key/Token'}
+                              onChange={(event) => updateSettings('scaping_api', event.target.value)}
                            />
                         </div>
-                        {['scrapingant', 'scrapingrobot', 'serply', 'serpapi'].includes(settings.scraper_type) && (
-                           <div className="settings__section__input mr-3">
-                              <label className={labelStyle}>Scraper API Key or Token</label>
-                              <input
-                                 className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
+                     )}
+                     {['scrapingant', 'scrapingrobot', 'serply', 'serpapi'].includes(settings.scraper_type) && (
+                        <div className="settings__section__input mr-3">
+                           <label className={labelStyle}>Scraping Frequency (Hours)</label>
+                           <input
+                              className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
                                  ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                 type="text"
-                                 value={settings?.scaping_api || ''}
-                                 placeholder={'API Key/Token'}
-                                 onChange={(event) => updateSettings('scaping_api', event.target.value)}
-                              />
-                           </div>
-                        )}
-                        {['scrapingant', 'scrapingrobot', 'serply', 'serpapi'].includes(settings.scraper_type) && (
-                           <div className="settings__section__input mr-3">
-                              <label className={labelStyle}>Scraping Frequency (Hours)</label>
-                              <input
-                                 className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
-                                 ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                 type="text"
-                                 value={settings?.scraping_frequency}
-                                 placeholder={'12, 24, 48'}
-                                 onChange={(event) => updateSettings('scraping_frequency', event.target.value)}
-                              />
-                           </div>
-                        )}
-                        {settings.scraper_type === 'proxy' && (
-                           <div className="settings__section__input mb-5">
-                              <label className={labelStyle}>Proxy List</label>
-                              <textarea
-                                 className={`w-full p-2 border border-gray-200 rounded mb-3 text-xs 
+                              type="text"
+                              value={settings?.scraping_frequency}
+                              placeholder={'12, 24, 48'}
+                              onChange={(event) => updateSettings('scraping_frequency', event.target.value)}
+                           />
+                        </div>
+                     )}
+                     {settings.scraper_type === 'proxy' && (
+                        <div className="settings__section__input mb-5">
+                           <label className={labelStyle}>Proxy List</label>
+                           <textarea
+                              className={`w-full p-2 border border-gray-200 rounded mb-3 text-xs 
                                  focus:outline-none min-h-[160px] focus:border-blue-200 
                                  ${settingsError && settingsError.type === 'no_email' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                 value={settings?.proxy}
-                                 placeholder={'http://122.123.22.45:5049\nhttps://user:password@122.123.22.45:5049'}
-                                 onChange={(event) => updateSettings('proxy', event.target.value)}
-                              />
-                           </div>
-                        )}
-                     </div>
-                  </div>
-               )}
-
-               {currentTab === 'notification' && (
-                  <div>
-                     <div className='settings__content styled-scrollbar p-6 text-sm'>
-                        <div className="settings__section__input mb-5">
-                           <label className={labelStyle}>Notification Frequency</label>
-                           <SelectField
-                              multiple={false}
-                              selected={[settings.notification_interval]}
-                              options={notificationOptions}
-                              defaultLabel={'Notification Settings'}
-                              updateField={(updated:string[]) => updated[0] && updateSettings('notification_interval', updated[0])}
-                              rounded='rounded'
-                              maxHeight={48}
-                              minWidth={270}
+                              value={settings?.proxy}
+                              placeholder={'http://122.123.22.45:5049\nhttps://user:password@122.123.22.45:5049'}
+                              onChange={(event) => updateSettings('proxy', event.target.value)}
                            />
                         </div>
-                        {settings.notification_interval !== 'never' && (
-                           <>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>Notification Emails</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
-                                    ${settingsError && settingsError.type === 'no_email' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                    type="text"
-                                    value={settings?.notification_email}
-                                    placeholder={'test@gmail.com'}
-                                    onChange={(event) => updateSettings('notification_email', event.target.value)}
-                                 />
-                              </div>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>SMTP Server</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
-                                    ${settingsError && settingsError.type === 'no_smtp_server' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                    type="text"
-                                    value={settings?.smtp_server || ''}
-                                    onChange={(event) => updateSettings('smtp_server', event.target.value)}
-                                 />
-                              </div>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>SMTP Port</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
-                                    ${settingsError && settingsError.type === 'no_smtp_port' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                    type="text"
-                                    value={settings?.smtp_port || ''}
-                                    onChange={(event) => updateSettings('smtp_port', event.target.value)}
-                                 />
-                              </div>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>SMTP Username</label>
-                                 <input
-                                    className={'w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200'}
-                                    type="text"
-                                    value={settings?.smtp_username || ''}
-                                    onChange={(event) => updateSettings('smtp_username', event.target.value)}
-                                 />
-                              </div>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>SMTP Password</label>
-                                 <input
-                                    className={'w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200'}
-                                    type="text"
-                                    value={settings?.smtp_password || ''}
-                                    onChange={(event) => updateSettings('smtp_password', event.target.value)}
-                                 />
-                              </div>
-                              <div className="settings__section__input mb-5">
-                                 <label className={labelStyle}>From Email Address</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
-                                    ${settingsError && settingsError.type === 'no_smtp_from' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                    type="text"
-                                    value={settings?.notification_email_from || ''}
-                                    placeholder="no-reply@mydomain.com"
-                                    onChange={(event) => updateSettings('notification_email_from', event.target.value)}
-                                 />
-                              </div>
-                           </>
-                        )}
-
-                        </div>
-                        {settingsError && (
-                           <div className='absolute w-full bottom-16  text-center p-3 bg-red-100 text-red-600 text-sm font-semibold'>
-                              {settingsError.msg}
-                           </div>
-                        )}
+                     )}
                   </div>
-               )}
+               </div>
+            )}
 
-               {currentTab === 'volume' && (
-                  <div>
-                     <div className='settings__content styled-scrollbar p-6 text-sm'>
-                        <div className="settings__section__select mb-5">
-                           <label className={labelStyle}>Keyword Volume Method</label>
-                           <SelectField
+            {currentTab === 'notification' && (
+               <div>
+                  <div className='settings__content styled-scrollbar p-6 text-sm'>
+                     <div className="settings__section__input mb-5">
+                        <label className={labelStyle}>Notification Frequency</label>
+                        <SelectField
+                           multiple={false}
+                           selected={[settings.notification_interval]}
+                           options={notificationOptions}
+                           defaultLabel={'Notification Settings'}
+                           updateField={(updated: string[]) => updated[0] && updateSettings('notification_interval', updated[0])}
+                           rounded='rounded'
+                           maxHeight={48}
+                           minWidth={270}
+                        />
+                     </div>
+                     {settings.notification_interval !== 'never' && (
+                        <>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>Notification Emails</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
+                                    ${settingsError && settingsError.type === 'no_email' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.notification_email}
+                                 placeholder={'test@gmail.com'}
+                                 onChange={(event) => updateSettings('notification_email', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>SMTP Server</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
+                                    ${settingsError && settingsError.type === 'no_smtp_server' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.smtp_server || ''}
+                                 onChange={(event) => updateSettings('smtp_server', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>SMTP Port</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
+                                    ${settingsError && settingsError.type === 'no_smtp_port' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.smtp_port || ''}
+                                 onChange={(event) => updateSettings('smtp_port', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>SMTP Username</label>
+                              <input
+                                 className={'w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200'}
+                                 type="text"
+                                 value={settings?.smtp_username || ''}
+                                 onChange={(event) => updateSettings('smtp_username', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>SMTP Password</label>
+                              <input
+                                 className={'w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200'}
+                                 type="text"
+                                 value={settings?.smtp_password || ''}
+                                 onChange={(event) => updateSettings('smtp_password', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mb-5">
+                              <label className={labelStyle}>From Email Address</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none  focus:border-blue-200 
+                                    ${settingsError && settingsError.type === 'no_smtp_from' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.notification_email_from || ''}
+                                 placeholder="no-reply@mydomain.com"
+                                 onChange={(event) => updateSettings('notification_email_from', event.target.value)}
+                              />
+                           </div>
+                        </>
+                     )}
+
+                  </div>
+                  {settingsError && (
+                     <div className='absolute w-full bottom-16  text-center p-3 bg-red-100 text-red-600 text-sm font-semibold'>
+                        {settingsError.msg}
+                     </div>
+                  )}
+               </div>
+            )}
+
+            {currentTab === 'volume' && (
+               <div>
+                  <div className='settings__content styled-scrollbar p-6 text-sm'>
+                     <div className="settings__section__select mb-5">
+                        <label className={labelStyle}>Keyword Volume Method</label>
+                        <SelectField
                            options={keywordVolumeOptions}
                            selected={[settings.keyword_volume_type || 'none']}
                            defaultLabel="Select Keyword Volume Method"
-                           updateField={(updatedTime:[string]) => updateSettings('keyword_volume_type', updatedTime[0])}
+                           updateField={(updatedTime: [string]) => updateSettings('keyword_volume_type', updatedTime[0])}
                            multiple={false}
                            rounded={'rounded'}
                            minWidth={270}
-                           />
-                        </div>
-                        {['dataforseo'].includes(settings.keyword_volume_type) && (
-                           <div>
-                              <div className="settings__section__input mr-3">
-                                 <label className={labelStyle}>API Username</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
+                        />
+                     </div>
+                     {['dataforseo'].includes(settings.keyword_volume_type) && (
+                        <div>
+                           <div className="settings__section__input mr-3">
+                              <label className={labelStyle}>API Username</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
                                     ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.keyword_volume_username || ''}
+                                 placeholder={'API Username'}
+                                 onChange={(event) => updateSettings('keyword_volume_username', event.target.value)}
+                              />
+                           </div>
+                           <div className="settings__section__input mr-3">
+                              <label className={labelStyle}>API Password</label>
+                              <input
+                                 className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
+                                    ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
+                                 type="text"
+                                 value={settings?.keyword_volume_password || ''}
+                                 placeholder={'API Username'}
+                                 onChange={(event) => updateSettings('keyword_volume_password', event.target.value)}
+                              />
+                           </div>
+                           <div className='h-[500px] overflow-auto'>
+                              <div>
+                                 <label className={labelStyle} htmlFor="countrySearch">Filter by Country: </label>
+                                 <input
+                                    id="countrySearch"
+                                    className={'w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200'}
                                     type="text"
-                                    value={settings?.keyword_volume_username || ''}
-                                    placeholder={'API Username'}
-                                    onChange={(event) => updateSettings('keyword_volume_username', event.target.value)}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Type country name..."
                                  />
                               </div>
-                              <div className="settings__section__input mr-3">
-                                 <label className={labelStyle}>API Password</label>
-                                 <input
-                                    className={`w-full p-2 border border-gray-200 rounded mt-2 mb-3 focus:outline-none  focus:border-blue-200 
-                                    ${settingsError && settingsError.type === 'no_api_key' ? ' border-red-400 focus:border-red-400' : ''} `}
-                                    type="text"
-                                    value={settings?.keyword_volume_password || ''}
-                                    placeholder={'API Username'}
-                                    onChange={(event) => updateSettings('keyword_volume_password', event.target.value)}
-                                 />
-                              </div>
-                              <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
-                                 <button
+                              {filteredData
+                                 .map(({ country, keyword_count, max_lastUpdated }) => (
+                                    <div key={country}>
+                                       <label className='mb-2 block'>
+                                          <input
+                                             type="checkbox"
+                                             checked={!!selected[country]}
+                                             onChange={() => handleCheckboxChange(country)}
+                                          />
+                                          {` ${countries[country][0]}: ${keyword_count} `}
+                                          (<TimeAgo title={dayjs(max_lastUpdated).format('DD-MMM-YYYY, hh:mm:ss A')} date={max_lastUpdated} />)
+                                       </label>
+                                    </div>
+                                 ))}
+                           </div>
+                           <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
+                              <button
                                  onClick={() => updateVolume(settings)}
                                  className=' py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'>
                                  {isUpdatingVolume && <Icon type="loading" size={14} />} Update Keyword Volume
-                                 </button>
-                              </div>
+                              </button>
                            </div>
-                           )}
-                     </div>
+                        </div>
+                     )}
                   </div>
-               )}
-               <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
-                  <button
+               </div>
+            )}
+            <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
+               <button
                   onClick={() => performUpdate()}
                   className=' py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'>
                   {isUpdating && <Icon type="loading" size={14} />} Update Settings
-                  </button>
-               </div>
+               </button>
             </div>
-       </div>
+         </div>
+      </div>
    );
 };
 

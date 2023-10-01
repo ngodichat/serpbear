@@ -256,3 +256,21 @@ export const downloadCSV = async (filters: any) => {
       console.error('There was a problem with the download:', error);
    }
 };
+
+export const fetchKeywordsCountByCountry = async () => {
+   const res = await fetch(`${window.location.origin}/api/keywords/stats?groupByCountry=true`, { method: 'GET' });
+   return res.json();
+};
+
+export function useFetchKeywordsCountByCountry() {
+   const { data: keywordsCountByCountry, isLoading: isLoading, isError } = useQuery(
+      ['keywordsCountByCountry'],
+      () => fetchKeywordsCountByCountry(),
+      {
+         onSuccess: (data) => {
+            
+         },
+      },
+   );
+   return { keywordsCountByCountry, isLoading, isError };
+}

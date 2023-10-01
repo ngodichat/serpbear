@@ -1,13 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Op } from 'sequelize';
-import db from '../../database/database';
-import Keyword from '../../database/models/keyword';
-import { refreshAndUpdateKeywords } from './refresh';
-import { getAppSettings } from './settings';
-import verifyUser from '../../utils/verifyUser';
-import parseKeywords from '../../utils/parseKeywords';
-import { integrateKeywordSCData, readLocalSCData } from '../../utils/searchConsole';
-import Domain from '../../database/models/domain';
+import db from '../../../database/database';
+import Keyword from '../../../database/models/keyword';
+import { refreshAndUpdateKeywords } from '../refresh';
+import { getAppSettings } from '../settings';
+import verifyUser from '../../../utils/verifyUser';
+import parseKeywords from '../../../utils/parseKeywords';
+import { integrateKeywordSCData, readLocalSCData } from '../../../utils/searchConsole';
+import Domain from '../../../database/models/domain';
 
 type KeywordsGetResponse = {
    keywords?: KeywordType[],
@@ -84,6 +84,13 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
       // const keywordsArray = keywords.replaceAll('\n', ',').split(',').map((item:string) => item.trim());
       const keywordsToAdd: any = []; // QuickFIX for bug: https://github.com/sequelize/sequelize-typescript/issues/936
 
+      // get all volumes of existed keywords for that country
+      const keywordsVolume = await getKeywordsVolumeByCountry(keywords[0].country);
+      const keywordVolumeMap: any = {};
+      keywordsVolume.forEach((kv: any) => {
+         keywordVolumeMap[kv.keyword] = kv.volume;
+      });
+      console.log('keywordVolumeMap: ', keywordVolumeMap);
       keywords.forEach((kwrd: KeywordAddPayload) => {
          const { keyword, device, country, domain, tags } = kwrd;
          const tagsArray = tags ? tags.split(',').map((item: string) => item.trim()) : [];
@@ -100,9 +107,11 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             sticky: false,
             lastUpdated: new Date().toJSON(),
             added: new Date().toJSON(),
+            volume: keywordVolumeMap[keyword],
          };
          keywordsToAdd.push(newKeyword);
       });
+      console.log('keywordsToAdd: ', keywordsToAdd);
 
       try {
          const newKeywords: Keyword[] = await Keyword.bulkCreate(keywordsToAdd);
@@ -189,4 +198,35 @@ const getKeywordsStats = async (req: NextApiRequest, res: NextApiResponse<any>) 
       }
    });
    return res.status(200).json({ mobile, desktop });
+};
+
+/**
+ * @param country US
+ * @returns list of keywords with their volumes
+ */
+const getKeywordsVolumeByCountry = async (country: string) => {
+   try {
+      // Await the Sequelize promise to resolve
+      const keywords = await Keyword.findAll({
+         attributes: ['keyword', 'country', 'volume'], // Selecting only keyword, country, and volume columns
+         where: {
+            country, // Using the countryInput variable in the where clause
+            volume: {
+               [Op.ne]: null, // volume is not null
+            },
+         },
+         order: [
+            ['keyword', 'ASC'], // Ordering by keyword in ascending order
+            ['country', 'ASC'], // Ordering by country in ascending order
+         ],
+         group: ['keyword', 'country', 'volume'], // To get distinct rows
+      });
+
+      // Return the retrieved keywords
+      return keywords;
+   } catch (err) {
+      // Log any error that occurs during the query and rethrow it
+      console.error(err);
+      throw err;
+   }
 };
