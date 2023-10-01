@@ -28,7 +28,7 @@ const keywordsCountByCountry = async (req: NextApiRequest, res: NextApiResponse<
         const keywordStats = await Keyword.findAll({
             attributes: [
                 'country',
-                [Sequelize.fn('COUNT', Sequelize.col('keyword')), 'keyword_count'],
+                [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('keyword'))), 'keyword_count'],
                 [Sequelize.fn('MAX', Sequelize.col('lastUpdated')), 'max_lastUpdated'],
             ],
             group: ['country'],
