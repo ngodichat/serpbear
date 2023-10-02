@@ -84,8 +84,7 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                     tasks.push(task);
                 });
             });
-            console.log('task: ', tasks[0]);
-            
+            console.log('task: ', tasks[0]);            
             createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
                 .then((data) => {
                     // console.log('List of task ids: ', data, data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
