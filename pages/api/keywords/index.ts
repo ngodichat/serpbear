@@ -78,6 +78,16 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
    }
 };
 
+function cleanString(input: string) {
+   // Define a regular expression pattern to match the specified characters
+   const pattern = /[,!@%^()={};~`<>?\\|―-]/g;
+
+   // Replace matched characters with an empty string
+   const cleaned = input.replace(pattern, '');
+
+   return cleaned;
+}
+
 const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
    const { keywords } = req.body;
    if (keywords && Array.isArray(keywords) && keywords.length > 0) {
@@ -95,7 +105,7 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
          const { keyword, device, country, domain, tags } = kwrd;
          const tagsArray = tags ? tags.split(',').map((item: string) => item.trim()) : [];
          const newKeyword = {
-            keyword,
+            keyword: cleanString(keyword),
             device,
             domain,
             country,
@@ -107,7 +117,7 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             sticky: false,
             lastUpdated: new Date().toJSON(),
             added: new Date().toJSON(),
-            volume: keywordVolumeMap[keyword],
+            volume: keywordVolumeMap[cleanString(keyword)],
          };
          keywordsToAdd.push(newKeyword);
       });
