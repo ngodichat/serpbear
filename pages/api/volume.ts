@@ -33,11 +33,11 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
             const countriesLimit = settings.keyword_volume_countries_limit.split(',');
             const allKeywords: Keyword[] = await Keyword.findAll({
                 where: {
-                  country: {
-                    [Op.in]: countriesLimit,
-                  },
+                    country: {
+                        [Op.in]: countriesLimit,
+                    },
                 },
-              });
+            });
             const allCountries: Country[] = await Country.findAll();
             const countryDict: any = {};
             allCountries.forEach((country) => {
@@ -84,7 +84,7 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                     tasks.push(task);
                 });
             });
-            console.log('task: ', tasks[0]);            
+            console.log('task: ', tasks[0]);
             createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
                 .then((data) => {
                     // console.log('List of task ids: ', data, data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
