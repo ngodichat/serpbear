@@ -84,6 +84,8 @@ const updateKeywordVolume = async (req: NextApiRequest, res: NextApiResponse<Key
                     tasks.push(task);
                 });
             });
+            console.log('task: ', tasks[0]);
+            
             createPostTasksDataForSeo(tasks, username, password).then((response) => response.json())
                 .then((data) => {
                     // console.log('List of task ids: ', data, data.tasks.filter((item: any) => item.status_code === 20100).map((item: any) => item.id));
@@ -130,10 +132,12 @@ const getReadyTasksDataForSeo = async (tasks_: any[], username: string, password
     // let i = 0;
     while (tasks.length > 0) {
         const task = tasks.shift();
+        console.log(task);
         const res = await fetch(`https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/task_get/${task}`, { method: 'GET', headers });
         const data = await res.json();
         const { result, status_code } = data.tasks[0];
         if (result) {
+            console.log('Result: ', result);
             const country: Country | null = await Country.findOne({ where: { location_code: result[0].location_code } });
             if (country) {
                 const countryCode = country.country_iso_code;
