@@ -28,23 +28,33 @@ const AddKeywords = ({ closeModal, domain, keywords }: AddKeywordsProps) => {
    const deviceTabStyle = 'cursor-pointer px-3 py-2 rounded mr-2';
 
    const addKeywords = () => {
-      if (newKeywordsData.keywords) {
-         const keywordsArray = [...new Set(newKeywordsData.keywords.split('\n').map((item) => item.trim()).filter((item) => !!item))];
-         const currentKeywords = keywords.map((k) => `${k.keyword}-${k.device}-${k.country}`);
-         const keywordExist = keywordsArray.filter((k) => currentKeywords.includes(`${k}-${newKeywordsData.device}-${newKeywordsData.country}`));
-         const { device, country, domain: kDomain, tags } = newKeywordsData;
-         let newKeywordsArray = keywordsArray.map((nItem) => ({ keyword: nItem, device, country, domain: kDomain, tags }));
-         if (keywordExist.length > 0) {
-            if (!ignoreDuplicates) {
-               setError(`Keywords ${keywordExist.join(',')} already Exist`);
-               setTimeout(() => { setError(''); }, 3000);
-               return;
-            }
-            newKeywordsArray = newKeywordsArray.filter((k: any) => !keywordExist.includes(k.keyword));
-            console.log('newKeywordsArray', keywordExist, currentKeywords, newKeywordsArray, useExistingData);
-            return;
-         }
-         addMutate(newKeywordsArray);
+      /*   if (newKeywordsData.keywords) {
+           const keywordsArray = [...new Set(newKeywordsData.keywords.split('\n').map((item) => item.trim()).filter((item) => !!item))];
+           const currentKeywords = keywords.map((k) => `${k.keyword}-${k.device}-${k.country}`);
+           const keywordExist = keywordsArray.filter((k) => currentKeywords.includes(`${k}-${newKeywordsData.device}-${newKeywordsData.country}`));
+           const { device, country, domain: kDomain, tags } = newKeywordsData;
+           let newKeywordsArray = keywordsArray.map((nItem) => ({ keyword: nItem, device, country, domain: kDomain, tags }));
+           if (keywordExist.length > 0) {
+              if (!ignoreDuplicates) {
+                 setError(`Keywords ${keywordExist.join(',')} already Exist`);
+                 setTimeout(() => { setError(''); }, 3000);
+                 return;
+              }
+              newKeywordsArray = newKeywordsArray.filter((k: any) => !keywordExist.includes(k.keyword));
+              console.log('newKeywordsArray', keywordExist, currentKeywords, newKeywordsArray, useExistingData);
+              return;
+           }
+           addMutate(newKeywordsArray);
+        } else {
+           setError('Please Insert a Keyword');
+           setTimeout(() => { setError(''); }, 3000);
+        } */
+        if (newKeywordsData.keywords) {
+           const keywordsArray = [...new Set(newKeywordsData.keywords.split('\n').map((item) => item.trim()).filter((item) => !!item))];
+           const { device, country, domain: kDomain, tags } = newKeywordsData;
+           let newKeywordsArray = keywordsArray.map((nItem) => ({ keyword: nItem, device, country, domain: kDomain, tags }));
+           addMutate({keywords: newKeywordsArray, ignoreDuplicates, useExistingData});
+           console.log('Add keywords', ignoreDuplicates, useExistingData, newKeywordsArray);
       } else {
          setError('Please Insert a Keyword');
          setTimeout(() => { setError(''); }, 3000);
