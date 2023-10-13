@@ -89,8 +89,7 @@ function cleanString(input: string) {
 }
 
 const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
-   const { keywords, ignoreDuplicates, useExistingData } = req.body;
-   console.log(keywords, ignoreDuplicates, useExistingData);
+   const { keywords, useExistingData } = req.body;
    if (keywords && Array.isArray(keywords) && keywords.length > 0) {
       // const keywordsArray = keywords.replaceAll('\n', ',').split(',').map((item:string) => item.trim());
       const keywordsToAdd: any = []; // QuickFIX for bug: https://github.com/sequelize/sequelize-typescript/issues/936
@@ -101,37 +100,42 @@ const addKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
       keywordsVolume.forEach((kv: any) => {
          keywordVolumeMap[kv.keyword] = kv.volume;
       });
-      keywords.forEach((kwrd: KeywordAddPayload) => {
+
+      for await (const kwrd of keywords) {
          const { keyword, device, country, domain, tags } = kwrd;
          if (domain !== '') {
             const tagsArray = tags ? tags.split(',').map((item: string) => item.trim()) : [];
-            const newKeyword = {
-               keyword: cleanString(keyword),
-               device,
-               domain,
-               country,
-               position: 0,
-               updating: true,
-               history: JSON.stringify({}),
-               url: '',
-               tags: JSON.stringify(tagsArray),
-               sticky: false,
-               lastUpdated: new Date().toJSON(),
-               added: new Date().toJSON(),
-               volume: keywordVolumeMap[cleanString(keyword)],
-            };
-            keywordsToAdd.push(newKeyword);
+            const keywordFound = await Keyword.findOne({ where: { keyword: cleanString(keyword), device, domain, country } });
+            if (!keywordFound) {
+               const newKeyword = {
+                  keyword: cleanString(keyword),
+                  device,
+                  domain,
+                  country,
+                  position: 0,
+                  updating: true,
+                  history: JSON.stringify({}),
+                  url: '',
+                  tags: JSON.stringify(tagsArray),
+                  sticky: false,
+                  lastUpdated: new Date().toJSON(),
+                  added: new Date().toJSON(),
+                  volume: keywordVolumeMap[cleanString(keyword)],
+               };
+               keywordsToAdd.push(newKeyword);
+            }
          }
-      });
+      }
+
+      console.log('List of keywords to add: ', keywordsToAdd.length);
 
       try {
-         /* const newKeywords: Keyword[] = await Keyword.bulkCreate(keywordsToAdd);
+         const newKeywords: Keyword[] = await Keyword.bulkCreate(keywordsToAdd);
          const formattedkeywords = newKeywords.map((el) => el.get({ plain: true }));
          const keywordsParsed: KeywordType[] = parseKeywords(formattedkeywords);
          const settings = await getAppSettings();
-         refreshAndUpdateKeywords(newKeywords, settings); // Queue the SERP Scraping Process
-         return res.status(201).json({ keywords: keywordsParsed }); */
-         return res.status(200);
+         refreshAndUpdateKeywords(newKeywords, settings, useExistingData); // Queue the SERP Scraping Process
+         return res.status(201).json({ keywords: keywordsParsed });
       } catch (error) {
          console.log('[ERROR] Adding New Keywords ', error);
          return res.status(400).json({ error: 'Could Not Add New Keyword!' });

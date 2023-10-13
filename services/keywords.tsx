@@ -95,9 +95,9 @@ export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterv
 
 export function useAddKeywords(onSuccess: Function) {
    const queryClient = useQueryClient();
-   return useMutation(async ({ keywords, ignoreDuplicates, useExistingData }: { keywords: KeywordAddPayload[], ignoreDuplicates: boolean, useExistingData: boolean }) => {
+   return useMutation(async ({ keywords, useExistingData = false}: { keywords: KeywordAddPayload[], useExistingData?: boolean }) => {
       const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
-      const fetchOpts = { method: 'POST', headers, body: JSON.stringify({ keywords, ignoreDuplicates, useExistingData }) };
+      const fetchOpts = { method: 'POST', headers, body: JSON.stringify({ keywords, useExistingData }) };
       const res = await fetch(`${window.location.origin}/api/keywords`, fetchOpts);
       if (res.status >= 400 && res.status < 600) {
          throw new Error('Bad response from server');

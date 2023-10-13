@@ -7,10 +7,11 @@ type KeywordsHeaderProps = {
    showAddModal: Function,
    exportCsv?: Function,
    scFilter?: string
-   setScFilter?: Function
+   setScFilter?: Function,
+   hideAddKeywords?: boolean,
 }
 
-const KeywordsHeader = ({ showAddModal, exportCsv }: KeywordsHeaderProps) => {
+const KeywordsHeader = ({ showAddModal, exportCsv, hideAddKeywords = false }: KeywordsHeaderProps) => {
    const router = useRouter();
    const [showOptions] = useState<boolean>(false);
 
@@ -66,8 +67,8 @@ const KeywordsHeader = ({ showAddModal, exportCsv }: KeywordsHeaderProps) => {
                      </button>
                   }
                </div>
-               {
-                  <button
+               {hideAddKeywords
+                  && <button
                      data-testid="add_keyword"
                      className={'ml-2 inline-block px-4 py-2 text-blue-700 font-bold text-sm'}
                      onClick={() => showAddModal(true)}>

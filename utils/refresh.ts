@@ -1,6 +1,7 @@
 import { performance } from 'perf_hooks';
 import { RefreshResult, scrapeKeywordFromGoogle } from './scraper';
 import sleep from './sleep';
+import Keyword from '../database/models/keyword';
 
 /**
  * Refreshes the Keywords position by Scraping Google Search Result by
@@ -9,7 +10,7 @@ import sleep from './sleep';
  * @param {SettingsType} settings - The App Settings that contain the Scraper settings
  * @returns {Promise}
  */
-const refreshKeywords = async (keywords:KeywordType[], settings:SettingsType): Promise<RefreshResult[]> => {
+const refreshKeywords = async (keywords: KeywordType[], settings: SettingsType, useExistingData: boolean = false): Promise<RefreshResult[]> => {
    if (!keywords || keywords.length === 0) { return []; }
    const start = performance.now();
 
@@ -18,11 +19,33 @@ const refreshKeywords = async (keywords:KeywordType[], settings:SettingsType): P
    if (['scrapingant', 'serpapi'].includes(settings.scraper_type)) {
       refreshedResults = await refreshParallel(keywords, settings);
    } else {
-      for await (const keyword of keywords) {
-         console.log('START SCRAPE: ', keyword.keyword);
-         const refreshedkeywordData = await scrapeKeywordFromGoogle(keyword, settings);
-         refreshedResults.push(refreshedkeywordData);
-         await sleep(100);
+      for await (const kwrd of keywords) {
+         if (useExistingData) {
+            // check if the scrape info already existed for other domain (keyword, device, country), if yes -> take it
+            const { keyword, device, country, domain } = kwrd;
+            const keywordFound = await Keyword.findOne({ where: { keyword, device, country } });
+            if (keywordFound) {
+               const lastResult = JSON.parse(keywordFound.lastResult);
+               const refreshedkeywordData = { ID: keywordFound.ID, keyword: keywordFound.keyword, position: keywordFound.position, url: keywordFound.url, result: lastResult, error: false, country: keywordFound.country };
+               lastResult.forEach((r: any) => {
+                  if (r.url.includes(domain)) {
+                     refreshedkeywordData.position = r.position;
+                     refreshedkeywordData.url = r.url;
+                  }
+               });
+               refreshedResults.push(refreshedkeywordData);
+            } else {
+               console.log('START SCRAPE: ', kwrd.keyword);
+               const refreshedkeywordData = await scrapeKeywordFromGoogle(kwrd, settings);
+               refreshedResults.push(refreshedkeywordData);
+               await sleep(100);
+            }
+         } else {
+            console.log('START SCRAPE: ', kwrd.keyword);
+            const refreshedkeywordData = await scrapeKeywordFromGoogle(kwrd, settings);
+            refreshedResults.push(refreshedkeywordData);
+            await sleep(100);
+         }
       }
    }
 
@@ -37,7 +60,7 @@ const refreshKeywords = async (keywords:KeywordType[], settings:SettingsType): P
  * @param {SettingsType} settings - The App Settings that contain the Scraper settings
  * @returns {Promise}
  */
-const refreshParallel = async (keywords:KeywordType[], settings:SettingsType) : Promise<RefreshResult[]> => {
+const refreshParallel = async (keywords: KeywordType[], settings: SettingsType): Promise<RefreshResult[]> => {
    const promises: Promise<RefreshResult>[] = keywords.map((keyword) => {
       return scrapeKeywordFromGoogle(keyword, settings);
    });
