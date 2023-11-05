@@ -111,22 +111,30 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          target_topical_trust_flow_value: e.target_topical_trust_flow_value,
          totalClicks: e.totalClicks,
       }));
+      const filteredDomainNames: any[] = [];
       const filteredByTags: DomainType[] = results.filter((domain: DomainType) => {
-         if (tagFilters.length === 0) return true;
+         if (tagFilters.length === 0) {
+            filteredDomainNames.push(domain.domain);
+            return true;
+         }
          const domainTags = domain.tags;
          for (let i = 0; i < domainTags.length; i += 1) {
             const t = domainTags[i];
-            if (tagFilters.includes(t)) return true;
+            if (tagFilters.includes(t)) {
+               filteredDomainNames.push(domain.domain);
+               return true;
+            }
          }
          return false;
       });
       const tags = results.reduce((acc: string[], domain: DomainType) => [...acc, ...domain.tags], []);
-      console.time('getdomainStats');
-      const theDomains: any[] = withStats ? await getdomainStats(filteredByTags) : filteredByTags;
-      console.timeEnd('getdomainStats');
-      const totalKeywords = theDomains.reduce((prev, current) => prev + current.keywordCount, 0);
-      const paginated = theDomains.slice(resultsPerPage * (page - 1), resultsPerPage * (page - 1) + resultsPerPage);
-      return res.status(200).json({ domains: paginated, totalDomains: theDomains.length, totalKeywords, totalPages: Math.ceil(theDomains.length / resultsPerPage), tags: Array.from(new Set(tags)) });
+      const theDomains: any[] = withStats ? await getdomainStats(filteredByTags.slice(resultsPerPage * (page - 1), resultsPerPage * (page - 1) + resultsPerPage)) : filteredByTags;
+      const totalKeywords = await Keyword.count({
+         where: {
+            domain: filteredDomainNames,
+         },
+      });
+      return res.status(200).json({ domains: theDomains, totalDomains: filteredByTags.length, totalKeywords, totalPages: Math.ceil(filteredByTags.length / resultsPerPage), tags: Array.from(new Set(tags)) });
    } catch (error) {
       return res.status(400).json({ domains: [], error: 'Error Getting Domains.', tags: [] });
    }
