@@ -7,6 +7,7 @@ const getdomainStats = async (domains:DomainType[]): Promise<DomainType[]> => {
    console.log('domains: ', domains.length);
 
    for (const domain of domains) {
+      console.time('for loop');
       const domainWithStat = domain;
 
       // First Get ALl The Keywords for this Domain
@@ -38,6 +39,7 @@ const getdomainStats = async (domains:DomainType[]): Promise<DomainType[]> => {
       }
 
       finalDomains.push(domainWithStat);
+      console.timeEnd('for loop');
    }
 
    return finalDomains;

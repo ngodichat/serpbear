@@ -121,7 +121,9 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          return false;
       });
       const tags = results.reduce((acc: string[], domain: DomainType) => [...acc, ...domain.tags], []);
+      console.time('getdomainStats');
       const theDomains: any[] = withStats ? await getdomainStats(filteredByTags) : filteredByTags;
+      console.timeEnd('getdomainStats');
       const totalKeywords = theDomains.reduce((prev, current) => prev + current.keywordCount, 0);
       const paginated = theDomains.slice(resultsPerPage * (page - 1), resultsPerPage * (page - 1) + resultsPerPage);
       return res.status(200).json({ domains: paginated, totalDomains: theDomains.length, totalKeywords, totalPages: Math.ceil(theDomains.length / resultsPerPage), tags: Array.from(new Set(tags)) });
