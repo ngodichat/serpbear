@@ -76,6 +76,7 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
    const dateRangeCond = `and STR_TO_DATE(date, '%Y-%m-%d') >= DATE_SUB(NOW(), INTERVAL ${parseInt(dateRange, 10) + 1} DAY)`;
    try {
       // const allDomains: Domain[] = await Domain.findAll();
+      console.time('codeBlockTimer');
       const [result] = await db.query(`with tmp as (
          SELECT l.tags as domainTags, sum(humanClicks) as totalClicks from link_stats_new ls 
          join link l on l.ID = ls.link_id
@@ -86,6 +87,7 @@ export const getDomains = async (req: NextApiRequest, res: NextApiResponse<Domai
          left join tmp on tmp.domainTags like CONCAT('%', d.domain, '%')
          group by d.domain 
          order by totalClicks desc`);
+      console.timeEnd('codeBlockTimer');
       const results: DomainType[] = result.map((e: any) => ({
          ID: e.ID,
          domain: e.domain,
