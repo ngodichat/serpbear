@@ -34,6 +34,7 @@ const KeywordsPage: NextPage = () => {
       // router.push({ pathname: '/keywords', query: { page: pageNum, search: filters.filterParams.search } });
       filterKeywords({ ...filters, page: pageNum });
    };
+   
    const { keywordsData, keywordsLoading } = useFetchCustomKeywords(router, setKeywordSPollInterval, keywordSPollInterval);
 
    const theKeywords: KeywordType[] = keywordsData && keywordsData.keywords;
