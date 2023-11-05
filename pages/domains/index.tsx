@@ -42,22 +42,22 @@ const SingleDomain: NextPage = () => {
    const [allDomainTags, setAllDomainTags] = useState<string[]>([]);
 
    const onPageChange = (pageNum: number) => {
-      router.push({ pathname: '/domains', query: { page: pageNum} });
+      router.push({ pathname: '/domains', query: { page: pageNum } });
       setCurrentPage(pageNum);
    };
 
    useEffect(() => {
       // Ensure that router is ready and page query exists
-    if (router.isReady) {
-      // router.query.page might be undefined, string or string[], so we ensure it's a string
-      const pageQuery = router.query.page;
-      const page = typeof pageQuery === 'string' ? parseInt(pageQuery, 10) : 1;
+      if (router.isReady) {
+         // router.query.page might be undefined, string or string[], so we ensure it's a string
+         const pageQuery = router.query.page;
+         const page = typeof pageQuery === 'string' ? parseInt(pageQuery, 10) : 1;
 
-      if (!isNaN(page) && page > 0) {
-        setCurrentPage(page);
+         if (!Number.isNaN(page) && page > 0) {
+            setCurrentPage(page);
+         }
       }
-    }
-    }, [router.query.page]);
+   }, [router.query.page]);
 
    useEffect(() => {
       console.log('Domains Data: ', domainsData);
