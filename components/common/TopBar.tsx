@@ -35,12 +35,12 @@ const TopBar = ({ showSettings, showAddModal, showAddDomainModal }:TopbarProps) 
        ${isDomainsPage ? 'max-w-7xl' : 'max-w-7xl'}  bg-white lg:bg-transparent`}>
          <div className='flex flex-row-reverse lg:flex-row md:flex-1 justify-between lg:justify-start items-center'>
             {!isDomainsPage && (
-               <Link href={'/domains'} passHref={true}>
+               <button onClick={() => router.back()}>
                   <a className=' right-14 top-2 px-2 py-1 cursor-pointer bg-[#ecf2ff] hover:bg-indigo-100 transition-all
                   lg:top-3 lg:right-auto lg:left-8 lg:px-3 lg:py-2 rounded-full'>
                      <Icon type="caret-left" size={16} title="Go Back" />
                   </a>
-               </Link>
+               </button>
             )}
             <h3 className={`p-4 text-base font-bold text-blue-700 ${isDomainsPage ? 'lg:pl-0' : 'lg:pl-2'}`}>
                <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#364AFF" /></span> Clickhub
