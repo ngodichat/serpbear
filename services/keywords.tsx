@@ -184,6 +184,7 @@ export function useUpdateKeywordTags(onSuccess: Function) {
          onSuccess();
          toast('Keyword Tags Updated!', { icon: '✔️' });
          queryClient.invalidateQueries(['keywords']);
+         queryClient.invalidateQueries(['custom_keywords']);
       },
       onError: () => {
          console.log('Error Updating Keyword Tags!!!');
