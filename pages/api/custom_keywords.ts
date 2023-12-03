@@ -6,6 +6,7 @@ import verifyUser from '../../utils/verifyUser';
 
 type KeywordsGetResponse = {
     keywords?: Keyword[],
+    tags?: string[],
     count?: number,
     byDevice?: any,
     error?: string | null,
@@ -33,8 +34,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     const pageSize = 100;
     const currentPage = parseInt((req.query.page as string), 10);
-    const { device, domain, search, country, sort } = req.query;
-    console.log(device, domain, search, country, sort);
+    const { device, domain, search, country, sort, tags } = req.query;
+    console.log(device, domain, search, country, sort, tags);
+    let tagCond = '1=1';
+    if (tags) {
+        const tagsArray = Array.isArray(tags) ? tags : tags.split(',');
+        tagCond = tagsArray.map((tag) => `JSON_CONTAINS(a.tags, '"${tag}"')`).join(' OR ');
+    }
 
     try {
         let baseQuery = `SELECT a.id as ID,  a.keyword, a.lastResult,  country, device, volume, low_top_of_page_bid, high_top_of_page_bid, lastUpdated, tags, a.history, a.position
@@ -49,6 +55,7 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
                     a.id = b.id
         where lastResult like '%${domain ?? ''}%'
         and a.keyword like '%${search ?? ''}%'
+        and ${tagCond}
         `;
         if (country) {
             const transform = (country as string).split(',').map((i: any) => `'${i}'`).join(',');
@@ -69,8 +76,6 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
                 processedKeywords.push(r);
             });
         }
-        // const integratedSC = process.env.SEARCH_CONSOLE_PRIVATE_KEY && process.env.SEARCH_CONSOLE_CLIENT_EMAIL;
-        // const domainSCData = integratedSC ? await readLocalSCData(domain) : false;
         let finalProcessedKeywords = processedKeywords.map((keyword: any) => {
             const historyArray = Object.keys(keyword.history).map((dateKey: string) => ({
                 date: new Date(dateKey).getTime(),
@@ -104,10 +109,14 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
             }
             finalProcessedKeywords = finalProcessedKeywords.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Math.min(pageSize, finalProcessedKeywords.length - (currentPage - 1) * pageSize));
         }
-        // const [count] = await db.query(baseQuery);
+
+        // Get all tags of keywords
+        const allTags = await getDistinctTagsOfKeywords();
+
         return res.status(200).json({
             keywords: finalProcessedKeywords,
             count: total.reduce((a: number, b: any) => a + b.count, 0),
+            tags: allTags,
             byDevice: total.reduce((prev: any, item: any) => {
                 const temp = { ...prev };
                 temp[item.device] = item.count;
@@ -119,6 +128,25 @@ const getKeywords = async (req: NextApiRequest, res: NextApiResponse<KeywordsGet
         return res.status(400).json({ error: 'Error Loading all Keywords.' });
     }
 };
+
+async function getDistinctTagsOfKeywords() {
+    try {
+        const distinctTags: { DISTINCT: string }[] = await Keyword.aggregate('tags', 'DISTINCT', { plain: false });
+
+        // Extracting tags from the result
+        const distinctTagsArray = distinctTags.map((tagObject) => JSON.parse(tagObject.DISTINCT));
+
+        // Flattening the array of arrays and converting to Set for uniqueness
+        const distinctTagsSet = new Set([].concat(...distinctTagsArray));
+
+        // Convert Set to an array to return
+        const distinctTagsResult = Array.from(distinctTagsSet);
+        return distinctTagsResult;
+    } catch (error) {
+        console.error('Error fetching distinct tags:', error);
+        throw error;
+    }
+}
 
 const exportCSV = async (req: NextApiRequest, res: NextApiResponse<KeywordsGetResponse>) => {
     try {

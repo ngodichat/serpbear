@@ -38,6 +38,7 @@ const KeywordsPage: NextPage = () => {
    const { keywordsData, keywordsLoading } = useFetchCustomKeywords(router, setKeywordSPollInterval, keywordSPollInterval);
 
    const theKeywords: KeywordType[] = keywordsData && keywordsData.keywords;
+   const tags: string[] = keywordsData && keywordsData.tags;
 
    useEffect(() => {
       // console.log('appSettings.settings: ', appSettings && appSettings.settings);
@@ -54,7 +55,7 @@ const KeywordsPage: NextPage = () => {
 
    const filterKeywords = (mFilters: any) => {
       setFilters(mFilters);
-      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries, device: mFilters.filterParams.device ?? 'desktop', sort: mFilters.sortBy };
+      let q: any = { page: mFilters.page ?? 1, country: mFilters.filterParams.countries, device: mFilters.filterParams.device ?? 'desktop', sort: mFilters.sortBy, tags: mFilters.filterParams.tags };
       setCurrentPage(mFilters.page ?? 1);
       if (mFilters.filterParams.search !== '') {
          q = { ...q, search: mFilters.filterParams.search };
@@ -84,6 +85,7 @@ const KeywordsPage: NextPage = () => {
                   showHistory={false}
                   domain={null}
                   keywords={theKeywords}
+                  tags={tags}
                   countByDevice={countByDevice}
                   filter={filterKeywords}
                   backlinks={[]}

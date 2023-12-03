@@ -26,6 +26,9 @@ export const fetchCustomKeywords = async (router: NextRouter) => {
    if (router.query.country) {
       queryParams = { ...queryParams, country: router.query.country };
    }
+   if (router.query.tags) {
+      queryParams = { ...queryParams, tags: router.query.tags };
+   }
    query = query + new URLSearchParams(queryParams).toString();
    const res = await fetch(`${query}`, { method: 'GET' });
    return res.json();
@@ -77,6 +80,7 @@ export function useFetchCustomKeywords(router: NextRouter, setKeywordSPollInterv
             // If Keywords are Manually Refreshed check if the any of the keywords position are still being fetched
             // If yes, then refecth the keywords every 5 seconds until all the keywords position is updated by the server
             if (data.keywords && data.keywords.length > 0 && setKeywordSPollInterval) {
+               data.keywords.forEach((kw: any) => kw.tags = JSON.parse(kw.tags));
                const hasRefreshingKeyword = data.keywords.some((x: KeywordType) => x.updating);
                if (hasRefreshingKeyword) {
                   setKeywordSPollInterval(5000);

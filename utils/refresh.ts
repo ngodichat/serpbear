@@ -2,6 +2,7 @@ import { performance } from 'perf_hooks';
 import { RefreshResult, scrapeKeywordFromGoogle } from './scraper';
 import sleep from './sleep';
 import Keyword from '../database/models/keyword';
+import { COLORS, logWithColor } from './logs';
 
 /**
  * Refreshes the Keywords position by Scraping Google Search Result by
@@ -25,6 +26,7 @@ const refreshKeywords = async (keywords: KeywordType[], settings: SettingsType, 
             const { keyword, device, country, domain } = kwrd;
             const keywordFound = await Keyword.findOne({ where: { keyword, device, country } });
             if (keywordFound) {
+               logWithColor(`Found scrape info from keyword: ${keyword}`, COLORS.yellow);
                const lastResult = JSON.parse(keywordFound.lastResult);
                const refreshedkeywordData = { ID: keywordFound.ID, keyword: keywordFound.keyword, position: keywordFound.position, url: keywordFound.url, result: lastResult, error: false, country: keywordFound.country };
                lastResult.forEach((r: any) => {
@@ -35,13 +37,13 @@ const refreshKeywords = async (keywords: KeywordType[], settings: SettingsType, 
                });
                refreshedResults.push(refreshedkeywordData);
             } else {
-               console.log('START SCRAPE: ', kwrd.keyword);
+               logWithColor(`START SCRAPE: ${kwrd.keyword}`, COLORS.red);
                const refreshedkeywordData = await scrapeKeywordFromGoogle(kwrd, settings);
                refreshedResults.push(refreshedkeywordData);
                await sleep(100);
             }
          } else {
-            console.log('START SCRAPE: ', kwrd.keyword);
+            logWithColor(`START SCRAPE: ${kwrd.keyword}`, COLORS.red);
             const refreshedkeywordData = await scrapeKeywordFromGoogle(kwrd, settings);
             refreshedResults.push(refreshedkeywordData);
             await sleep(100);

@@ -15,6 +15,7 @@ import AddTags from './AddTags';
 type KeywordsTableProps = {
    domain: DomainType | null,
    keywords: KeywordType[],
+   tags: string[],
    backlinks: BacklinkType[],
    filter: Function,
    isLoading: boolean,
@@ -28,7 +29,7 @@ type KeywordsTableProps = {
 }
 
 const AllKeywordsTable = (props: KeywordsTableProps) => {
-   const { domain, keywords = [], isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter, countByDevice = {}, compareWithHistory = true } = props;
+   const { domain, keywords = [], tags, isLoading = true, showAddModal = false, setShowAddModal, isConsoleIntegrated = false, backlinks = [], showPosition = true, showHistory = true, filter, countByDevice = {}, compareWithHistory = true } = props;
    const showSCData = isConsoleIntegrated;
    const [device, setDevice] = useState<string>('desktop');
    const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
@@ -68,11 +69,6 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
    useEffect(() => {
       setFilterParams({ ...filterParams, device });
    }, [device]);
-
-   const allDomainTags: string[] = useMemo(() => {
-      const allTags = keywords.reduce((acc: string[], keyword) => [...acc, ...keyword.tags], []);
-      return [...new Set(allTags)];
-   }, [keywords]);
 
    const selectKeyword = (keywordID: number) => {
       console.log('Select Keyword: ', keywordID);
@@ -131,7 +127,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
             )}
             {selectedKeywords.length === 0 && (
                <KeywordFilters
-                  allTags={allDomainTags}
+                  allTags={tags}
                   filterParams={filterParams}
                   filterKeywords={(params: KeywordFilters) => setFilterParams(params)}
                   updateSort={(sorted: string) => setSortBy(sorted)}
@@ -271,7 +267,7 @@ const AllKeywordsTable = (props: KeywordsTableProps) => {
          </CSSTransition>
          {showTagManager && (
             <KeywordTagManager
-               allTags={allDomainTags}
+               allTags={tags}
                keyword={keywords.find((k) => k.ID === showTagManager)}
                closeModal={() => setShowTagManager(null)}
             />

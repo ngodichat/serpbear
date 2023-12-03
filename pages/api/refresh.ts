@@ -7,6 +7,7 @@ import { getAppSettings } from './settings';
 import verifyUser from '../../utils/verifyUser';
 import parseKeywords from '../../utils/parseKeywords';
 import { getSerp, removeFromRetryQueue, retryScrape } from '../../utils/scraper';
+import { logWithColor, logWithTime, COLORS } from '../../utils/logs';
 
 type KeywordsRefreshRes = {
    keywords?: KeywordType[]
@@ -51,6 +52,7 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
       // If Single Keyword wait for the scraping process,
       // else, Process the task in background. Do not wait.
       if (keywordIDs && keywordIDs.length === 0) {
+         logWithTime('Refresh all keywords');
          const refreshed: KeywordType[] = await refreshAndUpdateKeywords(keywordQueries, settings);
          keywords = refreshed;
       } else {
@@ -68,7 +70,7 @@ const refresTheKeywords = async (req: NextApiRequest, res: NextApiResponse<Keywo
 
       return res.status(200).json({ keywords });
    } catch (error) {
-      console.log('ERROR refresThehKeywords: ', error);
+      logWithColor(`[ERROR] refresThehKeywords: ${error}`, COLORS.red);
       return res.status(400).json({ error: 'Error refreshing keywords!' });
    }
 };
@@ -148,13 +150,13 @@ export const refreshAndUpdateKeywords = async (initKeywords: Keyword[], settings
 
          // Update the Keyword Position in Database
          try {
-            console.log('Updating keyword: ', keyword.keyword);
+            logWithColor(`Updating keyword: ${keyword.keyword} of domain: ${keyword.domain}`, COLORS.yellow);
             await keywordRaw.update({
                ...updatedVal,
                lastResult: Array.isArray(udpatedkeyword.result) ? JSON.stringify(udpatedkeyword.result) : udpatedkeyword.result,
                history: JSON.stringify(history),
             });
-            console.log('[SUCCESS] Updating the Keyword: ', keyword.keyword);
+            logWithColor(`[SUCCESS] Updating the Keyword: ${keyword.keyword}`, COLORS.green);
          } catch (error) {
             console.log('[ERROR] Updating SERP for Keyword', keyword.keyword, error);
          }
